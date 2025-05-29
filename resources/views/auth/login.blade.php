@@ -65,17 +65,17 @@
                                     <div class="text-center  mb-2">
                                         <p class="text-muted">Don't have an account ?  <a href="{{('register')}}" class="text-primary ms-2">Resister</a></p>
                                     </div>
-                                    <div class="d-flex justify-content-center">
-                                        {{-- <a href="{{ route('auth.facebook') }}" class="d-flex justify-content-center align-items-center thumb-md bg-blue-subtle text-blue rounded-circle me-2">
+                                    {{-- <div class="d-flex justify-content-center">
+                                        <a href="{{ route('auth.facebook') }}" class="d-flex justify-content-center align-items-center thumb-md bg-blue-subtle text-blue rounded-circle me-2">
                                             <i class="fab fa-facebook align-self-center"></i>
-                                        </a> --}}
+                                        </a>
                                         <a href="{{ route('auth.twitter') }}" class="d-flex justify-content-center align-items-center thumb-md bg-info-subtle text-info rounded-circle me-2">
                                             <i class="fab fa-twitter align-self-center"></i>
                                         </a>
                                         <a href="{{ route('auth.google') }}" class="d-flex justify-content-center align-items-center thumb-md bg-danger-subtle text-danger rounded-circle">
                                             <i class="fab fa-google align-self-center"></i>
                                         </a>
-                                    </div>
+                                    </div> --}}
                                 </div><!--end card-body-->
                             </div><!--end card-->
                         </div><!--end col-->
