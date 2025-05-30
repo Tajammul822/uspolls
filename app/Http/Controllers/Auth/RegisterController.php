@@ -36,7 +36,7 @@ class RegisterController extends Controller
 
         session(['user' => $user->email]);
 
-        return redirect()->route('home')->with('success', 'Successfully registered');
+        return redirect()->route('dashboard')->with('success', 'Successfully registered');
     }
 
    
