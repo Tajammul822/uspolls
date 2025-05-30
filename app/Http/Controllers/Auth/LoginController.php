@@ -26,13 +26,13 @@ class LoginController extends Controller
             session(['user' => Auth::user()->email]);
 
             $user = Auth::user();
-            if ($user->user_type === 'super_admin') {
-                return redirect()->route('admin.dashboard')->with('success', 'Welcome, Super Admin!');
+            if ($user->role === 1) {
+                return redirect()->route('dashboard')->with('success', 'Welcome, Super Admin!');
             } 
         
 
             // Default redirection for other users
-            return redirect()->route('dashboard')->with('success', 'Successfully logged in');
+            return redirect()->route('home')->with('success', 'Successfully logged in');
         } else {
             return back()->withInput()->withErrors(['login_error' => 'Invalid email or password.']);
         }
