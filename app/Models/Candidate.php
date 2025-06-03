@@ -13,4 +13,9 @@ class Candidate extends Model
         'party',
         'status',
     ];
+    
+    public function pollCandidates()
+    {
+        return $this->hasMany(PollCandidate::class);
+    }
 }

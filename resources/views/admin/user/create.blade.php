@@ -10,7 +10,7 @@
                             <h4 class="card-title">Create Users</h4>
                         </div><!--end col-->
                     </div> <!--end row-->
-                </div><!--end card-header-->
+                </div><!--end card-header-->    
                 <div class="card-body pt-0">
                     <form method="post" action="{{route('users.store')}}" enctype="multipart/form-data">
                         @csrf

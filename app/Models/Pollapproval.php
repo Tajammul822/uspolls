@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Pollapproval extends Model
 {
     use HasFactory;
+    protected $table = 'poll_approvals';
     protected $fillable = [
         'poll_id',
         'approve_percentage',
@@ -16,4 +17,9 @@ class Pollapproval extends Model
         'subject',
     ];
 
+
+    public function poll()
+    {
+        return $this->belongsTo(Poll::class);
+    }
 }

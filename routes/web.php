@@ -8,6 +8,13 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\SocialController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PollController;
+use App\Http\Controllers\PollsterController;
+use App\Http\Controllers\StateController;
+use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\RaceController;
+use App\Http\Controllers\PollCandidateController;
+use App\Http\Controllers\PollApprovalController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -26,9 +33,6 @@ Route::post('auth/login', [LoginController::class, 'loginUser'])->name('auth.log
 Route::get('auth/register', [RegisterController::class, 'registerForm'])->name('register');
 Route::post('auth/register', [RegisterController::class, 'registerUser'])->name('auth.register');
 
-
-Route::resource('users', UserController::class);
-
 Route::get('/profile', [ProfileController::class, 'profile'])->name('admin-profile');
 Route::post('/profile/{id}', [ProfileController::class, 'profileUpdate'])->name('profile-update');
 // Password Change
@@ -43,3 +47,12 @@ Route::get('auth/twitter', [SocialController::class, 'redirectToTwitter'])->name
 Route::get('auth/twitter/callback', [SocialController::class, 'redirectToTwitterCallback']);
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::resource('users', UserController::class);
+Route::resource('polls', PollController::class);
+Route::resource('pollsters', PollsterController::class);
+Route::resource('states', StateController::class);
+Route::resource('candidates', CandidateController::class);
+Route::resource('races', RaceController::class);
+Route::resource('poll_candidates', PollCandidateController::class);
+Route::resource('poll_approvals', PollApprovalController::class);

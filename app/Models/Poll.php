@@ -23,4 +23,31 @@ class Poll extends Model
         'tags',
     ];
 
+
+    public function race()
+    {
+        return $this->belongsTo(Race::class);
+    }
+
+    public function pollster()
+    {
+        return $this->belongsTo(Pollster::class);
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public function candidates()
+    {
+        return $this->hasMany(PollCandidate::class);
+    }
+
+    public function approvals()
+    {
+        return $this->hasMany(PollApproval::class);
+    }
+
+    
 }

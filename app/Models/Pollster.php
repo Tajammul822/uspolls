@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Pollsters extends Model
+class Pollster extends Model
 {
     use HasFactory;
 
@@ -14,5 +14,11 @@ class Pollsters extends Model
         'website_url',
         'status',
     ];
+
+
+    public function polls()
+    {
+        return $this->hasMany(Poll::class);
+    }
 
 }

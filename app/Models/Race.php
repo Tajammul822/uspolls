@@ -14,5 +14,9 @@ class Race extends Model
         'status',
     ];
 
+    public function polls()
+    {
+        return $this->hasMany(Poll::class);
+    }
 
 }
