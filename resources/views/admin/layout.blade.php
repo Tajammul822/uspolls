@@ -1,16 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-startbar="light" data-bs-theme="light">
-
-
-<!-- Mirrored from mannatthemes.com/Politix/default/ui-navbar.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 12 Dec 2024 16:11:17 GMT -->
-
 <head>
 
 
     <meta charset="utf-8" />
-    <title>Politix | Politix - Admin & Dashboard Template</title>
+    <title>Politix Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Politix Dashboard" name="description" />
     <meta content="" name="author" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
@@ -27,12 +23,6 @@
     <link rel="stylesheet" href="{{ url('assets/css/datepicker.min.css') }}" type="text/css" />
     <link rel="stylesheet" href="{{ url('assets/css/huebee.min.css') }}" type="text/css" />
 
-
-
-
-
-
-
 </head>
 
 
@@ -43,8 +33,6 @@
     <div class="topbar d-print-none">
         <div class="container-xxl">
             <nav class="topbar-custom d-flex justify-content-between" id="topbar-custom">
-
-
                 <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
                     <li>
                         <button class="nav-link mobile-menu-btn nav-icon" id="togglemenu">
@@ -52,7 +40,7 @@
                         </button>
                     </li>
                     <li class="mx-3 welcome-text">
-                        <h3 class="mb-0 fw-bold text-truncate">Good Morning, James!</h3>
+                        <h3 class="mb-0 fw-bold text-truncate">{{ $greeting }}, {{ Auth::user()->name ?? 'Guest' }}!</h3>
                         <!-- <h6 class="mb-0 fw-normal text-muted text-truncate fs-14">Here's your overview this week.</h6> -->
                     </li>
                 </ul>
