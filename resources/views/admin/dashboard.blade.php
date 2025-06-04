@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('admin-dasboard-content')
 
-<div class="row justify-content-center">
+{{-- <div class="row justify-content-center">
     <div class="col-md-6 col-lg-6">
         <div class="card">
             <div class="card-header">
@@ -117,7 +117,7 @@
             </div><!--end card-body--> 
         </div><!--end card--> 
     </div> <!--end col-->                                                       
-</div><!--end row-->
+</div><!--end row--> --}}
 @endsection
 
 

@@ -2366,7 +2366,7 @@
     @endif
 </head>
 
-<body class="bg-[#1a1a2e] text-white" >
+<body class="bg-[#1a1a2e] text-white">
     <header class="flex items-center justify-between px-6 py-3 border-b border-[#2e2e4d] ">
         <div class="flex items-center space-x-2">
             <!-- <img src="https://storage.googleapis.com/a1aa/image/2bdf0589-fbfd-46cd-162a-8d3b518f9e9b.jpg" alt="F in yellow square logo for Politix" class="w-8 h-8" width="32" height="32"> -->
