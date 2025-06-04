@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-startbar="light" data-bs-theme="light">
+
 <head>
 
 
@@ -40,7 +41,8 @@
                         </button>
                     </li>
                     <li class="mx-3 welcome-text">
-                        <h3 class="mb-0 fw-bold text-truncate">{{ $greeting }}, {{ Auth::user()->name ?? 'Guest' }}!</h3>
+                        <h3 class="mb-0 fw-bold text-truncate">{{ $greeting }},
+                            {{ Auth::user()->name ?? 'Guest' }}!</h3>
                         <!-- <h6 class="mb-0 fw-normal text-muted text-truncate fs-14">Here's your overview this week.</h6> -->
                     </li>
                 </ul>
@@ -57,7 +59,8 @@
                     <li class="dropdown topbar-item">
                         <a class="nav-link dropdown-toggle arrow-none nav-icon" data-bs-toggle="dropdown" href="#"
                             role="button" aria-haspopup="false" aria-expanded="false">
-                            <img src="{{ url('assets/images/users/avatar-1.jpg') }}" alt="" class="thumb-lg rounded-circle">
+                            <img src="{{ url('assets/images/users/avatar-1.jpg') }}" alt=""
+                                class="thumb-lg rounded-circle">
                         </a>
                         <div class="dropdown-menu dropdown-menu-end py-0">
                             <div class="d-flex align-items-center dropdown-item py-2 bg-secondary-subtle">
@@ -115,7 +118,7 @@
                             <span>Main Menu</span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('dashboard')}}">
+                            <a class="nav-link" href="{{ route('dashboard') }}">
                                 <i class="iconoir-home-simple menu-icon"></i>
                                 <span>Dashboard</span>
                             </a>
@@ -175,7 +178,7 @@
                                 </ul>
                             </div>
                         </li>
-                       
+
                         {{-- <li class="nav-item">
                             <a class="nav-link" href="#sidebarCandidate" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarCandidate">
@@ -272,70 +275,71 @@
                 </div>
             </div>
         </div>
-    </div><
-    <div class="startbar-overlay d-print-none"></div>
-  
-    <div class="page-wrapper">
+    </div>
+    < <div class="startbar-overlay d-print-none">
+        </div>
 
-        <!-- Page Content-->
-        <div class="page-content">
-            <div class="container-xxl">
-                @yield('admin-dasboard-content')
-                @yield('content')
-            </div><!-- container -->
+        <div class="page-wrapper">
 
-            <footer class="footer text-center text-sm-start d-print-none">
+            <!-- Page Content-->
+            <div class="page-content">
                 <div class="container-xxl">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card mb-0 rounded-bottom-0">
-                                <div class="card-body">
-                                    <p class="text-muted mb-0">
-                                        ©
-                                        <script>
-                                            document.write(new Date().getFullYear())
-                                        </script>
-                                        Politix
-                                        <span class="text-muted d-none d-sm-inline-block float-end">
-                                            Crafted with
-                                            <i class="iconoir-heart text-danger"></i>
-                                            by Politix</span>
-                                    </p>
+                    @yield('admin-dasboard-content')
+                    @yield('content')
+                </div><!-- container -->
+
+                <footer class="footer text-center text-sm-start d-print-none">
+                    <div class="container-xxl">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-0 rounded-bottom-0">
+                                    <div class="card-body">
+                                        <p class="text-muted mb-0">
+                                            ©
+                                            <script>
+                                                document.write(new Date().getFullYear())
+                                            </script>
+                                            Politix
+                                            <span class="text-muted d-none d-sm-inline-block float-end">
+                                                Crafted with
+                                                <i class="iconoir-heart text-danger"></i>
+                                                by Politix</span>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </footer>
+                </footer>
 
-            <!--end footer-->
+                <!--end footer-->
+            </div>
+            <!-- end page content -->
         </div>
-        <!-- end page content -->
-    </div>
-    <!-- end page-wrapper -->
+        <!-- end page-wrapper -->
 
-    <!-- Javascript  -->
-    <!-- vendor js -->
-    <script src="{{ url('assets/js/app.js') }}"></script>
-    <script src="{{ url('assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url('assets/js/simplebar.min.js') }}"></script>
-    <script src="{{ url('assets/js/apexcharts.min.js') }}"></script>
-    <script src="{{ url('assets/js/irregular-data-series.js') }}"></script>
-    <script src="{{ url('assets/js/ohlc.js') }}"></script>
-    <script src="{{ url('assets/js/apexcharts.init.js') }}"></script>
-    <script src="{{ url('assets/js/simple-datatables.js') }}"></script>
-    <script src="{{ url('assets/js/datatable.init.js') }}"></script>
-    <script src="{{ url('assets/js/stock-prices.js') }}"></script>
-    <script src="{{ url('assets/js/jsvectormap.min.js') }}"></script>
-    <script src="{{ url('assets/js/world.js') }}"></script>
-    <script src="{{ url('assets/js/index.init.js') }}"></script>
-    <script src="{{ url('assets/js/forms-advanced.js') }}"></script>
-    <script src="{{ url('assets/js/selectr.min.js') }}"></script>
-    <script src="{{ url('assets/js/huebee.pkgd.min.js') }}"></script>
-    <script src="{{ url('assets/js/datepicker-full.min.js') }}"></script>
-    <script src="{{ url('assets/js/moment.js') }}"></script>
-    <script src="{{ url('assets/js/imask.min.js') }}"></script>
-
+        <!-- Javascript  -->
+        <!-- vendor js -->
+        <script src="{{ url('assets/js/app.js') }}"></script>
+        <script src="{{ url('assets/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ url('assets/js/simplebar.min.js') }}"></script>
+        <script src="{{ url('assets/js/apexcharts.min.js') }}"></script>
+        <script src="{{ url('assets/js/irregular-data-series.js') }}"></script>
+        <script src="{{ url('assets/js/ohlc.js') }}"></script>
+        <script src="{{ url('assets/js/apexcharts.init.js') }}"></script>
+        <script src="{{ url('assets/js/simple-datatables.js') }}"></script>
+        <script src="{{ url('assets/js/datatable.init.js') }}"></script>
+        <script src="{{ url('assets/js/stock-prices.js') }}"></script>
+        <script src="{{ url('assets/js/jsvectormap.min.js') }}"></script>
+        <script src="{{ url('assets/js/world.js') }}"></script>
+        <script src="{{ url('assets/js/index.init.js') }}"></script>
+        <script src="{{ url('assets/js/forms-advanced.js') }}"></script>
+        <script src="{{ url('assets/js/selectr.min.js') }}"></script>
+        <script src="{{ url('assets/js/huebee.pkgd.min.js') }}"></script>
+        <script src="{{ url('assets/js/datepicker-full.min.js') }}"></script>
+        <script src="{{ url('assets/js/moment.js') }}"></script>
+        <script src="{{ url('assets/js/imask.min.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

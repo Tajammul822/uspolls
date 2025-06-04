@@ -45,7 +45,7 @@ class ProfileController extends Controller
 
         $status = $user->save();
         if ($status) {
-            return redirect()->route('dashboard')->with('success', 'Amenity created successfully.');
+            return redirect()->route('admin-profile')->with('success', 'Profile updated successfully.');
         } else {
             return redirect()->back()->with('error', 'Please try again!');
         }
@@ -57,6 +57,7 @@ class ProfileController extends Controller
     {
         return view('admin.user.changePassword');
     }
+
     public function changPasswordStore(Request $request)
     {
 
@@ -68,7 +69,7 @@ class ProfileController extends Controller
 
         User::find(auth()->user()->id)->update(['password' => Hash::make($request->new_password)]);
 
-        return redirect()->route('dashboard')->with('success', 'Password successfully changed');
+        return redirect()->route('admin-profile')->with('success', 'Password successfully changed');
     }
 }
 

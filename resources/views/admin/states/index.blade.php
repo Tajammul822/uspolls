@@ -45,7 +45,7 @@
                                                 <form method="POST" action="{{ route('states.destroy', $state->id) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm dltBtn"
+                                                    <button type="button" class="btn btn-danger btn-sm dltBtn"
                                                         data-id="{{ $state->id }}"
                                                         style="height:30px; width:30px;border-radius:50%"
                                                         data-toggle="tooltip" data-placement="bottom" title="Delete">
@@ -71,45 +71,31 @@
             </div> <!--end col-->
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.dltBtn');
 
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
 
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="Appearance" aria-labelledby="AppearanceLabel">
-        <div class="offcanvas-header border-bottom justify-content-between">
-            <h5 class="m-0 font-14" id="AppearanceLabel">Appearance</h5>
-            <button type="button" class="btn-close text-reset p-0 m-0 align-self-center" data-bs-dismiss="offcanvas"
-                aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <h6>Account Settings</h6>
-            <div class="p-2 text-start mt-3">
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="settings-switch1">
-                    <label class="form-check-label" for="settings-switch1">Auto updates</label>
-                </div><!--end form-switch-->
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="settings-switch2" checked>
-                    <label class="form-check-label" for="settings-switch2">Location Permission</label>
-                </div><!--end form-switch-->
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="settings-switch3">
-                    <label class="form-check-label" for="settings-switch3">Show offline Contacts</label>
-                </div><!--end form-switch-->
-            </div><!--end /div-->
-            <h6>General Settings</h6>
-            <div class="p-2 text-start mt-3">
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="settings-switch4">
-                    <label class="form-check-label" for="settings-switch4">Show me Online</label>
-                </div><!--end form-switch-->
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="settings-switch5" checked>
-                    <label class="form-check-label" for="settings-switch5">Status visible to all</label>
-                </div><!--end form-switch-->
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="settings-switch6">
-                    <label class="form-check-label" for="settings-switch6">Notifications Popup</label>
-                </div><!--end form-switch-->
-            </div><!--end /div-->
-        </div><!--end offcanvas-body-->
-    </div>
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, delete it!',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endsection
