@@ -45,7 +45,7 @@
             <button type="submit" class="btn btn-primary">
                 {{ isset($candidate) ? 'Update Candidate' : 'Create Candidate' }}
             </button>
-            <button type="reset" class="btn btn-danger">Cancel</button>
+            <button type="reset" class="btn btn-danger">Reset</button>
         </div>
     </div>
 </form>

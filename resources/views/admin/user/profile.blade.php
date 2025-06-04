@@ -48,7 +48,7 @@
                         <div class="row">
                             <div class="col-sm-10 ms-auto">
                                 <button type="submit" class="btn btn-primary">Update</button>
-                                <button type="reset" class="btn btn-danger">Cancel</button>
+                                <button type="reset" class="btn btn-danger">Reset</button>
                             </div>
                         </div>
                     </form>

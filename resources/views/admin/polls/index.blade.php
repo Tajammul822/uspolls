@@ -1,10 +1,7 @@
-
 @extends('admin.layout')
 
 @section('content')
-
-
-    @if(session('success'))
+    @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
@@ -27,50 +24,61 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Pollster</th>
-                                        <th>Race</th>
-                                        <th>State</th>
-                                        <th>Actions</th>
+                                        <tr>
+                                            <th>Candidate</th>
+                                            <th>Party</th>
+                                            <th>Race Type</th>
+                                            <th>Support (%)</th>
+                                            <th>Approval Rating</th>
+                                            <th>Pollster</th>
+                                            <th>State</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($polls as $poll)
-                                    <tr>
-                                        <td>{{ $poll->title }}</td>
-                                        <td>{{ $poll->pollster->name }}</td>
-                                        <td>{{ $poll->race->name }}</td>
-                                        <td>{{ optional($poll->state)->name ?? 'N/A' }}</td>
-    
-                                        <td class="d-flex justify-evenly-space align-items-center" >        
-                                            <a href="{{ route('polls.edit', $poll->id) }}"
-                                                class="btn btn-primary btn-sm float-left mr-1"
-                                                style="height:30px; width:30px;border-radius:50%"
-                                                data-toggle="tooltip"
-                                                title="edit"
-                                                data-placement="bottom">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form method="POST" action="{{ route('polls.destroy', $poll->id) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-danger btn-sm dltBtn"
-                                                    data-id="{{ $poll->id }}"
-                                                    style="height:30px; width:30px;border-radius:50%"
-                                                    data-toggle="tooltip"
-                                                    data-placement="bottom"
-                                                    title="Delete">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td>{{ $poll->candidate_name }}</td>
+                                            <td>{{ $poll->party }}</td>
+                                            <td>{{ ucfirst($poll->race) }}</td>
+                                            <td>{{ number_format($poll->support_percentage, 2) }}%</td>
+                                            <td>{{ $poll->approval_rating }}</td>
+                                            <td>{{ $poll->pollster }}</td>
+                                            <td>{{ optional($poll->state)->name ?? '—' }}</td>
+                                            <td>
+                                                @if($poll->status == 1)
+                                                    <span class="badge bg-primary">Active</span>
+                                                @else
+                                                    <span class="badge bg-warning">Inactive</span>
+                                                @endif
+                                            </td>
+
+                                            <td class="d-flex justify-evenly-space align-items-center">
+                                                <a href="{{ route('polls.edit', $poll->id) }}"
+                                                    class="btn btn-primary btn-sm float-left mr-1"
+                                                    style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
+                                                    title="edit" data-placement="bottom">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST" action="{{ route('polls.destroy', $poll->id) }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-danger btn-sm dltBtn"
+                                                        data-id="{{ $poll->id }}"
+                                                        style="height:30px; width:30px;border-radius:50%"
+                                                        data-toggle="tooltip" data-placement="bottom" title="Delete">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
                                     @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center">No Polls found.</td>
-                                    </tr>
-                                     @endforelse
-                                </tbody>
+                                        <tr>
+                                            <td colspan="9" class="text-center">No polls found.</td>
+                                        </tr>
+                                    @endforelse
                             </table>
                             {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>
                             <button type="button" class="btn btn-sm btn-primary sql">Export SQL</button>
@@ -82,10 +90,10 @@
             </div> <!--end col-->
         </div>
     </div>
-    {{ $polls->links() }}
+    {{-- {{ $polls->links() }} --}}
 
 
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="Appearance" aria-labelledby="AppearanceLabel">
+    {{-- <div class="offcanvas offcanvas-end" tabindex="-1" id="Appearance" aria-labelledby="AppearanceLabel">
         <div class="offcanvas-header border-bottom justify-content-between">
             <h5 class="m-0 font-14" id="AppearanceLabel">Appearance</h5>
             <button type="button" class="btn-close text-reset p-0 m-0 align-self-center" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -122,5 +130,5 @@
                 </div><!--end form-switch-->
             </div><!--end /div-->
         </div><!--end offcanvas-body-->
-    </div>
+    </div> --}}
 @endsection

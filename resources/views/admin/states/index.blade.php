@@ -71,7 +71,6 @@
             </div> <!--end col-->
         </div>
     </div>
-    {{ $states->links() }}
 
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="Appearance" aria-labelledby="AppearanceLabel">

@@ -10,7 +10,7 @@ class StateController extends Controller
     public function index()
     {
         // Paginate 10 per page (adjust as needed)
-        $states = State::latest()->paginate(10);
+        $states = State::all();
         return view('admin.states.index', compact('states'));
     }
 

@@ -25,8 +25,6 @@
                     <div class="card-body pt-0">
                         @include('admin.polls.form', [
                             'poll'      => $poll,       {{-- existing model --}}
-                            'races'     => $races,
-                            'pollsters' => $pollsters,
                             'states'    => $states
                         ])
                 </div>

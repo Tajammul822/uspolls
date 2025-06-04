@@ -40,7 +40,7 @@
                             <div class="form-group row">
                                 <div class="col-lg-9 col-xl-8 offset-lg-3">
                                     <button type="submit" class="btn btn-primary">Change Password</button>
-                                    <button type="reset" class="btn btn-danger">Cancel</button>
+                                    <button type="reset" class="btn btn-danger">Reset</button>
                                 </div>
                             </div>
                         </form>

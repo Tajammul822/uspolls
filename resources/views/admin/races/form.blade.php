@@ -35,7 +35,7 @@
             <button type="submit" class="btn btn-primary">
                 {{ isset($race) ? 'Update Race' : 'Create Race' }}
             </button>
-            <button type="reset" class="btn btn-danger">Cancel</button>
+            <button type="reset" class="btn btn-danger">Reset</button>
         </div>
     </div>
 </form>

@@ -56,7 +56,7 @@
             <button type="submit" class="btn btn-primary">
                 {{ isset($entry) ? 'Update Entry' : 'Create Entry' }}
             </button>
-            <button type="reset" class="btn btn-danger">Cancel</button>
+            <button type="reset" class="btn btn-danger">Reset</button>
         </div>
     </div>
 </form>

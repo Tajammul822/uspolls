@@ -152,7 +152,7 @@
                             </div>
                         </li>
 
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a class="nav-link" href="#sidebarPollster" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarPollster">
                                 <i class="fa-solid fa-person-booth menu-icon"></i>
@@ -168,7 +168,7 @@
                                     </li>
                                 </ul>
                             </div>
-                        </li>
+                        </li> --}}
 
                         <li class="nav-item">
                             <a class="nav-link" href="#sidebarPolls" data-bs-toggle="collapse" role="button"
@@ -188,7 +188,7 @@
                             </div>
                         </li>
                        
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a class="nav-link" href="#sidebarCandidate" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarCandidate">
                                 <i class="fas fa-users menu-icon"></i>
@@ -260,7 +260,7 @@
                                     </li>
                                 </ul>
                             </div>
-                        </li>
+                        </li> --}}
 
 
                         <li class="nav-item">
