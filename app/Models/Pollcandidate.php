@@ -26,4 +26,6 @@ class Pollcandidate extends Model
         return $this->belongsTo(Candidate::class);
     }
 
+
+
 }

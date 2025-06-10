@@ -20,16 +20,13 @@
                             <div class="col">
                                 <h4 class="card-title">Edit Polls</h4>
                             </div>
-                        </div> 
+                        </div>
                     </div>
                     <div class="card-body pt-0">
-                        @include('admin.polls.form', [
-                            'poll'      => $poll,       {{-- existing model --}}
-                            'states'    => $states
-                        ])
+                        @include('admin.polls.form', ['poll' => $poll, 'candidates' => $candidates, 'approvalCandidate' => $approvalCandidate])
+                    </div>
                 </div>
             </div>
-        </div> 
+        </div>
     </div>
-</div>
 @endsection

@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('poll_approvals', function (Blueprint $table) {
             $table->id(); 
-
             $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade');
-            $table->decimal('approve_percentage', 5, 2);
-            $table->decimal('disapprove_percentage', 5, 2);
-            $table->decimal('neutral_percentage', 5, 2)->nullable(); 
-            $table->string('subject'); 
+            $table->string('name');
+            $table->date('poll_date');
+            $table->string('pollster');
+            $table->integer('sample_size');
+            $table->decimal('approve_rating', 5, 2);
+            $table->decimal('disapprove_rating', 5, 2);
             $table->timestamps();
         });
     }

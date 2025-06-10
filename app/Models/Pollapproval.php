@@ -11,10 +11,12 @@ class Pollapproval extends Model
     protected $table = 'poll_approvals';
     protected $fillable = [
         'poll_id',
-        'approve_percentage',
-        'disapprove_percentage',
-        'neutral_percentage',
-        'subject',
+        'name',
+        'poll_date',
+        'pollster',
+        'sample_size',  
+        'approve_rating',
+        'disapprove_rating',
     ];
 
 

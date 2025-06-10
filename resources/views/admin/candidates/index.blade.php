@@ -43,7 +43,6 @@
                                                     <span class="badge bg-warning">Inactive</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $cand->created_at->format('Y-m-d') }}</td>
 
                                             <td class="d-flex justify-evenly-space align-items-center">
                                                 <a href="{{ route('candidates.edit', $cand->id) }}"

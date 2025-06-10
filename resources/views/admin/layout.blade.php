@@ -179,7 +179,7 @@
                             </div>
                         </li>
 
-                        {{-- <li class="nav-item">
+                       <li class="nav-item">
                             <a class="nav-link" href="#sidebarCandidate" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarCandidate">
                                 <i class="fas fa-users menu-icon"></i>
@@ -197,7 +197,7 @@
                             </div>
                         </li>
 
-                        <li class="nav-item">
+                        {{--  <li class="nav-item">
                             <a class="nav-link" href="#sidebarPoll_Candidate" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarPoll_Candidate">
                                 <i class="fa-solid fa-user-tie menu-icon"></i>
@@ -285,7 +285,9 @@
             <div class="page-content">
                 <div class="container-xxl">
                     @yield('admin-dasboard-content')
+                    @yield('create-poll-content')
                     @yield('content')
+                    
                 </div><!-- container -->
 
                 <footer class="footer text-center text-sm-start d-print-none">
@@ -320,6 +322,7 @@
 
         <!-- Javascript  -->
         <!-- vendor js -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
         <script src="{{ url('assets/js/app.js') }}"></script>
         <script src="{{ url('assets/js/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ url('assets/js/simplebar.min.js') }}"></script>

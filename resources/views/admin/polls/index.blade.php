@@ -25,13 +25,9 @@
                                 <thead class="">
                                     <tr>
                                     <tr>
-                                        <th>Candidate</th>
-                                        <th>Party</th>
-                                        <th>Race Type</th>
-                                        <th>Support (%)</th>
-                                        <th>Approval Rating</th>
-                                        <th>Pollster</th>
-                                        <th>State</th>
+                                        <th>Poll Type</th>
+                                        <th>Race Type</th>
+                                        <th>Election Round</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -40,13 +36,9 @@
                                 <tbody>
                                     @forelse($polls as $poll)
                                         <tr>
-                                            <td>{{ $poll->candidate_name }}</td>
-                                            <td>{{ $poll->party }}</td>
-                                            <td>{{ ucfirst($poll->race) }}</td>
-                                            <td>{{ number_format($poll->support_percentage, 2) }}%</td>
-                                            <td>{{ $poll->approval_rating }}</td>
-                                            <td>{{ $poll->pollster }}</td>
-                                            <td>{{ optional($poll->state)->name ?? '—' }}</td>
+                                            <td>{{ ucfirst($poll->poll_type) }}</td>
+                                            <td>{{ ucfirst($poll->race_type) }}</td>
+                                            <td>{{ ucfirst($poll->election_round) }}</td>
                                             <td>
                                                 @if ($poll->status == 1)
                                                     <span class="badge bg-primary">Active</span>
@@ -72,6 +64,12 @@
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
+                                                 <a href="{{ route('polls.details', $poll->id) }}"
+                                                    class="btn btn-primary btn-sm float-left mr-1"
+                                                    style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
+                                                    title="edit" data-placement="bottom">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     @empty

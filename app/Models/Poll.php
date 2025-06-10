@@ -9,58 +9,12 @@ class Poll extends Model
 {
     use HasFactory;
 
-    // protected $fillable = [
-    //     'race_id',
-    //     'title',
-    //     'pollster_id',
-    //     'state_id',
-    //     'field_date_start',
-    //     'field_date_end',
-    //     'release_date',
-    //     'sample_size',
-    //     'margin_of_error',
-    //     'source_url',
-    //     'tags',
-    // ];
-
     protected $fillable = [
-        'candidate_name',
-        'party',
-        'race',
-        'support_percentage',
-        'approval_rating',
-        'pollster',
-        'state_id',
-        'field_date_start',
-        'field_date_end',
-        'release_date',
-        'sample_size',
-        'margin_of_error',
-        'source_url',
-        'tags',
+        'poll_type',
+        'race_type',
+        'election_round',
         'status',
     ];
-
-
-    protected $casts = [
-        'field_date_start' => 'datetime',
-        'field_date_end' => 'datetime',
-        'release_date' => 'datetime',
-        'status' => 'boolean',
-    ];
-
-
-
-
-    // public function race()
-    // {
-    //     return $this->belongsTo(Race::class);
-    // }
-
-    // public function pollster()
-    // {
-    //     return $this->belongsTo(Pollster::class);
-    // }
 
     public function state()
     {
@@ -77,5 +31,23 @@ class Poll extends Model
     //     return $this->hasMany(PollApproval::class);
     // }
 
+
+     public function pollCandidates()
+    {
+        return $this->hasMany(PollCandidate::class, 'poll_id', 'id');
+    }
+
+    /**
+     * Convenience: the actual Candidate models via the pivot table.
+     */
+    public function candidates()
+    {
+        return $this->belongsToMany(
+            Candidate::class,
+            'poll_candidates',
+            'poll_id',
+            'candidate_id'
+        );
+    }
     
 }

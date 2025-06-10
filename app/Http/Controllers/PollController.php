@@ -2,234 +2,153 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use App\Models\Candidate;
 use Illuminate\Http\Request;
 use App\Models\Poll;
+use App\Models\PollCandidate;
 // use App\Models\Race;
 // use App\Models\Pollster;
 use App\Models\State;
 
 class PollController extends Controller
 {
-    /**
-     * Display a listing of polls.
-     */
     public function index()
     {
-        // Eager‑load state for display.
-        $polls = Poll::with('state')->latest()->paginate(10);
-
+        $polls = Poll::all();
         return view('admin.polls.index', compact('polls'));
     }
 
-    /**
-     * Show the form for creating a new poll.
-     */
     public function create()
     {
-        // We still need the list of states to populate "state_id"
-        $states = State::orderBy('name')->get();
-
-        return view('admin.polls.create', compact('states'));
+        $candidates = Candidate::all();
+        $approvalCandidate = null;
+        return view('admin.polls.create',  compact('candidates', 'approvalCandidate'));
     }
 
-    /**
-     * Store a newly created poll in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'candidate_name'     => 'required|string|max:255',
-            'party'              => 'required|string|max:255',
-            'race'               => 'required|in:primary,general,midterm,approval',
-            'support_percentage' => 'required|numeric|min:0|max:100',
-            'approval_rating'    => 'required|in:Approve,Disapprove,Neutral',
-            'pollster'           => 'required|string|max:255',
-            'state_id'           => 'nullable|exists:states,id',
-            'field_date_start'   => 'required|date',
-            'field_date_end'     => 'required|date|after_or_equal:field_date_start',
-            'release_date'       => 'required|date',
-            'sample_size'        => 'required|integer|min:1',
-            'margin_of_error'    => 'required|numeric|min:0',
-            'source_url'         => 'required|url',
-            'tags'               => 'nullable|string',
-            'status'             => 'required|in:0,1',
+            'poll_type' => 'required|in:election,approval',
+            'race_type' => 'nullable|in:president,senate,house,governor,other',
+            'election_round' => 'nullable|in:primary,general',
         ]);
 
-        Poll::create([
-            'candidate_name'     => $validated['candidate_name'],
-            'party'              => $validated['party'],
-            'race'               => $validated['race'],
-            'support_percentage' => $validated['support_percentage'],
-            'approval_rating'    => $validated['approval_rating'],
-            'pollster'           => $validated['pollster'],
-            'state_id'           => $validated['state_id'],
-            'field_date_start'   => $validated['field_date_start'],
-            'field_date_end'     => $validated['field_date_end'],
-            'release_date'       => $validated['release_date'],
-            'sample_size'        => $validated['sample_size'],
-            'margin_of_error'    => $validated['margin_of_error'],
-            'source_url'         => $validated['source_url'],
-            'tags'               => $validated['tags'] ?? '',
-            'status'             => $validated['status'],
+        $poll = Poll::create($validated);
+
+        $validated2 = $request->validate([
+            'candidates.*.candidate_id' => 'nullable|exists:candidates,id',
+            'candidate_id' => 'nullable|exists:candidates,id',
         ]);
 
-        return redirect()
-            ->route('polls.index')
-            ->with('success', 'Poll created successfully.');
+        // Handle election type with multiple candidates
+        if ($request->poll_type === 'election') {
+            foreach ($request->input('candidates', []) as $cd) {
+                if (!empty($cd['candidate_id'])) {
+                    PollCandidate::create([
+                        'poll_id' => $poll->id,
+                        'candidate_id' => $cd['candidate_id']
+                    ]);
+                }
+            }
+        }
+
+        // Handle approval type with single candidate
+        if ($request->poll_type === 'approval' && !empty($validated2['candidate_id'])) {
+            PollCandidate::create([
+                'poll_id' => $poll->id,
+                'candidate_id' => $validated2['candidate_id']
+            ]);
+        }
+
+        return redirect()->route('polls.index')->with('success', 'Poll created successfully');
     }
 
-    /**
-     * Show the form for editing the specified poll.
-     */
-    public function edit(Poll $poll)
-    {
-        // List of states to repopulate the dropdown
-        $states = State::orderBy('name')->get();
+   public function edit(Poll $poll)
+{
+    $candidates = Candidate::all();
 
-        return view('admin.polls.edit', compact('poll', 'states'));
+    // Build an array of ['candidate_id'=>…, 'party'=>…] for the form
+    $rows = $poll->pollCandidates()->with('candidate')->get()
+                 ->map(fn($pc) => [
+                    'candidate_id' => $pc->candidate_id,
+                    'party'        => $pc->candidate->party,
+                 ])
+                 ->toArray();
+
+    $poll->candidates = $rows;
+
+    $approvalCandidate = $poll->pollCandidates()->first();
+
+    return view(
+        'admin.polls.edit',
+        compact('poll','candidates','approvalCandidate')
+    );
+}
+
+   public function update(Request $request, Poll $poll)
+{
+    $validated = $request->validate([
+        'poll_type'      => 'required|in:election,approval',
+        'race_type'      => 'nullable|in:president,senate,house,governor,other',
+        'election_round' => 'nullable|in:primary,general',
+    ]);
+    $poll->update($validated);
+
+    // Re-validate the candidate inputs
+    $request->validate([
+        'candidates.*.candidate_id' => 'nullable|exists:candidates,id',
+        'candidate_id'              => 'nullable|exists:candidates,id',
+    ]);
+
+    if ($request->poll_type === 'election') {
+        // 1) grab all incoming IDs (filter out blanks)
+        $incoming = collect($request->input('candidates', []))
+                    ->pluck('candidate_id')
+                    ->filter()
+                    ->unique()
+                    ->toArray();
+
+        // 2) delete only those *not* in incoming
+        PollCandidate::where('poll_id', $poll->id)
+                     ->whereNotIn('candidate_id', $incoming)
+                     ->delete();
+
+        // 3) upsert the rest
+        foreach ($incoming as $cid) {
+            PollCandidate::firstOrCreate([
+                'poll_id'      => $poll->id,
+                'candidate_id'=> $cid,
+            ]);
+        }
     }
 
-    /**
-     * Update the specified poll in storage.
-     */
-    public function update(Request $request, Poll $poll)
-    {
-        $validated = $request->validate([
-            'candidate_name'     => 'required|string|max:255',
-            'party'              => 'required|string|max:255',
-            'race'               => 'required|in:primary,general,midterm,approval',
-            'support_percentage' => 'required|numeric|min:0|max:100',
-            'approval_rating'    => 'required|in:Approve,Disapprove,Neutral',
-            'pollster'           => 'required|string|max:255',
-            'state_id'           => 'nullable|exists:states,id',
-            'field_date_start'   => 'required|date',
-            'field_date_end'     => 'required|date|after_or_equal:field_date_start',
-            'release_date'       => 'required|date',
-            'sample_size'        => 'required|integer|min:1',
-            'margin_of_error'    => 'required|numeric|min:0',
-            'source_url'         => 'required|url',
-            'tags'               => 'nullable|string',
-            'status'             => 'required|in:0,1',
-        ]);
-
-        $poll->update([
-            'candidate_name'     => $validated['candidate_name'],
-            'party'              => $validated['party'],
-            'race'               => $validated['race'],
-            'support_percentage' => $validated['support_percentage'],
-            'approval_rating'    => $validated['approval_rating'],
-            'pollster'           => $validated['pollster'],
-            'state_id'           => $validated['state_id'],
-            'field_date_start'   => $validated['field_date_start'],
-            'field_date_end'     => $validated['field_date_end'],
-            'release_date'       => $validated['release_date'],
-            'sample_size'        => $validated['sample_size'],
-            'margin_of_error'    => $validated['margin_of_error'],
-            'source_url'         => $validated['source_url'],
-            'tags'               => $validated['tags'] ?? '',
-            'status'             => $validated['status'],
-        ]);
-
-        return redirect()
-            ->route('polls.index')
-            ->with('success', 'Poll updated successfully.');
+    // approval stays untouched
+    if ($request->poll_type === 'approval' && $request->filled('candidate_id')) {
+        PollCandidate::updateOrCreate(
+            ['poll_id' => $poll->id],
+            ['candidate_id' => $request->input('candidate_id')]
+        );
     }
 
-    /**
-     * Remove the specified poll from storage.
-     */
+    return redirect()->route('polls.index')
+                     ->with('success','Poll updated successfully');
+}
+
     public function destroy(Poll $poll)
     {
         $poll->delete();
-
-        return redirect()
-            ->route('polls.index')
-            ->with('success', 'Poll deleted successfully.');
+        return redirect()->route('polls.index')->with('success', 'Poll deleted successfully');
     }
 
 
 
+    public function details(Request $request, $id)
+    {
+        $poll = Poll::findOrFail($id);
+        $candidates = Candidate::where('poll_id', $id)->get();
+        $states = State::all();
 
-
-    // old 
-    // public function index()
-    // {
-    //     $polls = Poll::latest()->paginate(10);
-    //     return view('admin.polls.index', compact('polls'));
-    // }
-
-    // public function create()
-    // {
-    //     return view('admin.polls.create', [
-    //         'races' => Race::all(),
-    //         'pollsters' => Pollster::all(),
-    //         'states' => State::all(),
-    //     ]);
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'race_id' => 'required|exists:races,id',
-    //         'title' => 'required|string|max:255',
-    //         'pollster_id' => 'required|exists:pollsters,id',
-    //         'state_id' => 'nullable|exists:states,id',
-    //         'field_date_start' => 'required|date',
-    //         'field_date_end' => 'required|date',
-    //         'release_date' => 'required|date',
-    //         'sample_size' => 'required|integer',
-    //         'margin_of_error' => 'required|numeric',
-    //         'source_url' => 'required|url',
-    //         'tags' => 'nullable|string',
-    //         'status' => 'required|integer',
-    //     ]);
-
-    //     Poll::create($validated);
-
-    //     return redirect()->route('polls.index')->with('success', 'Poll created successfully.');
-    // }
-
-    // public function show(Poll $poll)
-    // {
-    //     return view('admin.polls.show', compact('poll'));
-    // }
-
-    // public function edit(Poll $poll)
-    // {
-    //     return view('admin.polls.edit', [
-    //         'poll' => $poll,
-    //         'races' => Race::all(),
-    //         'pollsters' => Pollster::all(),
-    //         'states' => State::all(),
-    //     ]);
-    // }
-
-    // public function update(Request $request, Poll $poll)
-    // {
-    //     $validated = $request->validate([
-    //         'race_id' => 'required|exists:races,id',
-    //         'title' => 'required|string|max:255',
-    //         'pollster_id' => 'required|exists:pollsters,id',
-    //         'state_id' => 'nullable|exists:states,id',
-    //         'field_date_start' => 'required|date',
-    //         'field_date_end' => 'required|date',
-    //         'release_date' => 'required|date',
-    //         'sample_size' => 'required|integer',
-    //         'margin_of_error' => 'required|numeric',
-    //         'source_url' => 'required|url',
-    //         'tags' => 'nullable|string',
-    //         'status' => 'required|integer',
-    //     ]);
-
-    //     $poll->update($validated);
-
-    //     return redirect()->route('polls.index')->with('success', 'Poll updated successfully.');
-    // }
-
-    // public function destroy(Poll $poll)
-    // {
-    //     $poll->delete();
-    //     return redirect()->route('polls.index')->with('success', 'Poll deleted successfully.');
-    // }
+        return view('admin.polls.details', compact('poll', 'candidates', 'states'));
+    }
 }

@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('poll_candidates', function (Blueprint $table) {
-            $table->id(); 
-
-            $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade');
-            $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
+        
+            
+           Schema::create('election_polls', function (Blueprint $table) {
+            $table->id();
+            $table->date('poll_date');
+            $table->string('pollster_source');
+            $table->unsignedInteger('sample_size');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('poll_candidates');
+        Schema::dropIfExists('election_polls');
     }
 };

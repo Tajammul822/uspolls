@@ -48,6 +48,8 @@ Route::get('auth/twitter/callback', [SocialController::class, 'redirectToTwitter
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::post('polls/{id}/details', [PollController::class, 'details'])->name('polls.details');
+
 Route::resource('users', UserController::class);
 Route::resource('polls', PollController::class);
 Route::resource('pollsters', PollsterController::class);
@@ -56,3 +58,4 @@ Route::resource('candidates', CandidateController::class);
 Route::resource('races', RaceController::class);
 Route::resource('poll_candidates', PollCandidateController::class);
 Route::resource('poll_approvals', PollApprovalController::class);
+
