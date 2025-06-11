@@ -82,6 +82,23 @@
             </div>
         </div>
 
+
+        <div class="mb-3 row">
+            <label for="state_id" class="col-sm-2 col-form-label">State</label>
+            <div class="col-sm-10">
+                <select name="state_id" id="state_id" class="form-select">
+                    <option value="">Select State</option>
+                    @foreach ($states as $state)
+                        <option value="{{ $state->id }}"
+                            {{ old('state_id', $poll->state_id ?? '') == $state->id ? 'selected' : '' }}>
+                            {{ $state->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+
         <div class="mb-3 row">
             <label class="col-sm-2 col-form-label">Candidates</label>
             <div class="col-sm-10">

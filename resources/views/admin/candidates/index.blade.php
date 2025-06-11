@@ -44,7 +44,7 @@
                                                 @endif
                                             </td>
 
-                                            <td class="d-flex justify-evenly-space align-items-center">
+                                            <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
                                                 <a href="{{ route('candidates.edit', $cand->id) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"

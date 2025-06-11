@@ -13,6 +13,7 @@ class Poll extends Model
         'poll_type',
         'race_type',
         'election_round',
+        'state_id',
         'status',
     ];
 
@@ -21,18 +22,8 @@ class Poll extends Model
         return $this->belongsTo(State::class);
     }
 
-    // public function candidates()
-    // {
-    //     return $this->hasMany(PollCandidate::class);
-    // }
 
-    // public function approvals()
-    // {
-    //     return $this->hasMany(PollApproval::class);
-    // }
-
-
-     public function pollCandidates()
+    public function pollCandidates()
     {
         return $this->hasMany(PollCandidate::class, 'poll_id', 'id');
     }
@@ -49,5 +40,16 @@ class Poll extends Model
             'candidate_id'
         );
     }
-    
+
+
+    public function electionPoll()
+    {
+        return $this->hasOne(ElectionPoll::class, 'poll_id', 'id');
+    }
+
+
+    public function pollApproval()
+    {
+        return $this->hasOne(PollApproval::class);
+    }
 }

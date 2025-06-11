@@ -9,10 +9,8 @@ use App\Http\Controllers\SocialController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PollController;
-use App\Http\Controllers\PollsterController;
 use App\Http\Controllers\StateController;
 use App\Http\Controllers\CandidateController;
-use App\Http\Controllers\RaceController;
 use App\Http\Controllers\PollCandidateController;
 use App\Http\Controllers\PollApprovalController;
 
@@ -48,14 +46,21 @@ Route::get('auth/twitter/callback', [SocialController::class, 'redirectToTwitter
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::post('polls/{id}/details', [PollController::class, 'details'])->name('polls.details');
+Route::get('admin/polls/{poll}/details', [PollController::class, 'details'])
+     ->name('polls.details');
+
+
+
+Route::post('admin/polls/approval', [PollController::class, 'storeApproval'])
+     ->name('polls.approval.store');
+
+Route::post('admin/polls/election', [PollController::class, 'storeElection'])
+     ->name('polls.election.store');
 
 Route::resource('users', UserController::class);
 Route::resource('polls', PollController::class);
-Route::resource('pollsters', PollsterController::class);
 Route::resource('states', StateController::class);
 Route::resource('candidates', CandidateController::class);
-Route::resource('races', RaceController::class);
 Route::resource('poll_candidates', PollCandidateController::class);
 Route::resource('poll_approvals', PollApprovalController::class);
 

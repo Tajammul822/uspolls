@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
-            
-           Schema::create('election_polls', function (Blueprint $table) {
+
+        Schema::create('election_polls', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade');
             $table->date('poll_date');
             $table->string('pollster_source');
             $table->unsignedInteger('sample_size');

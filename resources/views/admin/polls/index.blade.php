@@ -28,6 +28,7 @@
                                         <th>Poll Type</th>
                                         <th>Race Type</th>
                                         <th>Election Round</th>
+                                        <th>State</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -37,8 +38,9 @@
                                     @forelse($polls as $poll)
                                         <tr>
                                             <td>{{ ucfirst($poll->poll_type) }}</td>
-                                            <td>{{ ucfirst($poll->race_type) }}</td>
-                                            <td>{{ ucfirst($poll->election_round) }}</td>
+                                            <td>{{ ucfirst($poll->race_type ?? 'N/A')  }}</td>
+                                            <td>{{ ucfirst($poll->election_round  ?? 'N/A') }}</td>
+                                            <td>{{ $poll->state->name ?? 'N/A' }}</td>
                                             <td>
                                                 @if ($poll->status == 1)
                                                     <span class="badge bg-primary">Active</span>
@@ -47,7 +49,7 @@
                                                 @endif
                                             </td>
 
-                                            <td class="d-flex justify-evenly-space align-items-center">
+                                            <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
                                                 <a href="{{ route('polls.edit', $poll->id) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
@@ -64,11 +66,11 @@
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
-                                                 <a href="{{ route('polls.details', $poll->id) }}"
-                                                    class="btn btn-primary btn-sm float-left mr-1"
-                                                    style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
-                                                    title="edit" data-placement="bottom">
-                                                    <i class="fas fa-edit"></i>
+                                                <a href="{{ route('polls.details', $poll->id) }}"
+                                                    class="btn btn-info btn-sm"
+                                                    style="height:30px;border-radius:50%" data-toggle="tooltip"
+                                                    data-placement="bottom" title="Details">
+                                                    <i class="fas fa-sign-in-alt"></i>
                                                 </a>
                                             </td>
                                         </tr>

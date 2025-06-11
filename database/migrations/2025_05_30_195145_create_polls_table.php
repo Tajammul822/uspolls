@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('polls', function (Blueprint $table) {
             $table->id(); // Primary key
-
             $table->enum('poll_type', ['election', 'approval']);
             $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'other'])->nullable();
-            $table->enum('election_round', ['primary', 'general'])->nullable();
+            $table->enum('election_round', ['primary', 'general'])->nullable(); 
+            $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
             $table->integer('status')->default(1);
             $table->timestamps(); 
         });
