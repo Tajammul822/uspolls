@@ -58,13 +58,6 @@
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
-
-                                                <a href="{{ route('election_polls_results.index', ['election_poll_id' => $item->id]) }}"
-                                                    class="btn btn-info btn-sm float-left mr-1"
-                                                    style="height:30px; width:30px; border-radius:50%" data-toggle="tooltip"
-                                                    title="View Results" data-placement="bottom">
-                                                    <i class="fas fa-list"></i>
-                                                </a>
                                             </td>
                                         </tr>
                                     @empty

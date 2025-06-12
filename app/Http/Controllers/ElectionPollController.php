@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ElectionPoll;
 use App\Models\Poll;
 use Illuminate\Http\Request;
+use App\Models\ElectionPollResult;
+use Illuminate\Support\Arr;
 
 class ElectionPollController extends Controller
 {
@@ -24,10 +26,14 @@ class ElectionPollController extends Controller
 
         return view('admin.election_polls.index', compact('electionPolls', 'poll'));
     }
+
     public function create(Request $request)
     {
-        // just pass the poll so you can show its title, etc.
-        $poll = Poll::findOrFail($request->query('poll_id'));
+        $poll    = Poll::findOrFail($request->query('poll_id'));
+
+        // Load exactly the candidates on this poll
+        $poll->load('candidates');
+
         return view('admin.election_polls.create', compact('poll'));
     }
 
@@ -38,19 +44,45 @@ class ElectionPollController extends Controller
             'poll_date'        => 'required|date',
             'pollster_source'  => 'required|string',
             'sample_size'      => 'required|integer',
+            'candidate_ids'    => 'required|array',
+            'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
+            'results'          => 'required|array',
+            'results.*'        => 'required|numeric|min:0|max:100',
         ]);
 
-        ElectionPoll::create($data);
+        // 1) Create the parent ElectionPoll
+        $election = ElectionPoll::create(Arr::only($data, [
+            'poll_id',
+            'poll_date',
+            'pollster_source',
+            'sample_size'
+        ]));
 
-        return redirect()->route('election_polls.index', ['poll_id' => $data['poll_id']])->with('success', 'Item created.');
+        // 2) Insert each result
+        foreach ($data['candidate_ids'] as $candId) {
+            ElectionPollResult::create([
+                'election_poll_id' => $election->id,
+                'candidate_id'     => $candId,
+                'result_percentage' => $data['results'][$candId]
+            ]);
+        }
+
+        return redirect()
+            ->route('election_polls.index', ['poll_id' => $election->poll_id])
+            ->with('success', 'Election poll created with results.');
     }
+
     public function edit(Request $request, ElectionPoll $election_poll)
     {
-        // Fetch the parent poll so we can show its title, etc.
-        // We’ll trust that $election_poll->poll_id is valid.
         $poll = Poll::findOrFail($election_poll->poll_id);
 
-        return view('admin.election_polls.edit', compact('election_poll', 'poll'));
+        // Load its candidates
+        $poll->load('candidates');
+
+        // Also eager-load existing results so we can prefill
+        $election_poll->load('results');
+
+        return view('admin.election_polls.edit', compact('poll', 'election_poll'));
     }
 
     /**
@@ -59,19 +91,37 @@ class ElectionPollController extends Controller
     public function update(Request $request, ElectionPoll $election_poll)
     {
         $data = $request->validate([
-            'poll_date'       => 'required|date',
-            'pollster_source' => 'required|string',
-            'sample_size'     => 'required|integer',
-            // no need to validate poll_id—it won’t change on edit
+            'poll_date'        => 'required|date',
+            'pollster_source'  => 'required|string',
+            'sample_size'      => 'required|integer',
+            'candidate_ids'    => 'required|array',
+            'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
+            'results'          => 'required|array',
+            'results.*'        => 'required|numeric|min:0|max:100',
         ]);
 
-        $election_poll->update($data);
+        // 1) Update the ElectionPoll
+        $election_poll->update(Arr::only($data, [
+            'poll_date',
+            'pollster_source',
+            'sample_size'
+        ]));
+
+        // 2) Upsert each result
+        foreach ($data['candidate_ids'] as $candId) {
+            ElectionPollResult::updateOrCreate(
+                [
+                    'election_poll_id' => $election_poll->id,
+                    'candidate_id'     => $candId
+                ],
+                ['result_percentage' => $data['results'][$candId]]
+            );
+        }
 
         return redirect()
             ->route('election_polls.index', ['poll_id' => $election_poll->poll_id])
-            ->with('success', 'Poll entry updated.');
+            ->with('success', 'Election poll updated with results.');
     }
-
     /**
      * Remove the specified ElectionPoll from storage.
      */
