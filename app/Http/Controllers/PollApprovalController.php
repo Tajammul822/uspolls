@@ -5,92 +5,86 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PollApproval;
 use App\Models\Poll;
+use Illuminate\Auth\Events\Validated;
 
 class PollApprovalController extends Controller
 {
-    /**
-     * Display a listing of poll approvals.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager‑load the poll’s title
-        $approvals = PollApproval::with(['poll:id,title'])
-                     ->latest()
-                     ->paginate(10);
+        $pollId = $request->query('poll_id');
+        abort_unless($pollId && Poll::find($pollId)?->poll_type === 'approval', 404);
 
-        return view('admin.poll_approvals.index', compact('approvals'));
+        $pollApprovals = PollApproval::where('poll_id', $pollId)
+                                     ->latest()
+                                     ->get();
+
+        $poll = Poll::findOrFail($pollId);
+
+        return view('admin.poll_approvals.index', compact('pollApprovals', 'poll'));
     }
 
-    /**
-     * Show the form for creating a new poll approval.
-     */
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.poll_approvals.create', [
-            'polls' => Poll::all(['id', 'title']),
-        ]);
+        // → pull exactly one Poll by ?poll_id=…
+        $poll = Poll::findOrFail($request->query('poll_id'));
+
+        return view('admin.poll_approvals.create', compact('poll'));
     }
 
-    /**
-     * Store a newly created poll approval in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'poll_id'              => 'required|exists:polls,id',
-            'approve_percentage'   => 'required|numeric|min:0|max:100',
-            'disapprove_percentage'=> 'required|numeric|min:0|max:100',
-            'neutral_percentage'   => 'nullable|numeric|min:0|max:100',
-            'subject'              => 'required|string|max:255',
+            'poll_id'          => 'required|exists:polls,id',
+            'name'             => 'required|string',
+            'poll_date'        => 'required|date',
+            'pollster'         => 'required|string',
+            'sample_size'      => 'required|integer',
+            'approve_rating'   => 'required|numeric|min:0|max:100',
+            'disapprove_rating'=> 'required|numeric|min:0|max:100',
         ]);
 
         PollApproval::create($validated);
 
         return redirect()
-            ->route('poll_approvals.index')
-            ->with('success', 'Poll‑Approval entry created successfully.');
+            ->route('poll_approvals.index', ['poll_id' => $validated['poll_id']])
+            ->with('success', 'Poll approval created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified poll approval.
-     */
-    public function edit(PollApproval $poll_approval)
+    public function edit(Request $request, PollApproval $poll_approval)
     {
-        return view('admin.poll_approvals.edit', [
-            'approval' => $poll_approval,
-            'polls'    => Poll::all(['id', 'title']),
-        ]);
+
+        $approval = $poll_approval;
+        
+        $poll = Poll::findOrFail($poll_approval->poll_id);
+
+        return view('admin.poll_approvals.edit', compact('approval', 'poll'));
     }
 
-    /**
-     * Update the specified poll approval in storage.
-     */
     public function update(Request $request, PollApproval $poll_approval)
     {
         $validated = $request->validate([
-            'poll_id'              => 'required|exists:polls,id',
-            'approve_percentage'   => 'required|numeric|min:0|max:100',
-            'disapprove_percentage'=> 'required|numeric|min:0|max:100',
-            'neutral_percentage'   => 'nullable|numeric|min:0|max:100',
-            'subject'              => 'required|string|max:255',
+            'poll_id'          => 'required|exists:polls,id',
+            'name'             => 'required|string',
+            'poll_date'        => 'required|date',
+            'pollster'         => 'required|string',
+            'sample_size'      => 'required|integer',
+            'approve_rating'   => 'required|numeric|min:0|max:100',
+            'disapprove_rating'=> 'required|numeric|min:0|max:100',
         ]);
 
-        $poll_approval->update($validated);
-
+        $updated = $poll_approval->update($validated);
         return redirect()
-            ->route('poll_approvals.index')
-            ->with('success', 'Poll‑Approval entry updated successfully.');
+            ->route('poll_approvals.index', ['poll_id' => $validated['poll_id']])
+            ->with('success', 'Poll approval updated successfully.');
     }
 
-    /**
-     * Remove the specified poll approval from storage.
-     */
     public function destroy(PollApproval $poll_approval)
     {
+        $pollId = $poll_approval->poll_id;
         $poll_approval->delete();
 
         return redirect()
-            ->route('poll_approvals.index')
-            ->with('success', 'Poll‑Approval entry deleted successfully.');
+            ->route('poll_approvals.index', ['poll_id' => $pollId])
+            ->with('success', 'Poll approval deleted successfully.');
     }
 }

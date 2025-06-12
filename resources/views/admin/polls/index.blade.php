@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Export Table</h4>
+                                <h4 class="card-title">Poll Table</h4>
                                 <a href="{{ route('polls.create') }}">
                                     <button type="button" class="btn btn-info">Create Polls</button>
                                 </a>
@@ -38,8 +38,8 @@
                                     @forelse($polls as $poll)
                                         <tr>
                                             <td>{{ ucfirst($poll->poll_type) }}</td>
-                                            <td>{{ ucfirst($poll->race_type ?? 'N/A')  }}</td>
-                                            <td>{{ ucfirst($poll->election_round  ?? 'N/A') }}</td>
+                                            <td>{{ ucfirst($poll->race_type ?? 'N/A') }}</td>
+                                            <td>{{ ucfirst($poll->election_round ?? 'N/A') }}</td>
                                             <td>{{ $poll->state->name ?? 'N/A' }}</td>
                                             <td>
                                                 @if ($poll->status == 1)
@@ -66,11 +66,11 @@
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
-                                                <a href="{{ route('polls.details', $poll->id) }}"
-                                                    class="btn btn-info btn-sm"
-                                                    style="height:30px;border-radius:50%" data-toggle="tooltip"
-                                                    data-placement="bottom" title="Details">
-                                                    <i class="fas fa-sign-in-alt"></i>
+                                                <a href="{{ $poll->poll_type === 'election'
+                                                    ? route('election_polls.index', ['poll_id' => $poll->id])
+                                                    : route('poll_approvals.index', ['poll_id' => $poll->id]) }}"
+                                                    class="btn btn-info btn-sm" title="Manage Entries">
+                                                    <i class="fas fa-list"></i>
                                                 </a>
                                             </td>
                                         </tr>

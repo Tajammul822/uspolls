@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('polls', function (Blueprint $table) {
-            $table->id(); // Primary key
+            $table->id();
             $table->enum('poll_type', ['election', 'approval']);
             $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'other'])->nullable();
             $table->enum('election_round', ['primary', 'general'])->nullable(); 

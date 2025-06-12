@@ -26,7 +26,7 @@
                         
                         @include('admin.poll_approvals.form', [
                             'approval' => $approval,
-                            'polls' => $polls,
+                            'poll' => $poll,
                         ])
 
                     </div>

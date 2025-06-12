@@ -50,6 +50,6 @@ class Poll extends Model
 
     public function pollApproval()
     {
-        return $this->hasOne(PollApproval::class);
+        return $this->hasMany(PollApproval::class);
     }
 }

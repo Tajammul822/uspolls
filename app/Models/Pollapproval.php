@@ -14,11 +14,14 @@ class Pollapproval extends Model
         'name',
         'poll_date',
         'pollster',
-        'sample_size',  
+        'sample_size',
         'approve_rating',
         'disapprove_rating',
     ];
 
+    protected $casts = [
+        'poll_date' => 'datetime',
+    ];
 
     public function poll()
     {

@@ -1,4 +1,5 @@
 @extends('admin.layout')
+
 @section('content')
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -11,9 +12,9 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Poll Approval Table</h4>
-                                <a href="{{ route('poll_approvals.create', ['poll_id' => $poll->id]) }}">
-                                    <button type="button" class="btn btn-info"> + New Item</button>
+                                <h4 class="card-title">Poll Results</h4>
+                                <a href="{{ route('election_polls_results.create', ['election_poll_id' => $poll->id]) }}">
+                                    <button type="button" class="btn btn-info"> + New Result</button>
                                 </a>
                             </div><!--end col-->
                         </div> <!--end row-->
@@ -23,39 +24,28 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Pollster</th>
-                                        <th>Date</th>
-                                        <th>Sample Size</th>
-                                        <th>Approve Rating (%)</th>
-                                        <th>Disapprove Rating (%)</th>
+                                        <th>Candidate</th>
+                                        <th>Result (%)</th>
                                         <th>Actions</th>
-                                    </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($pollApprovals as $item)
+                                    @forelse($poll_results as $item)
                                         <tr>
-                                            <td>{{ $item->name }}</td>
-                                            <td>{{ $item->pollster }}</td>
-                                            <td>{{ $item->poll_date->format('Y-m-d') }}</td>
-                                            <td>{{ $item->sample_size }}</td>
-                                            <td>{{ $item->approve_rating }}</td>
-                                            <td>{{ $item->disapprove_rating }}</td>
-
+                                            <td>{{ $item->candidate->name }}</td>
+                                            <td>{{ $item->result_percentage }}%</td>
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('poll_approvals.edit', $item) }}"
+                                                <a href="{{ route('election_polls_results.edit', $item->id) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
-                                                    title="edit" data-placement="bottom">
+                                                    title="Edit" data-placement="bottom">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+
                                                 <form method="POST"
-                                                    action="{{ route('poll_approvals.destroy', ['poll_approval' => $item->id, 'poll_id' => $poll->id]) }}">
+                                                    action="{{ route('election_polls_results.destroy', $item->id) }}">
                                                     @csrf
                                                     @method('DELETE')
-
                                                     <button type="submit" class="btn btn-danger btn-sm dltBtn"
                                                         data-id="{{ $item->id }}"
                                                         style="height:30px; width:30px;border-radius:50%"
@@ -67,20 +57,18 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center">No items yet</td>
+                                            <td colspan="3" class="text-center">No results added yet.</td>
                                         </tr>
                                     @endforelse
+                                </tbody>
                             </table>
-                            {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>
-                            <button type="button" class="btn btn-sm btn-primary sql">Export SQL</button>
-                            <button type="button" class="btn btn-sm btn-primary txt">Export TXT</button>
-                            <button type="button" class="btn btn-sm btn-primary json">Export JSON</button> --}}
                         </div>
                     </div><!--end card-body-->
                 </div><!--end card-->
             </div> <!--end col-->
         </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const deleteButtons = document.querySelectorAll('.dltBtn');
@@ -92,7 +80,7 @@
 
                     Swal.fire({
                         title: 'Are you sure?',
-                        text: "You won't be able to revert this!",
+                        text: "This action cannot be undone.",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',

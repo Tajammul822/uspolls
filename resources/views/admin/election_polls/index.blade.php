@@ -11,8 +11,8 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Poll Approval Table</h4>
-                                <a href="{{ route('poll_approvals.create', ['poll_id' => $poll->id]) }}">
+                                <h4 class="card-title">Election Poll Table</h4>
+                                <a href="{{ route('election_polls.create', ['poll_id' => $poll->id]) }}">
                                     <button type="button" class="btn btn-info"> + New Item</button>
                                 </a>
                             </div><!--end col-->
@@ -23,36 +23,31 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Pollster</th>
+                                        <th>Poll Type</th>
                                         <th>Date</th>
-                                        <th>Sample Size</th>
-                                        <th>Approve Rating (%)</th>
-                                        <th>Disapprove Rating (%)</th>
+                                        <th>Source</th>
+                                        <th>Sample</th>
                                         <th>Actions</th>
-                                    </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($pollApprovals as $item)
+                                    @forelse($electionPolls as $item)
                                         <tr>
-                                            <td>{{ $item->name }}</td>
-                                            <td>{{ $item->pollster }}</td>
+                                            <td>{{ $item->poll->poll_type }}</td>
                                             <td>{{ $item->poll_date->format('Y-m-d') }}</td>
+                                            <td>{{ $item->pollster_source }}</td>
                                             <td>{{ $item->sample_size }}</td>
-                                            <td>{{ $item->approve_rating }}</td>
-                                            <td>{{ $item->disapprove_rating }}</td>
 
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('poll_approvals.edit', $item) }}"
+                                                <a href="{{ route('election_polls.edit', ['election_poll' => $item->id, 'poll_id' => $poll->id]) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
                                                     title="edit" data-placement="bottom">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+
                                                 <form method="POST"
-                                                    action="{{ route('poll_approvals.destroy', ['poll_approval' => $item->id, 'poll_id' => $poll->id]) }}">
+                                                    action="{{ route('election_polls.destroy', ['election_poll' => $item->id, 'poll_id' => $poll->id]) }}">
                                                     @csrf
                                                     @method('DELETE')
 
@@ -63,6 +58,13 @@
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
+
+                                                <a href="{{ route('election_polls_results.index', ['election_poll_id' => $item->id]) }}"
+                                                    class="btn btn-info btn-sm float-left mr-1"
+                                                    style="height:30px; width:30px; border-radius:50%" data-toggle="tooltip"
+                                                    title="View Results" data-placement="bottom">
+                                                    <i class="fas fa-list"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     @empty
@@ -70,6 +72,7 @@
                                             <td colspan="4" class="text-center">No items yet</td>
                                         </tr>
                                     @endforelse
+                                </tbody>
                             </table>
                             {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>
                             <button type="button" class="btn btn-sm btn-primary sql">Export SQL</button>

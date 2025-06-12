@@ -15,23 +15,21 @@
         <div class="row justify-content-center">
             <div class="col-md-12 col-lg-12">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h4 class="card-title">Create Poll‑Approval Entry</h4>
-                            </div>
+                        <div class="card-header">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h4 class="card-title">Create Election Poll</h4>
+                                </div>
+                            </div> 
                         </div>
-                    </div>
-                    <div class="card-body pt-0">
+                        <div class="card-body pt-0">   
 
-                        @include('admin.poll_approvals.form', [
-                            'poll' => $poll,
-                        ])
+                            @include('admin.election_polls.form', ['poll' => $poll])
 
                     </div>
                 </div>
-            </div>
+            </div> 
         </div>
     </div>
-
+                  
 @endsection

@@ -13,6 +13,8 @@ use App\Http\Controllers\StateController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\PollCandidateController;
 use App\Http\Controllers\PollApprovalController;
+use App\Http\Controllers\ElectionPollController;
+use App\Http\Controllers\ElectionPollResultController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -63,4 +65,6 @@ Route::resource('states', StateController::class);
 Route::resource('candidates', CandidateController::class);
 Route::resource('poll_candidates', PollCandidateController::class);
 Route::resource('poll_approvals', PollApprovalController::class);
+Route::resource('election_polls', ElectionPollController::class);
+Route::resource('election_polls_results', ElectionPollResultController::class);
 

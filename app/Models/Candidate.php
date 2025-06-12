@@ -18,4 +18,6 @@ class Candidate extends Model
     {
         return $this->hasMany(PollCandidate::class);
     }
+
+
 }
