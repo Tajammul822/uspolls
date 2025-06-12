@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Pollcandidate extends Model
+class PollCandidate extends Model
 {
     use HasFactory;
     protected $table = 'poll_candidates';
@@ -25,7 +25,4 @@ class Pollcandidate extends Model
     {
         return $this->belongsTo(Candidate::class);
     }
-
-
-
 }

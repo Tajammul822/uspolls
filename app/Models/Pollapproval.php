@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Pollapproval extends Model
+class PollApproval extends Model
 {
     use HasFactory;
     protected $table = 'poll_approvals';
