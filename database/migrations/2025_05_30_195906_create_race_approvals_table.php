@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('poll_approvals', function (Blueprint $table) {
+        Schema::create('race_approvals', function (Blueprint $table) {
             $table->id(); 
-            $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade');
+            $table->foreignId('race_id')->constrained('races')->onDelete('cascade');
             $table->string('name');
-            $table->date('poll_date');
+            $table->date('race_date');
             $table->string('pollster');
             $table->integer('sample_size');
             $table->decimal('approve_rating', 5, 2);
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('poll_approvals');
+        Schema::dropIfExists('race_approvals');
     }
 };

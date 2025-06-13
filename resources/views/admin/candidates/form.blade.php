@@ -1,5 +1,5 @@
 <form method="POST"
-    action="{{ isset($candidate) ? route('candidates.update', $candidate->id) : route('candidates.store') }}">
+    action="{{ isset($candidate) ? route('candidates.update', $candidate->id) : route('candidates.store') }}" enctype="multipart/form-data">
     @csrf
 
     {{-- If editing, spoof PUT --}}
@@ -24,6 +24,25 @@
                 placeholder="Enter party (or leave blank)" value="{{ old('party', $candidate->party ?? '') }}">
         </div>
     </div>
+
+    {{-- ----- Image (optional) ----- --}}
+    <div class="mb-3 row">
+        <label for="image" class="col-sm-2 col-form-label">Image</label>
+        <div class="col-sm-10">
+            <input type="file" id="image" name="image" class="form-control"
+                {{ isset($candidate) ? '' : 'required' }}>
+        </div>
+    </div>
+
+    @if (isset($candidate) && $candidate->image)
+        <div class="mb-3 row">
+            <label class="col-sm-2 col-form-label">Current</label>
+            <div class="col-sm-10">
+                <img src="{{ asset($candidate->image) }}" width="120" alt="Candidate image">
+            </div>
+        </div>
+    @endif
+
 
     {{-- ----- Status ----- --}}
     <div class="mb-3 row">

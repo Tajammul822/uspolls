@@ -143,37 +143,19 @@
                             </div>
                         </li>
 
-                        {{-- <li class="nav-item">
-                            <a class="nav-link" href="#sidebarPollster" data-bs-toggle="collapse" role="button"
-                                aria-expanded="false" aria-controls="sidebarPollster">
-                                <i class="fa-solid fa-person-booth menu-icon"></i>
-                                <span>Pollsters</span>
-                            </a>
-                            <div class="collapse " id="sidebarPollster">
-                                <ul class="nav flex-column">
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('pollsters.index') }}">Pollster List</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('pollsters.create') }}">Pollster Add</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li> --}}
-
                         <li class="nav-item">
-                            <a class="nav-link" href="#sidebarPolls" data-bs-toggle="collapse" role="button"
-                                aria-expanded="false" aria-controls="sidebarPolls">
+                            <a class="nav-link" href="#sidebarRaces" data-bs-toggle="collapse" role="button"
+                                aria-expanded="false" aria-controls="sidebarRaces">
                                 <i class="fas fa-poll menu-icon"></i>
-                                <span>Polls</span>
+                                <span>Races</span>
                             </a>
-                            <div class="collapse " id="sidebarPolls">
+                            <div class="collapse " id="sidebarRaces">
                                 <ul class="nav flex-column">
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('polls.index') }}">Poll List</a>
+                                        <a class="nav-link" href="{{ route('races.index') }}">Races List</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('polls.create') }}">Poll Add</a>
+                                        <a class="nav-link" href="{{ route('races.create') }}">Race Add</a>
                                     </li>
                                 </ul>
                             </div>

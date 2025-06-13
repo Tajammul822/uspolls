@@ -5,26 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PollApproval extends Model
+class PollResult extends Model
 {
+
     use HasFactory;
-    protected $table = 'poll_approvals';
+
     protected $fillable = [
         'poll_id',
-        'name',
-        'poll_date',
-        'pollster',
-        'sample_size',
-        'approve_rating',
-        'disapprove_rating',
-    ];
-
-    protected $casts = [
-        'poll_date' => 'datetime',
+        'candidate_id',
+        'result_percentage',
     ];
 
     public function poll()
     {
         return $this->belongsTo(Poll::class);
     }
+
+    public function candidate()
+    {
+        return $this->belongsTo(Candidate::class);
+    }
+
 }

@@ -11,12 +11,13 @@ class Candidate extends Model
     protected $fillable = [
         'name',
         'party',
+        'image',
         'status',
     ];
     
-    public function pollCandidates()
+    public function raceCandidates()
     {
-        return $this->hasMany(PollCandidate::class);
+        return $this->hasMany(RaceCandidate::class);
     }
 
 

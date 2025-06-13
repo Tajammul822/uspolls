@@ -18,16 +18,15 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h4 class="card-title">Edit Entry</h4>
+                                <h4 class="card-title">Edit Race‑Approval Entry</h4>
                             </div>
                         </div>
                     </div>
                     <div class="card-body pt-0">
 
-                        @include('admin.poll_candidates.form', [
-                            'entry' => $entry,
-                            'polls' => $polls,
-                            'candidates' => $candidates,
+                        @include('admin.race_approvals.form', [
+                            'approval' => $approval,
+                            'race' => $race,
                         ])
 
                     </div>

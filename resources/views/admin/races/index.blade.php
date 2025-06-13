@@ -1,4 +1,5 @@
 @extends('admin.layout')
+
 @section('content')
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -11,9 +12,9 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Poll Approval Table</h4>
-                                <a href="{{ route('poll_approvals.create', ['poll_id' => $poll->id]) }}">
-                                    <button type="button" class="btn btn-info"> + New Item</button>
+                                <h4 class="card-title">Race</h4>
+                                <a href="{{ route('races.create') }}">
+                                    <button type="button" class="btn btn-info">Create Race</button>
                                 </a>
                             </div><!--end col-->
                         </div> <!--end row-->
@@ -24,50 +25,58 @@
                                 <thead class="">
                                     <tr>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Pollster</th>
-                                        <th>Date</th>
-                                        <th>Sample Size</th>
-                                        <th>Approve Rating (%)</th>
-                                        <th>Disapprove Rating (%)</th>
+                                        <th>Race</th>
+                                        <th>Race Type</th>
+                                        <th>Election Round</th>
+                                        <th>State</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($pollApprovals as $item)
+                                    @forelse($races as $race)
                                         <tr>
-                                            <td>{{ $item->name }}</td>
-                                            <td>{{ $item->pollster }}</td>
-                                            <td>{{ $item->poll_date->format('Y-m-d') }}</td>
-                                            <td>{{ $item->sample_size }}</td>
-                                            <td>{{ $item->approve_rating }}</td>
-                                            <td>{{ $item->disapprove_rating }}</td>
+                                            <td>{{ ucfirst($race->race) }}</td>
+                                            <td>{{ ucfirst($race->race_type ?? 'N/A') }}</td>
+                                            <td>{{ ucfirst($race->election_round ?? 'N/A') }}</td>
+                                            <td>{{ $race->state->name ?? 'N/A' }}</td>
+                                            <td>
+                                                @if ($race->status == 1)
+                                                    <span class="badge bg-primary">Active</span>
+                                                @else
+                                                    <span class="badge bg-warning">Inactive</span>
+                                                @endif
+                                            </td>
 
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('poll_approvals.edit', $item) }}"
+                                                <a href="{{ route('races.edit', $race->id) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
                                                     title="edit" data-placement="bottom">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form method="POST"
-                                                    action="{{ route('poll_approvals.destroy', ['poll_approval' => $item->id, 'poll_id' => $poll->id]) }}">
+                                                <form method="POST" action="{{ route('races.destroy', $race->id) }}">
                                                     @csrf
                                                     @method('DELETE')
-
-                                                    <button type="submit" class="btn btn-danger btn-sm dltBtn"
-                                                        data-id="{{ $item->id }}"
+                                                    <button class="btn btn-danger btn-sm dltBtn"
+                                                        data-id="{{ $race->id }}"
                                                         style="height:30px; width:30px;border-radius:50%"
                                                         data-toggle="tooltip" data-placement="bottom" title="Delete">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
+                                                <a href="{{ $race->race === 'election'
+                                                    ? route('polls.index', ['race_id' => $race->id])
+                                                    : route('race_approvals.index', ['race_id' => $race->id]) }}"
+                                                    class="btn btn-info btn-sm" title="Manage Entries">
+                                                    <i class="fas fa-list"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center">No items yet</td>
+                                            <td colspan="9" class="text-center">No Races found.</td>
                                         </tr>
                                     @endforelse
                             </table>

@@ -1,5 +1,5 @@
 <form method="POST"
-    action="{{ isset($approval) ? route('poll_approvals.update', ['poll_approval' => $approval->id, 'poll_id' => $approval->poll_id]) : route('poll_approvals.store', ['poll_id' => request('poll_id')]) }}">
+    action="{{ isset($approval) ? route('race_approvals.update', ['race_approval' => $approval->id, 'race_id' => $approval->race_id]) : route('race_approvals.store', ['race_id' => request('race_id')]) }}">
     @csrf
 
     @isset($approval)
@@ -8,24 +8,24 @@
 
 
 
-    {{-- Base Poll (read-only) --}}
+    {{-- Base Race (read-only) --}}
     <div class="mb-3 row">
-        <label class="col-sm-2 col-form-label">Poll</label>
+        <label class="col-sm-2 col-form-label">Race</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" value="{{ $poll->poll_type }}" readonly>
-            <input type="hidden" name="poll_id" value="{{ $poll->id }}">
+            <input type="text" class="form-control" value="{{ $race->race }}" readonly>
+            <input type="hidden" name="race_id" value="{{ $race->id }}">
         </div>
     </div>
 
     @php
         // grab the single candidate from the pivot relation
-        $candidate = $poll->candidates()->first();
+        $candidate = $race->candidates()->first();
     @endphp
 
     <div class="mb-3 row">
         <label class="col-sm-2 col-form-label">Official Name</label>
         <div class="col-sm-10">
-            @if ($poll->poll_type === 'approval' && $candidate)
+            @if ($race->race === 'approval' && $candidate)
                 {{-- read-only display of the only candidate --}}
                 <input type="text" name="name" class="form-control" value="{{ $candidate->name }}"  readonly>
             @endif
@@ -34,10 +34,10 @@
 
     {{-- Date --}}
     <div class="mb-3 row">
-        <label for="poll_date" class="col-sm-2 col-form-label">Date</label>
+        <label for="race_date" class="col-sm-2 col-form-label">Date</label>
         <div class="col-sm-10">
-            <input type="date" name="poll_date" id="poll_date" class="form-control"
-                value="{{ old('poll_date', isset($approval) ? $approval->poll_date->format('Y-m-d') : '') }}" required>
+            <input type="date" name="race_date" id="race_date" class="form-control"
+                value="{{ old('race_date', isset($approval) ? $approval->race_date->format('Y-m-d') : '') }}" required>
         </div>
     </div>
 

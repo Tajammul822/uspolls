@@ -24,8 +24,8 @@
                         </div>
                         <div class="card-body pt-0">   
 
-                            @include('admin.poll_candidates.form', [
-                                'polls'      => $polls,
+                            @include('admin.race_candidates.form', [
+                                'races'      => $races,
                                 'candidates' => $candidates,
                             ])
                             

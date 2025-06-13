@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::create('election_polls', function (Blueprint $table) {
+        Schema::create('polls', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade');
+            $table->foreignId('race_id')->constrained('races')->onDelete('cascade');
             $table->date('poll_date');
             $table->string('pollster_source');
             $table->unsignedInteger('sample_size');
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('election_polls');
+        Schema::dropIfExists('polls');
     }
 };

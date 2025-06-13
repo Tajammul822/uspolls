@@ -12,8 +12,8 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Poll Candidate Table</h4>
-                                <a href="{{ route('poll_candidates.create') }}">
+                                <h4 class="card-title">Race Candidate Table</h4>
+                                <a href="{{ route('race_candidates.create') }}">
                                     <button type="button" class="btn btn-info">Create Entry</button>
                                 </a>
                             </div><!--end col-->
@@ -24,7 +24,7 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                        <th>Poll</th>
+                                        <th>Race</th>
                                         <th>Candidate</th>
                                         <th>Support %</th>
                                         <th>Created At</th>
@@ -33,20 +33,20 @@
                                 </thead>
                                 <tbody>
                                     @forelse($entries as $entry)
-                                        <td>{{ $entry->poll->title }}</td>
+                                        <td>{{ $entry->race->race }}</td>
                                         <td>{{ $entry->candidate->name }}</td>
                                         <td>{{ number_format($entry->support_percentage, 2) }}%</td>
                                         <td>{{ $entry->created_at->format('Y-m-d') }}</td>
 
                                         <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                            <a href="{{ route('poll_candidates.edit', $entry->id) }}"
+                                            <a href="{{ route('race_candidates.edit', $entry->id) }}"
                                                 class="btn btn-primary btn-sm float-left mr-1"
                                                 style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
                                                 title="edit" data-placement="bottom">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form method="POST"
-                                                action="{{ route('poll_candidates.destroy', $entry->id) }}">
+                                                action="{{ route('race_candidates.destroy', $entry->id) }}">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="btn btn-danger btn-sm dltBtn" data-id="{{ $entry->id }}"

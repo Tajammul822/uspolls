@@ -1,7 +1,6 @@
 @extends('admin.layout')
 
 @section('content')
-
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -9,6 +8,7 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+        </div>
     @endif
 
     <div class="container-xxl">
@@ -18,20 +18,18 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h4 class="card-title">Edit Election Poll</h4>
+                                <h4 class="card-title">Create Race</h4>
                             </div>
                         </div>
                     </div>
                     <div class="card-body pt-0">
 
-                        @include('admin.election_polls.form', [
-                            'poll' => $poll,
-                            'election_poll' => $election_poll,
-                        ])
+                        @include('admin.races.form')
 
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 @endsection

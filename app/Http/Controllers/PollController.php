@@ -2,161 +2,136 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
-use App\Models\Candidate;
-use Illuminate\Http\Request;
 use App\Models\Poll;
-use App\Models\PollCandidate;
-
-use App\Models\PollApproval;
-use App\Models\ElectionPoll;
-use App\Models\ElectionPollResult;
+use App\Models\Race;
+use Illuminate\Http\Request;
+use App\Models\PollResult;
 use Illuminate\Support\Arr;
-// use App\Models\Race;
-// use App\Models\Pollster;
-use App\Models\State;
 
 class PollController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $polls = Poll::all();
-        $states = State::all();
-        return view('admin.polls.index', compact('polls', 'states'));
+        // 1) Grab & validate the race_id
+        $raceId = $request->query('race_id');
+        abort_unless($raceId && Race::find($raceId)?->race === 'election', 404);
+
+        // 2) Fetch only those child‐records
+        $polls = Poll::where('race_id', $raceId)
+            ->latest()
+            ->get();
+
+        // 3) Pass both the items *and* the parent poll (optional)
+        $race = Race::findOrFail($raceId);
+
+        return view('admin.polls.index', compact('polls', 'race'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $candidates = Candidate::all();
-        $approvalCandidate = null;
-        $states = State::all();
-        return view('admin.polls.create',  compact('candidates', 'approvalCandidate', 'states'));
+        $race    = Race::findOrFail($request->query('race_id'));
+
+        // Load exactly the candidates on this race
+        $race->load('candidates');
+
+        return view('admin.polls.create', compact('race'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'poll_type' => 'required|in:election,approval',
-            'race_type' => 'nullable|in:president,senate,house,governor,other',
-            'state_id' => 'nullable|exists:states,id',
-            'election_round' => 'nullable|in:primary,general',
+        $data = $request->validate([
+            'race_id'          => 'required|exists:races,id',
+            'poll_date'        => 'required|date',
+            'pollster_source'  => 'required|string',
+            'sample_size'      => 'required|integer',
+            'candidate_ids'    => 'required|array',
+            'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
+            'results'          => 'required|array',
+            'results.*'        => 'required|numeric|min:0|max:100',
         ]);
 
-        $poll = Poll::create($validated);
+        // 1) Create the parent Poll
+        $poll = Poll::create(Arr::only($data, [
+            'race_id',
+            'poll_date',
+            'pollster_source',
+            'sample_size'
+        ]));
 
-        $validated2 = $request->validate([
-            'candidates.*.candidate_id' => 'nullable|exists:candidates,id',
-            'candidate_id' => 'nullable|exists:candidates,id',
-        ]);
-
-        // Handle election type with multiple candidates
-        if ($request->poll_type === 'election') {
-            foreach ($request->input('candidates', []) as $cd) {
-                if (!empty($cd['candidate_id'])) {
-                    PollCandidate::create([
-                        'poll_id' => $poll->id,
-                        'candidate_id' => $cd['candidate_id']
-                    ]);
-                }
-            }
-        }
-
-        // Handle approval type with single candidate
-        if ($request->poll_type === 'approval' && !empty($validated2['candidate_id'])) {
-            PollCandidate::create([
+        // 2) Insert each result
+        foreach ($data['candidate_ids'] as $candId) {
+            PollResult::create([
                 'poll_id' => $poll->id,
-                'candidate_id' => $validated2['candidate_id']
+                'candidate_id'     => $candId,
+                'result_percentage' => $data['results'][$candId]
             ]);
         }
 
-        return redirect()->route('polls.index')->with('success', 'Poll created successfully');
+        return redirect()
+            ->route('polls.index', ['race_id' => $poll->race_id])
+            ->with('success', 'Poll created with results.');
     }
 
-    public function edit(Poll $poll)
+    public function edit(Request $request, Poll $poll)
     {
-        $candidates = Candidate::all();
-        $states = State::all();
-        // Build an array of ['candidate_id'=>…, 'party'=>…] for the form
-        $rows = $poll->pollCandidates()->with('candidate')->get()
-            ->map(fn($pc) => [
-                'candidate_id' => $pc->candidate_id,
-                'party'        => $pc->candidate->party,
-            ])
-            ->toArray();
+        $race = Race::findOrFail($poll->race_id);
 
-        $poll->candidates = $rows;
+        // Load its candidates
+        $race->load('candidates');
 
-        $approvalCandidate = $poll->pollCandidates()->first();
+        // Also eager-load existing results so we can prefill
+        $poll->load('results');
 
-        return view(
-            'admin.polls.edit',
-            compact('poll', 'candidates', 'approvalCandidate', 'states')
-        );
+        return view('admin.polls.edit', compact('race', 'poll'));
     }
 
+    /**
+     * Update the specified Poll in storage.
+     */
     public function update(Request $request, Poll $poll)
     {
-        $validated = $request->validate([
-            'poll_type'      => 'required|in:election,approval',
-            'race_type'      => 'nullable|in:president,senate,house,governor,other',
-            'state_id'      => 'nullable|exists:states,id',
-            'election_round' => 'nullable|in:primary,general',
-        ]);
-        $poll->update($validated);
-
-        // Re-validate the candidate inputs
-        $request->validate([
-            'candidates.*.candidate_id' => 'nullable|exists:candidates,id',
-            'candidate_id'              => 'nullable|exists:candidates,id',
+        $data = $request->validate([
+            'poll_date'        => 'required|date',
+            'pollster_source'  => 'required|string',
+            'sample_size'      => 'required|integer',
+            'candidate_ids'    => 'required|array',
+            'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
+            'results'          => 'required|array',
+            'results.*'        => 'required|numeric|min:0|max:100',
         ]);
 
-        if ($request->poll_type === 'election') {
-            // incoming IDs
-            $incoming = collect($request->input('candidates', []))
-                ->pluck('candidate_id')
-                ->filter()
-                ->unique()
-                ->toArray();
+        // 1) Update the Poll
+        $poll->update(Arr::only($data, [
+            'poll_date',
+            'pollster_source',
+            'sample_size'
+        ]));
 
-            // existing IDs
-            $existing = $poll->pollCandidates()->pluck('candidate_id')->toArray();
-
-            // which were removed?
-            $removed = array_diff($existing, $incoming);
-
-            if ($removed) {
-                // delete pivot rows
-                PollCandidate::where('poll_id', $poll->id)
-                    ->whereIn('candidate_id', $removed)
-                    ->delete();
-
-                // delete any results for those candidate_ids
-                ElectionPollResult::whereIn('candidate_id', $removed)->delete();
-            }
-
-            // re-add the rest
-            foreach ($incoming as $cid) {
-                PollCandidate::firstOrCreate([
-                    'poll_id'      => $poll->id,
-                    'candidate_id' => $cid,
-                ]);
-            }
-        }
-        // approval stays untouched
-        if ($request->poll_type === 'approval' && $request->filled('candidate_id')) {
-            PollCandidate::updateOrCreate(
-                ['poll_id' => $poll->id],
-                ['candidate_id' => $request->input('candidate_id')]
+        // 2) Upsert each result
+        foreach ($data['candidate_ids'] as $candId) {
+            PollResult::updateOrCreate(
+                [
+                    'poll_id' => $poll->id,
+                    'candidate_id'     => $candId
+                ],
+                ['result_percentage' => $data['results'][$candId]]
             );
         }
 
-        return redirect()->route('polls.index')
-            ->with('success', 'Poll updated successfully');
+        return redirect()
+            ->route('polls.index', ['race_id' => $poll->race_id])
+            ->with('success', 'Poll updated with results.');
     }
-
+    /**
+     * Remove the specified Poll from storage.
+     */
     public function destroy(Poll $poll)
     {
+        $raceId = $poll->race_id;
         $poll->delete();
-        return redirect()->route('polls.index')->with('success', 'Poll deleted successfully');
+
+        return redirect()
+            ->route('polls.index', ['race_id' => $raceId])
+            ->with('success', 'Deleted.');
     }
 }

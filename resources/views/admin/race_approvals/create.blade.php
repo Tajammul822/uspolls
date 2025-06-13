@@ -18,14 +18,14 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h4 class="card-title">Create Election Poll</h4>
+                                <h4 class="card-title">Create Race‑Approval Entry</h4>
                             </div>
                         </div>
                     </div>
                     <div class="card-body pt-0">
 
-                        @include('admin.election_polls.form', [
-                            'poll' => $poll,
+                        @include('admin.race_approvals.form', [
+                            'race' => $race,
                         ])
 
                     </div>

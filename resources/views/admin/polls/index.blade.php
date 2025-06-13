@@ -1,5 +1,4 @@
 @extends('admin.layout')
-
 @section('content')
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -12,9 +11,9 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Poll Table</h4>
-                                <a href="{{ route('polls.create') }}">
-                                    <button type="button" class="btn btn-info">Create Polls</button>
+                                <h4 class="card-title">Polls</h4>
+                                <a href="{{ route('polls.create', ['race_id' => $race->id]) }}">
+                                    <button type="button" class="btn btn-info"> + New Poll</button>
                                 </a>
                             </div><!--end col-->
                         </div> <!--end row-->
@@ -24,61 +23,49 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                    <tr>
-                                        <th>Poll Type</th>
-                                        <th>Race Type</th>
-                                        <th>Election Round</th>
-                                        <th>State</th>
-                                        <th>Status</th>
+                                        <th>Race</th>
+                                        <th>Date</th>
+                                        <th>Source</th>
+                                        <th>Sample</th>
                                         <th>Actions</th>
-                                    </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($polls as $poll)
+                                    @forelse($polls as $item)
                                         <tr>
-                                            <td>{{ ucfirst($poll->poll_type) }}</td>
-                                            <td>{{ ucfirst($poll->race_type ?? 'N/A') }}</td>
-                                            <td>{{ ucfirst($poll->election_round ?? 'N/A') }}</td>
-                                            <td>{{ $poll->state->name ?? 'N/A' }}</td>
-                                            <td>
-                                                @if ($poll->status == 1)
-                                                    <span class="badge bg-primary">Active</span>
-                                                @else
-                                                    <span class="badge bg-warning">Inactive</span>
-                                                @endif
-                                            </td>
+                                            <td>{{ $item->race->race }}</td>
+                                            <td>{{ $item->poll_date->format('Y-m-d') }}</td>
+                                            <td>{{ $item->pollster_source }}</td>
+                                            <td>{{ $item->sample_size }}</td>
 
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('polls.edit', $poll->id) }}"
+                                                <a href="{{ route('polls.edit', ['poll' => $item->id, 'race_id' => $race->id]) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
-                                                    title="edit" data-placement="bottom">
+                                                    title="edit" data-placempollent="bottom">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form method="POST" action="{{ route('polls.destroy', $poll->id) }}">
+
+                                                <form method="POST"
+                                                    action="{{ route('polls.destroy', ['poll' => $item->id, 'race_id' => $race->id]) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm dltBtn"
-                                                        data-id="{{ $poll->id }}"
+
+                                                    <button type="submit" class="btn btn-danger btn-sm dltBtn"
+                                                        data-id="{{ $item->id }}"
                                                         style="height:30px; width:30px;border-radius:50%"
                                                         data-toggle="tooltip" data-placement="bottom" title="Delete">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
-                                                <a href="{{ $poll->poll_type === 'election'
-                                                    ? route('election_polls.index', ['poll_id' => $poll->id])
-                                                    : route('poll_approvals.index', ['poll_id' => $poll->id]) }}"
-                                                    class="btn btn-info btn-sm" title="Manage Entries">
-                                                    <i class="fas fa-list"></i>
-                                                </a>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-center">No polls found.</td>
+                                            <td colspan="4" class="text-center">No items yet</td>
                                         </tr>
                                     @endforelse
+                                </tbody>
                             </table>
                             {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>
                             <button type="button" class="btn btn-sm btn-primary sql">Export SQL</button>

@@ -10,46 +10,53 @@ class Poll extends Model
     use HasFactory;
 
     protected $fillable = [
-        'poll_type',
-        'race_type',
-        'election_round',
-        'state_id',
-        'status',
+        'race_id',
+        'poll_date',
+        'pollster_source',
+        'sample_size',
     ];
 
-    public function state()
+    protected $casts = [
+        'poll_date' => 'datetime',
+    ];
+
+    public function race()
     {
-        return $this->belongsTo(State::class);
+        return $this->belongsTo(Race::class);
     }
 
-
-    public function pollCandidates()
+    public function results()
     {
-        return $this->hasMany(PollCandidate::class, 'poll_id', 'id');
+        return $this->hasMany(PollResult::class);
     }
 
-    /**
-     * Convenience: the actual Candidate models via the pivot table.
-     */
     public function candidates()
     {
         return $this->belongsToMany(
             Candidate::class,
-            'poll_candidates',
-            'poll_id',
-            'candidate_id'
+            'race_candidates',   // pivot table name
+            'race_id',           // FK on pivot that points to Poll->id
+            'candidate_id'       // FK on pivot that points to Candidate->id
         );
     }
+    // use HasFactory;
+
+    // protected $fillable = [
+    //     'poll_id',
+    //     'poll_date',
+    //     'pollster_source',
+    //     'sample_size',
+    // ];
+
+    // public function poll()
+    // {
+    //     return $this->belongsTo(Poll::class, 'poll_id', 'id');
+    // }
 
 
-    public function electionPoll()
-    {
-        return $this->hasOne(ElectionPoll::class, 'poll_id', 'id');
-    }
+    // public function results()
+    // {
+    //     return $this->hasMany(ElectionPollResult::class, 'election_poll_id', 'id');
+    // }
 
-
-    public function pollApproval()
-    {
-        return $this->hasMany(PollApproval::class);
-    }
 }

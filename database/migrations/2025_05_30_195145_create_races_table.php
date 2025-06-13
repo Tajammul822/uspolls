@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('polls', function (Blueprint $table) {
+        Schema::create('races', function (Blueprint $table) {
             $table->id();
-            $table->enum('poll_type', ['election', 'approval']);
+            $table->enum('race', ['election', 'approval']);
             $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'other'])->nullable();
             $table->enum('election_round', ['primary', 'general'])->nullable(); 
             $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('polls');
+        Schema::dropIfExists('races');
     }
 };

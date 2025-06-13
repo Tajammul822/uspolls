@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Export Table</h4>
+                                <h4 class="card-title">Candidates</h4>
                                 <a href="{{ route('candidates.create') }}">
                                     <button type="button" class="btn btn-info">Create Candidate</button>
                                 </a>
@@ -24,16 +24,25 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
+                                        <th>Candidate</th>
                                         <th>Name</th>
                                         <th>Party</th>
                                         <th>Status</th>
-                                        <th>Created At</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($candidates as $cand)
                                         <tr>
+                                            <td>
+                                                @if ($cand->image)
+                                                    <img src="{{ asset($cand->image) }}" alt="Candidate Image"
+                                                        class="rounded-circle" style="width: 50px; height: 50px;">
+                                                @else
+                                                    <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image"
+                                                        class="rounded-circle" style="width: 50px; height: 50px;">
+                                                @endif
+                                            </td>
                                             <td>{{ $cand->name }}</td>
                                             <td>{{ $cand->party ?? '—' }}</td>
                                             <td>
@@ -80,7 +89,6 @@
             </div> <!--end col-->
         </div>
     </div>
-    {{ $candidates->links() }}
 
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="Appearance" aria-labelledby="AppearanceLabel">

@@ -11,9 +11,9 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Election Poll Table</h4>
-                                <a href="{{ route('election_polls.create', ['poll_id' => $poll->id]) }}">
-                                    <button type="button" class="btn btn-info"> + New Item</button>
+                                <h4 class="card-title">Race Approvals</h4>
+                                <a href="{{ route('race_approvals.create', ['race_id' => $race->id]) }}">
+                                    <button type="button" class="btn btn-info"> + New Approvals</button>
                                 </a>
                             </div><!--end col-->
                         </div> <!--end row-->
@@ -23,31 +23,36 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                        <th>Poll Type</th>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Pollster</th>
                                         <th>Date</th>
-                                        <th>Source</th>
-                                        <th>Sample</th>
+                                        <th>Sample Size</th>
+                                        <th>Approve Rating (%)</th>
+                                        <th>Disapprove Rating (%)</th>
                                         <th>Actions</th>
+                                    </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($electionPolls as $item)
+                                    @forelse($raceApprovals as $item)
                                         <tr>
-                                            <td>{{ $item->poll->poll_type }}</td>
-                                            <td>{{ $item->poll_date->format('Y-m-d') }}</td>
-                                            <td>{{ $item->pollster_source }}</td>
+                                            <td>{{ $item->name }}</td>
+                                            <td>{{ $item->pollster }}</td>
+                                            <td>{{ $item->race_date->format('Y-m-d') }}</td>
                                             <td>{{ $item->sample_size }}</td>
+                                            <td>{{ $item->approve_rating }}</td>
+                                            <td>{{ $item->disapprove_rating }}</td>
 
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('election_polls.edit', ['election_poll' => $item->id, 'poll_id' => $poll->id]) }}"
+                                                <a href="{{ route('race_approvals.edit', $item) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
                                                     title="edit" data-placement="bottom">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-
                                                 <form method="POST"
-                                                    action="{{ route('election_polls.destroy', ['election_poll' => $item->id, 'poll_id' => $poll->id]) }}">
+                                                    action="{{ route('race_approvals.destroy', ['race_approval' => $item->id, 'race_id' => $race->id]) }}">
                                                     @csrf
                                                     @method('DELETE')
 
@@ -65,7 +70,6 @@
                                             <td colspan="4" class="text-center">No items yet</td>
                                         </tr>
                                     @endforelse
-                                </tbody>
                             </table>
                             {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>
                             <button type="button" class="btn btn-sm btn-primary sql">Export SQL</button>

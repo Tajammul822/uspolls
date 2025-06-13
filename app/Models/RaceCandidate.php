@@ -5,20 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PollCandidate extends Model
+class RaceCandidate extends Model
 {
     use HasFactory;
-    protected $table = 'poll_candidates';
+    protected $table = 'race_candidates';
     protected $fillable = [
-        'poll_id',
+        'race_id',
         'candidate_id',
         'support_percentage',
     ];
 
 
-    public function poll()
+    public function race()
     {
-        return $this->belongsTo(Poll::class);
+        return $this->belongsTo(Race::class);
     }
 
     public function candidate()

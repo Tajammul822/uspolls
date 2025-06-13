@@ -10,7 +10,7 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Export Table</h4>
+                                <h4 class="card-title">Export Users</h4>
                                 <a href="{{ route('users.create') }}">
                                     <button type="button" class="btn btn-info">Create User</button>
                                 </a>

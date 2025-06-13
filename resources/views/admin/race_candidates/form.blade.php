@@ -1,6 +1,6 @@
-{{-- resources/views/poll_candidates/form.blade.php --}}
+{{-- resources/views/race_candidates/form.blade.php --}}
 <form method="POST"
-    action="{{ isset($entry) ? route('poll_candidates.update', $entry->id) : route('poll_candidates.store') }}">
+    action="{{ isset($entry) ? route('race_candidates.update', $entry->id) : route('race_candidates.store') }}">
     @csrf
 
     {{-- If editing, spoof PUT --}}
@@ -8,16 +8,16 @@
         @method('PUT')
     @endisset
 
-    {{-- ----- Poll ----- --}}
+    {{-- ----- Race ----- --}}
     <div class="mb-3 row">
-        <label for="poll_id" class="col-sm-2 col-form-label">Poll</label>
+        <label for="race_id" class="col-sm-2 col-form-label">Race</label>
         <div class="col-sm-10">
-            <select id="poll_id" name="poll_id" class="form-select" required>
-                <option value="">Select Poll</option>
-                @foreach ($polls as $poll)
-                    <option value="{{ $poll->id }}"
-                        {{ old('poll_id', $entry->poll_id ?? '') == $poll->id ? 'selected' : '' }}>
-                        {{ $poll->title }}
+            <select id="race_id" name="race_id" class="form-select" required>
+                <option value="">Select Race</option>
+                @foreach ($races as $race)
+                    <option value="{{ $race->id }}"
+                        {{ old('race_id', $entry->race_id ?? '') == $race->id ? 'selected' : '' }}>
+                        {{ $race->title }}
                     </option>
                 @endforeach
             </select>

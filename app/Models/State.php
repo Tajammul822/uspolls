@@ -14,9 +14,9 @@ class State extends Model
         'abbreviation',
     ];
 
-    public function polls()
+    public function races()
     {
-        return $this->hasMany(Poll::class);
+        return $this->hasMany(Race::class);
     }
     
 

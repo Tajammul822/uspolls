@@ -18,12 +18,17 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col">
-                                <h4 class="card-title">Edit Polls</h4>
+                                <h4 class="card-title">Edit Poll</h4>
                             </div>
                         </div>
                     </div>
                     <div class="card-body pt-0">
-                        @include('admin.polls.form', ['poll' => $poll, 'candidates' => $candidates, 'approvalCandidate' => $approvalCandidate])
+
+                        @include('admin.polls.form', [
+                            'race' => $race,
+                            'poll' => $poll,
+                        ])
+
                     </div>
                 </div>
             </div>
