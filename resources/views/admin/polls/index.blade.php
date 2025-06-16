@@ -25,7 +25,7 @@
                                     <tr>
                                         <th>Race</th>
                                         <th>Date</th>
-                                        <th>Source</th>
+                                        <th>Pollster</th>
                                         <th>Sample</th>
                                         <th>Actions</th>
                                     </tr>
@@ -35,7 +35,7 @@
                                         <tr>
                                             <td>{{ $item->race->race }}</td>
                                             <td>{{ $item->poll_date->format('Y-m-d') }}</td>
-                                            <td>{{ $item->pollster_source }}</td>
+                                            <td>{{ $item->pollster->name }}</td>
                                             <td>{{ $item->sample_size }}</td>
 
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">

@@ -38,7 +38,7 @@
                                     @forelse($raceApprovals as $item)
                                         <tr>
                                             <td>{{ $item->name }}</td>
-                                            <td>{{ $item->pollster }}</td>
+                                            <td>{{ $item->pollster->name }}</td>
                                             <td>{{ $item->race_date->format('Y-m-d') }}</td>
                                             <td>{{ $item->sample_size }}</td>
                                             <td>{{ $item->approve_rating }}</td>

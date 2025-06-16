@@ -36,12 +36,23 @@
         </div>
     </div>
 
-    {{-- 3) Source --}}
+    {{-- Pollster --}}
+    @php
+        $current = $poll ?? $race;
+    @endphp
+
     <div class="mb-3 row">
-        <label for="pollster_source" class="col-sm-2 col-form-label">Source</label>
+        <label for="pollster_id" class="col-sm-2 col-form-label">Pollster</label>
         <div class="col-sm-10">
-            <input type="text" name="pollster_source" id="pollster_source" class="form-control"
-                value="{{ old('pollster_source', $poll->pollster_source ?? '') }}" required>
+            <select name="pollster_id" id="pollster_id" class="form-select">
+                <option value="">Select Pollster</option>
+                @foreach ($pollsters as $pollster)
+                    <option value="{{ $pollster->id }}"
+                        {{ old('pollster_id', $current->pollster_id ?? '') == $pollster->id ? 'selected' : '' }}>
+                        {{ $pollster->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
     </div>
 

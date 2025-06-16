@@ -12,9 +12,9 @@
                     <div class="card-header">
                         <div class="row align-items-center">
                             <div class="col d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">Candidates</h4>
-                                <a href="{{ route('candidates.create') }}">
-                                    <button type="button" class="btn btn-info">Create Candidate</button>
+                                <h4 class="card-title">Pollsters</h4>
+                                <a href="{{ route('pollsters.create') }}">
+                                    <button type="button" class="btn btn-info">New Pollster</button>
                                 </a>
                             </div><!--end col-->
                         </div> <!--end row-->
@@ -24,48 +24,40 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                        <th>Candidate</th>
-                                        <th>Party</th>
-                                        <th>Status</th>
+                                        <th>Name</th>
+                                        <th>Rank</th>
+                                        <th>Description</th>
+                                        <th>Website</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($candidates as $cand)
+                                    @forelse($pollsters as $p)
                                         <tr>
-                                            {{-- <td>
-                                               
-                                            </td> --}}
-                                            <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                 @if ($cand->image)
-                                                    <img src="{{ asset($cand->image) }}" alt="Candidate Image"
-                                                        class="rounded-circle" style="width: 50px; height: 50px;">
-                                                @else
-                                                    <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image"
-                                                        class="rounded-circle" style="width: 50px; height: 50px;">
-                                                @endif
-                                                {{ $cand->name }}</td>
-                                            <td>{{ $cand->party ?? '—' }}</td>
+                                            <td>{{ $p->name }}</td>
+                                            <td>{{ $p->rank }}</td>
+                                            <td>{{ Str::limit($p->description, 50, '…') }}</td>
                                             <td>
-                                                @if ($cand->status == 1)
-                                                    <span class="badge bg-primary">Active</span>
+                                                @if ($p->website)
+                                                    <a href="{{ $p->website }}"
+                                                        target="_blank">{{ Str::limit($p->website, 30) }}</a>
                                                 @else
-                                                    <span class="badge bg-warning">Inactive</span>
+                                                    —
                                                 @endif
                                             </td>
 
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('candidates.edit', $cand->id) }}"
+                                                <a href="{{ route('pollsters.edit', $p->id) }}"
                                                     class="btn btn-primary btn-sm float-left mr-1"
                                                     style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
                                                     title="edit" data-placement="bottom">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form method="POST" action="{{ route('candidates.destroy', $cand->id) }}">
+                                                <form method="POST" action="{{ route('pollsters.destroy', $p->id) }}">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-danger btn-sm dltBtn"
-                                                        data-id="{{ $cand->id }}"
+                                                        data-id="{{ $p->id }}"
                                                         style="height:30px; width:30px;border-radius:50%"
                                                         data-toggle="tooltip" data-placement="bottom" title="Delete">
                                                         <i class="fas fa-trash-alt"></i>
@@ -75,7 +67,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center">No candidates found.</td>
+                                            <td colspan="5" class="text-center">No pollsters found</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

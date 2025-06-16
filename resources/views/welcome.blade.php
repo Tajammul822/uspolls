@@ -2553,6 +2553,98 @@
                 </div>
             </aside>
         </section>
+
+        <!-- Header Filters -->
+        <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <select
+                        class="w-full px-4 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option>Battleground States</option>
+                        <option>Arizona</option>
+                        <option>Nevada</option>
+                    </select>
+                </div>
+                <div>
+                    <select
+                        class="w-full px-4 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option>Top Senate Races</option>
+                        <option>Race 1</option>
+                        <option>Race 2</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="text" placeholder="Try 'State', or 'Candidate'"
+                        class="w-full px-6 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <input type="text" placeholder="Find Any Poll"
+                        class="w-full px-6 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="space-y-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-purple-900">2024 Maine CD1: Trump vs. Harris</h1>
+            <p class="text-purple-700">Trump vs. Harris | Multi-Candidate | Maine CD2</p>
+
+            <!-- Battleground States -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <span class="text-sm font-medium text-gray-700">Battleground States:</span>
+                <a href="#" class="text-sm text-purple-600 hover:underline">Arizona</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">Nevada</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">Wisconsin</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">Michigan</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">Pennsylvania</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">North Carolina</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">Georgia</a>
+                <a href="#" class="text-sm text-purple-600 hover:underline">RCP Electoral Map</a>
+            </div>
+
+            <!-- Poll Results Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                POLLSTER</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                DATE</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                SAMPLE</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                HARRIS (D)</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                TRUMP (R)</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                SPREAD</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="bg-yellow-500 text-white">
+                            <td class="px-6 py-4 whitespace-nowrap">Final Results</td>
+                            <td class="px-6 py-4 whitespace-nowrap">—</td>
+                            <td class="px-6 py-4 whitespace-nowrap">—</td>
+                            <td class="px-6 py-4 whitespace-nowrap">59.8</td>
+                            <td class="px-6 py-4 whitespace-nowrap">38.0</td>
+                            <td class="px-6 py-4 whitespace-nowrap flex items-center">
+                                <span>Harris</span>
+                                <span
+                                    class="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">+21.8</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Political News & Analysis -->
         <section class="bg-[#2e2e4d] rounded-lg p-6 mb-8">
             <h2 class="text-xl font-semibold mb-4">Political News &amp; Analysis</h2>

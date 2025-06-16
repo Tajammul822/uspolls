@@ -27,6 +27,7 @@
                         @include('admin.polls.form', [
                             'race' => $race,
                             'poll' => $poll,
+                            'pollsters' => $pollsters,
                         ])
 
                     </div>

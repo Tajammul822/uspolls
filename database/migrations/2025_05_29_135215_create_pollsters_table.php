@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        Schema::create('polls', function (Blueprint $table) {
+        Schema::create('pollsters', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('race_id')->constrained('races')->onDelete('cascade');
-            $table->date('poll_date');
-            $table->string('pollster_source');
-            $table->unsignedInteger('sample_size');
+            $table->string('name')->unique();    // Pollster name
+            $table->enum('rank', ['A+','A','B','C']);
+            $table->text('description')->nullable();
+            $table->string('website')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('polls');
+        Schema::dropIfExists('pollsters');
     }
 };

@@ -18,6 +18,7 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\RaceCandidateController;
 use App\Http\Controllers\RaceApprovalController;
 use App\Http\Controllers\PollController;
+use App\Http\Controllers\PollsterController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -70,4 +71,5 @@ Route::resource('candidates', CandidateController::class);
 Route::resource('race_candidates', RaceCandidateController::class);
 Route::resource('race_approvals', RaceApprovalController::class);
 Route::resource('polls', PollController::class);
+Route::resource('pollsters', PollsterController::class);
 

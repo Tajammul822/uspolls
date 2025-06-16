@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\RaceApproval;
 use App\Models\Race;
+use App\Models\Pollster;
 use Illuminate\Auth\Events\Validated;
 
 class RaceApprovalController extends Controller
@@ -27,8 +28,8 @@ class RaceApprovalController extends Controller
     {
         // → pull exactly one Race by ?race_id=…
         $race = Race::findOrFail($request->query('race_id'));
-
-        return view('admin.race_approvals.create', compact('race'));
+        $pollsters = Pollster::all();
+        return view('admin.race_approvals.create', compact('race', 'pollsters'));
     }
 
     public function store(Request $request)
@@ -37,7 +38,7 @@ class RaceApprovalController extends Controller
             'race_id'          => 'required|exists:races,id',
             'name'             => 'required|string',
             'race_date'        => 'required|date',
-            'pollster'         => 'required|string',
+            'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
             'approve_rating'   => 'required|numeric|min:0|max:100',
             'disapprove_rating'=> 'required|numeric|min:0|max:100',
@@ -56,8 +57,8 @@ class RaceApprovalController extends Controller
         $approval = $race_approval;
 
         $race = Race::findOrFail($race_approval->race_id);
-
-        return view('admin.race_approvals.edit', compact('approval', 'race'));
+        $pollsters = Pollster::all();
+        return view('admin.race_approvals.edit', compact('approval', 'race', 'pollsters'));
     }
 
     public function update(Request $request, RaceApproval $race_approval)
@@ -66,7 +67,7 @@ class RaceApprovalController extends Controller
             'race_id'          => 'required|exists:races,id',
             'name'             => 'required|string',
             'race_date'        => 'required|date',
-            'pollster'         => 'required|string',
+            'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
             'approve_rating'   => 'required|numeric|min:0|max:100',
             'disapprove_rating'=> 'required|numeric|min:0|max:100',

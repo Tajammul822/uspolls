@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use App\Models\Candidate;
+
 use Illuminate\Http\Request;
 use App\Models\Race;
 use App\Models\RaceCandidate;
 use App\Models\PollResult;
-use Illuminate\Support\Arr;
-// use App\Models\Race;
-// use App\Models\Pollster;
+use App\Models\Candidate;
 use App\Models\State;
+
+use Illuminate\Support\Arr;
 
 class RaceController extends Controller
 {
@@ -32,6 +32,10 @@ class RaceController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->input('state_id') === 'general') {
+            $request->merge(['state_id' => null]);
+        }
+
         $validated = $request->validate([
             'race' => 'required|in:election,approval',
             'race_type' => 'nullable|in:president,senate,house,governor,other',
@@ -93,6 +97,10 @@ class RaceController extends Controller
 
     public function update(Request $request, Race $race)
     {
+        if ($request->input('state_id') === 'general') {
+            $request->merge(['state_id' => null]);
+        }
+        
         $validated = $request->validate([
             'race'      => 'required|in:election,approval',
             'race_type'      => 'nullable|in:president,senate,house,governor,other',

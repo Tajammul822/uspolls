@@ -161,7 +161,7 @@
                             </div>
                         </li>
 
-                       <li class="nav-item">
+                        <li class="nav-item">
                             <a class="nav-link" href="#sidebarCandidate" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarCandidate">
                                 <i class="fas fa-users menu-icon"></i>
@@ -179,25 +179,27 @@
                             </div>
                         </li>
 
-                        {{--  <li class="nav-item">
-                            <a class="nav-link" href="#sidebarPoll_Candidate" data-bs-toggle="collapse" role="button"
-                                aria-expanded="false" aria-controls="sidebarPoll_Candidate">
-                                <i class="fa-solid fa-user-tie menu-icon"></i>
-                                <span>Poll Candidates</span>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#sidebarPollster" data-bs-toggle="collapse"
+                                role="button" aria-expanded="false" aria-controls="sidebarPollster">
+                                <i class="fa-solid fa-person-booth menu-icon"></i>
+                                <span>Pollster</span>
                             </a>
-                            <div class="collapse " id="sidebarPoll_Candidate">
+                            <div class="collapse " id="sidebarPollster">
                                 <ul class="nav flex-column">
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('poll_candidates.index') }}">Poll Candidate List</a>
+                                        <a class="nav-link" href="{{ route('pollsters.index') }}">
+                                            Pollster List</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('poll_candidates.create') }}">Poll Candidate Add</a>
+                                        <a class="nav-link" href="{{ route('pollsters.create') }}">
+                                            Pollster Add</a>
                                     </li>
                                 </ul>
                             </div>
                         </li>
 
-
+                        {{-- 
                         <li class="nav-item">
                             <a class="nav-link" href="#sidebarPoll_Approval" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarPoll_Approval">
@@ -269,7 +271,7 @@
                     @yield('admin-dasboard-content')
                     @yield('create-poll-content')
                     @yield('content')
-                    
+
                 </div><!-- container -->
 
                 <footer class="footer text-center text-sm-start d-print-none">
@@ -304,7 +306,7 @@
 
         <!-- Javascript  -->
         <!-- vendor js -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="{{ url('assets/js/app.js') }}"></script>
         <script src="{{ url('assets/js/bootstrap.bundle.min.js') }}"></script>
         <script src="{{ url('assets/js/simplebar.min.js') }}"></script>

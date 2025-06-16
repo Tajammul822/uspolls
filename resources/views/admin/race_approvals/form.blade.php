@@ -6,8 +6,6 @@
         @method('PUT')
     @endisset
 
-
-
     {{-- Base Race (read-only) --}}
     <div class="mb-3 row">
         <label class="col-sm-2 col-form-label">Race</label>
@@ -27,7 +25,7 @@
         <div class="col-sm-10">
             @if ($race->race === 'approval' && $candidate)
                 {{-- read-only display of the only candidate --}}
-                <input type="text" name="name" class="form-control" value="{{ $candidate->name }}"  readonly>
+                <input type="text" name="name" class="form-control" value="{{ $candidate->name }}" readonly>
             @endif
         </div>
     </div>
@@ -41,12 +39,23 @@
         </div>
     </div>
 
-    {{-- Pollster --}}
+     {{-- Pollster --}}
+    @php
+        $current = $approval ?? $race;
+    @endphp
+
     <div class="mb-3 row">
-        <label for="pollster" class="col-sm-2 col-form-label">Pollster</label>
+        <label for="pollster_id" class="col-sm-2 col-form-label">Pollster</label>
         <div class="col-sm-10">
-            <input type="text" name="pollster" id="pollster" class="form-control"
-                value="{{ old('pollster', $approval->pollster ?? '') }}" required>
+            <select name="pollster_id" id="pollster_id" class="form-select">
+                <option value="">Select Pollster</option>
+                @foreach ($pollsters as $pollster)
+                    <option value="{{ $pollster->id }}"
+                        {{ old('pollster_id', $current->pollster_id ?? '') == $pollster->id ? 'selected' : '' }}>
+                        {{ $pollster->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
     </div>
 

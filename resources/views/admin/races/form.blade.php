@@ -88,6 +88,10 @@
             <div class="col-sm-10">
                 <select name="state_id" id="state_id" class="form-select">
                     <option value="">Select State</option>
+                    <option value="general"
+                        {{ old('state_id', (string) ($race->state_id ?? '')) === 'general' ? 'selected' : '' }}>
+                        General
+                    </option>
                     @foreach ($states as $state)
                         <option value="{{ $state->id }}"
                             {{ old('state_id', $race->state_id ?? '') == $state->id ? 'selected' : '' }}>
@@ -97,7 +101,6 @@
                 </select>
             </div>
         </div>
-
 
         <div class="mb-3 row">
             <label class="col-sm-2 col-form-label">Candidates</label>

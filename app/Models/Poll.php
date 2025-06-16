@@ -12,7 +12,7 @@ class Poll extends Model
     protected $fillable = [
         'race_id',
         'poll_date',
-        'pollster_source',
+        'pollster_id',
         'sample_size',
     ];
 
@@ -30,6 +30,11 @@ class Poll extends Model
         return $this->hasMany(PollResult::class);
     }
 
+      public function pollster()
+    {
+        return $this->belongsTo(Pollster::class);
+    }
+
     public function candidates()
     {
         return $this->belongsToMany(
@@ -39,24 +44,6 @@ class Poll extends Model
             'candidate_id'       // FK on pivot that points to Candidate->id
         );
     }
-    // use HasFactory;
-
-    // protected $fillable = [
-    //     'poll_id',
-    //     'poll_date',
-    //     'pollster_source',
-    //     'sample_size',
-    // ];
-
-    // public function poll()
-    // {
-    //     return $this->belongsTo(Poll::class, 'poll_id', 'id');
-    // }
-
-
-    // public function results()
-    // {
-    //     return $this->hasMany(ElectionPollResult::class, 'election_poll_id', 'id');
-    // }
+ 
 
 }

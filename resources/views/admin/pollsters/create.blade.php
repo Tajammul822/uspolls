@@ -15,24 +15,21 @@
         <div class="row justify-content-center">
             <div class="col-md-12 col-lg-12">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h4 class="card-title">Create Race‑Approval Entry</h4>
-                            </div>
+                        <div class="card-header">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h4 class="card-title">Create Pollster</h4>
+                                </div>
+                            </div> 
                         </div>
-                    </div>
-                    <div class="card-body pt-0">
+                        <div class="card-body pt-0">   
 
-                        @include('admin.race_approvals.form', [
-                            'race' => $race,
-                            'pollsters' => $pollsters,
-                        ])
+                            @include('admin.pollsters.form')
 
                     </div>
                 </div>
-            </div>
+            </div> 
         </div>
     </div>
-
+                  
 @endsection

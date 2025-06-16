@@ -13,7 +13,7 @@ class RaceApproval extends Model
         'race_id',
         'name',
         'race_date',
-        'pollster',
+        'pollster_id',
         'sample_size',
         'approve_rating',
         'disapprove_rating',
@@ -26,5 +26,10 @@ class RaceApproval extends Model
     public function race()
     {
         return $this->belongsTo(Race::class);
+    }
+
+      public function pollster()
+    {
+        return $this->belongsTo(Pollster::class);
     }
 }

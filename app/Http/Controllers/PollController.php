@@ -6,6 +6,7 @@ use App\Models\Poll;
 use App\Models\Race;
 use Illuminate\Http\Request;
 use App\Models\PollResult;
+use App\Models\Pollster;
 use Illuminate\Support\Arr;
 
 class PollController extends Controller
@@ -34,7 +35,9 @@ class PollController extends Controller
         // Load exactly the candidates on this race
         $race->load('candidates');
 
-        return view('admin.polls.create', compact('race'));
+        $pollsters = Pollster::all();
+
+        return view('admin.polls.create', compact('race', 'pollsters'));
     }
 
     public function store(Request $request)
@@ -42,7 +45,7 @@ class PollController extends Controller
         $data = $request->validate([
             'race_id'          => 'required|exists:races,id',
             'poll_date'        => 'required|date',
-            'pollster_source'  => 'required|string',
+            'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
             'candidate_ids'    => 'required|array',
             'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
@@ -54,7 +57,7 @@ class PollController extends Controller
         $poll = Poll::create(Arr::only($data, [
             'race_id',
             'poll_date',
-            'pollster_source',
+            'pollster_id',
             'sample_size'
         ]));
 
@@ -82,7 +85,9 @@ class PollController extends Controller
         // Also eager-load existing results so we can prefill
         $poll->load('results');
 
-        return view('admin.polls.edit', compact('race', 'poll'));
+        $pollsters = Pollster::all();
+
+        return view('admin.polls.edit', compact('race', 'poll', 'pollsters'));
     }
 
     /**
@@ -92,7 +97,7 @@ class PollController extends Controller
     {
         $data = $request->validate([
             'poll_date'        => 'required|date',
-            'pollster_source'  => 'required|string',
+            'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
             'candidate_ids'    => 'required|array',
             'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
@@ -103,7 +108,7 @@ class PollController extends Controller
         // 1) Update the Poll
         $poll->update(Arr::only($data, [
             'poll_date',
-            'pollster_source',
+            'pollster_id',
             'sample_size'
         ]));
 
