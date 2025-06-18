@@ -5,13 +5,59 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Candidate;
 use App\Models\Poll;
+use App\Models\Race;
+use App\Models\State;
 use Illuminate\Support\Facades\Response;
 
 class HomeController extends Controller
 {
+    // Show the page with your State dropdown
+    public function index()
+    {
+        $states = State::orderBy('name')->get(['id','name']);
+        return view('frontend.home', compact('states'));
+    }
+
+    // AJAX: Fetch all polls for any race in this state
+    public function pollsByState($stateId)
+    {
+        $polls = Poll::whereHas('race', function($q) use ($stateId){
+                $q->where('state_id', $stateId);
+            })
+            ->with(['candidate','pollster'])
+            ->get();
+
+        // Build JSON-friendly array
+        $data = $polls->map(function($poll){
+            // assume exactly two candidates per poll
+            $c = $poll->candidate->map(fn($cand)=>[
+                'name' => $cand->name,
+                'pct'  => $cand->pivot->result_percentage
+            ])->values();
+
+            // sort descending so [0] is winner
+            $c = $c->sortByDesc('pct')->values();
+
+            $net = number_format($c[0]['pct'] - ($c[1]['pct'] ?? 0), 1);
+
+            return [
+                'pollster' => $poll->pollster->name ?? 'N/A',
+                'date'     => $poll->poll_date,
+                'sample'   => $poll->sample_size,
+                'cand1'    => $c[0]['pct'],
+                'cand2'    => $c[1]['pct'] ?? 0,
+                'net'      => $net,
+                'leadClass'=> $net >= 0 ? 'positive' : 'negative',
+                'c1class'  => 'positive',   // winner always positive
+                'c2class'  => 'negative',   // runner-up negative
+            ];
+        });
+
+        return response()->json($data);
+    }
 
 
-
+    
     public function searchPolls(Request $request)
     {
         $q = $request->input('search');
@@ -70,57 +116,6 @@ class HomeController extends Controller
             'polls' => $result,
         ]);
     }
-    //  /**
-    //  * Live‐search by candidate name → return distinct polls,
-    //  * each labeled “A vs B vs …” for the dropdown.
-    //  */
-    // public function searchPolls(Request $request)
-    // {
-    //     $q = $request->input('search', '');
-    //     // 1) find poll_ids where any candidate name matches
-    //     $pollIds = Candidate::where('name', 'like', "%{$q}%")
-    //         ->join('poll_results', 'candidates.id', '=', 'poll_results.candidate_id')
-    //         ->distinct()
-    //         ->pluck('poll_results.poll_id');
 
-    //     // 2) for each poll, build “A vs B vs C”
-    //     $results = Poll::whereIn('id', $pollIds)
-    //         ->with('candidates')
-    //         ->get()
-    //         ->map(function ($poll) {
-    //             $names = $poll->candidates->pluck('name')->toArray();
-    //             return [
-    //                 'poll_id' => $poll->id,
-    //                 'label'   => implode(' vs ', $names),
-    //             ];
-    //         });
-
-    //     return Response::json($results);
-    // }
-
-    // /**
-    //  * Given a poll_id, return:
-    //  * – pollster_id
-    //  * – poll_date
-    //  * – sample_size
-    //  * – array of { name, pct } for each candidate
-    //  */
-    // public function getResults(Poll $poll)
-    // {
-    //     $poll->load('candidate');
-
-    //     $data = [
-    //         'pollster_id' => $poll->pollster_id,
-    //         'poll_date'   => $poll->poll_date,
-    //         'sample_size' => $poll->sample_size,
-    //         'results'     => $poll->candidate->map(function ($cand) {
-    //             return [
-    //                 'name' => $cand->name,
-    //                 'pct'  => $cand->pivot->result_percentage,
-    //             ];
-    //         })->values()->toArray(),
-    //     ];
-
-    //     return Response::json($data);
-    // }
+    
 }

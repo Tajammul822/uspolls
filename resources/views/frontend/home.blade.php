@@ -14,7 +14,7 @@
                 </select>
             </div>
 
-            <div class="filter-group">
+            {{-- <div class="filter-group">
                 <label for="state"><i class="fas fa-map-marker-alt"></i> State:</label>
                 <select id="state">
                     <option value="all">All States</option>
@@ -25,6 +25,19 @@
                     <option value="pa">Pennsylvania</option>
                     <option value="tx">Texas</option>
                 </select>
+            </div> --}}
+
+            <!-- State Filter -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="state"><i class="fas fa-map-marker-alt"></i> State:</label>
+                    <select id="state">
+                        <option value="">-- Select State --</option>
+                        @foreach ($states as $st)
+                            <option value="{{ $st->id }}">{{ $st->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
             <div class="filter-group">
@@ -261,7 +274,7 @@
         </div>
     </div>
 
- <script>
+    <script>
         // Initialize charts after page load
         document.addEventListener('DOMContentLoaded', function() {
             // Approval trend chart (line)
@@ -492,5 +505,43 @@
     </script>
 
 
+    <script>
+        // CSRF for AJAX
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
+        // On State change, fetch polls
+        $('#state').on('change', function() {
+            const sid = $(this).val();
+            $('#poll-table-body').empty();
+
+            if (!sid) return;
+
+            $.getJSON(`/polls/by-state/${sid}`, function(list) {
+                if (list.length === 0) {
+                    $('#poll-table-body').html(
+                        '<tr><td colspan="6">No polls found for this state.</td></tr>'
+                    );
+                    return;
+                }
+
+                let rows = '';
+                list.forEach(p => {
+                    rows += `<tr>
+        <td>${p.pollster}</td>
+        <td>${p.date}</td>
+        <td>${p.sample}</td>
+        <td class="poll-result ${p.c1class}">${p.cand1}%</td>
+        <td class="poll-result ${p.c2class}">${p.cand2}%</td>
+        <td class="poll-result ${p.leadClass}">${p.net >= 0? '+' : ''}${p.net}%</td>
+      </tr>`;
+                });
+
+                $('#poll-table-body').html(rows);
+            });
+        });
+    </script>
 @endsection
