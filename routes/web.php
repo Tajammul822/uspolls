@@ -20,6 +20,8 @@ use App\Http\Controllers\RaceApprovalController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\PollsterController;
 
+use App\Http\Controllers\HomeController;
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +32,7 @@ Route::middleware('web')->group(function () {
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
+
 
 Route::get('dashboard', function () {
     return view('admin.dashboard');
@@ -67,9 +70,27 @@ Route::get('auth/twitter/callback', [SocialController::class, 'redirectToTwitter
 Route::resource('users', UserController::class);
 Route::resource('races', RaceController::class);
 Route::resource('states', StateController::class);
-Route::resource('candidates', CandidateController::class);
+Route::resource('candidates', CandidateController::class)->except(['show']);
 Route::resource('race_candidates', RaceCandidateController::class);
 Route::resource('race_approvals', RaceApprovalController::class);
-Route::resource('polls', PollController::class);
+Route::resource('polls', PollController::class)->except(['show']);
 Route::resource('pollsters', PollsterController::class);
 
+
+// Front_End 
+Route::get('/home', function () {
+    return view('frontend.home');
+})->name('homeboard');
+Route::view('/presidential', 'frontend.presidential')->name('presidential');
+Route::view('/senate', 'frontend.senate')->name('senate');
+Route::view('/house', 'frontend.house')->name('house');
+Route::view('/governor', 'frontend.governor')->name('governor');
+
+// Route::get('/polls/search', [HomeController::class, 'searchPolls'])
+//      ->name('polls.search');
+
+// Route::get('/polls/{poll}/results', [HomeController::class, 'getResults'])
+//      ->name('polls.results');
+
+Route::get('/candidates/search', [HomeController::class, 'searchPolls'])->name('candidates.search');
+Route::get('/polls/results/{key}', [HomeController::class, 'getResults']);

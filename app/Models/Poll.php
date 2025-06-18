@@ -30,7 +30,7 @@ class Poll extends Model
         return $this->hasMany(PollResult::class);
     }
 
-      public function pollster()
+    public function pollster()
     {
         return $this->belongsTo(Pollster::class);
     }
@@ -44,6 +44,10 @@ class Poll extends Model
             'candidate_id'       // FK on pivot that points to Candidate->id
         );
     }
- 
 
+    public function candidate()
+    {
+        return $this->belongsToMany(Candidate::class, 'poll_results')
+            ->withPivot('result_percentage');
+    }
 }

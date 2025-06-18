@@ -63,7 +63,7 @@
                                 class="thumb-lg rounded-circle">
                         </a>
                         <div class="dropdown-menu dropdown-menu-end py-0">
-                            <div class="d-flex align-items-center dropdown-item py-2 bg-secondary-subtle">
+                            <div class=" align-items-center dropdown-item py-2 bg-secondary-subtle">
                                 <div class="flex-shrink-0">
                                     <img src="{{ url('assets/images/users/avatar-1.jpg') }}" alt=""
                                         class="thumb-md rounded-circle">
