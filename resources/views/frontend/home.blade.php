@@ -4,28 +4,18 @@
     <div class="main-content">
         <!-- Filters -->
         <div class="filters">
-            <div class="filter-group">
-                <label for="poll-type"><i class="fas fa-filter"></i> Poll Type:</label>
-                <select id="poll-type">
-                    <option value="all">All Polls</option>
-                    <option value="approval">Approval Ratings</option>
-                    <option value="senate">Senate Races</option>
-                    <option value="president">President Matchups</option>
-                </select>
+            <!-- Race Filter -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="race-select"><i class="fas fa-flag"></i> Race:</label>
+                    <select id="race-select">
+                        <option value="">-- Select Race --</option>
+                        @foreach ($races as $race)
+                            <option value="{{ $race->id }}">{{ $race->race }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-
-            {{-- <div class="filter-group">
-                <label for="state"><i class="fas fa-map-marker-alt"></i> State:</label>
-                <select id="state">
-                    <option value="all">All States</option>
-                    <option value="az">Arizona</option>
-                    <option value="ga">Georgia</option>
-                    <option value="mi">Michigan</option>
-                    <option value="nv">Nevada</option>
-                    <option value="pa">Pennsylvania</option>
-                    <option value="tx">Texas</option>
-                </select>
-            </div> --}}
 
             <!-- State Filter -->
             <div class="filters">
@@ -50,8 +40,8 @@
         <!-- Polling Table -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title"><i class="fas fa-table"></i> Latest Polling Data</div>
-                <div class="time-filters">…</div>
+                <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
+                <div class="time-filters"></div>
             </div>
             <div class="polling-table-container">
                 <table class="polling-table" id="polling-table">
@@ -65,35 +55,38 @@
             </div>
         </div>
 
-        <!-- Chart Section -->
         <div class="chart-container">
+            {{-- Time filters --}}
             <div class="time-filters">
-                <div class="time-filter active">1D</div>
-                <div class="time-filter">1W</div>
-                <div class="time-filter">1M</div>
-                <div class="time-filter">1Y</div>
-                <div class="time-filter">5Y</div>
-                <div class="time-filter">ALL</div>
-            </div>
-            <!-- </div> -->
-            <div class="chart-header">
-                <div class="chart-title">President Approval Rating Trend</div>
-                <div class="chart-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Current Approval</div>
-                        <div class="stat-value positive">49.7%</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Current Disapproval</div>
-                        <div class="stat-value negative">47.5%</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Net Approval</div>
-                        <div class="stat-value positive">+2.2%</div>
-                    </div>
-                </div>
+                @foreach (['1D', '1W', '1M', '1Y', '5Y', 'ALL'] as $tf)
+                    <div class="time-filter {{ $tf === '1M' ? 'active' : '' }}">{{ $tf }}</div>
+                @endforeach
             </div>
 
+            {{-- Header & stats --}}
+            <div class="chart-header">
+                <div class="chart-title">President Approval Rating Trend</div>
+                @if ($approvalStats)
+                    <div class="chart-stats" style="margin-top:.5rem;">
+                        <div class="stat-item">
+                            <div class="stat-label">Current Approval</div>
+                            <div class="stat-value positive">{{ $approvalStats['approve'] }}%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Current Disapproval</div>
+                            <div class="stat-value negative">{{ $approvalStats['disapprove'] }}%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Net Approval</div>
+                            <div class="stat-value {{ $approvalStats['net'] >= 0 ? 'positive' : 'negative' }}">
+                                {{ ($approvalStats['net'] >= 0 ? '+' : '') . $approvalStats['net'] }}%
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Canvas --}}
             <div class="chart-wrapper">
                 <canvas id="approvalChart"></canvas>
             </div>
@@ -102,114 +95,113 @@
         <!-- Polling Table -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title"><i class="fas fa-table"></i> Latest Polling Data</div>
-                <div class="time-filters">
-                    <div class="time-filter">30 Days</div>
-                    <div class="time-filter active">1 Year</div>
-                    <div class="time-filter">5 Years</div>
+                <div class="card-title"><i class="fas fa-table"></i> Latest Approval Data</div>
+                <div class=" approvalfilters" id="table-filters">
+                    <div class=" approvalfilter active">7D</div>
+                    <div class=" approvalfilter">1M</div>
+                    <div class=" approvalfilter">1Y</div>
                 </div>
             </div>
-
             <div class="polling-table-container">
                 <table class="polling-table">
                     <thead>
                         <tr>
                             <th>Pollster</th>
                             <th>Date</th>
+                            <th>Sample Size</th>
                             <th>Approve</th>
                             <th>Disapprove</th>
                             <th>Net</th>
-                            <th>Sample Size</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Jun 18, 2025</td>
-                            <td>RealClear Politics</td>
-                            <td class="poll-result positive">49.7%</td>
-                            <td class="poll-result negative">47.5%</td>
-                            <td class="poll-result positive">+2.2%</td>
-                            <td>1,200 LV</td>
-                        </tr>
-                        <tr>
-                            <td>Jun 17, 2025</td>
-                            <td>Gallup</td>
-                            <td class="poll-result positive">48.9%</td>
-                            <td class="poll-result negative">48.2%</td>
-                            <td class="poll-result positive">+0.7%</td>
-                            <td>1,500 RV</td>
-                        </tr>
-                        <tr>
-                            <td>Jun 16, 2025</td>
-                            <td>Pew Research</td>
-                            <td class="poll-result positive">49.1%</td>
-                            <td class="poll-result negative">47.8%</td>
-                            <td class="poll-result positive">+1.3%</td>
-                            <td>2,000 A</td>
-                        </tr>
-                        <tr>
-                            <td>Jun 15, 2025</td>
-                            <td>YouGov</td>
-                            <td class="poll-result negative">47.3%</td>
-                            <td class="poll-result positive">49.1%</td>
-                            <td class="poll-result negative">-1.8%</td>
-                            <td>1,350 LV</td>
-                        </tr>
-                        <tr>
-                            <td>Jun 14, 2025</td>
-                            <td>Rasmussen</td>
-                            <td class="poll-result positive">51.2%</td>
-                            <td class="poll-result negative">46.8%</td>
-                            <td class="poll-result positive">+4.4%</td>
-                            <td>1,000 LV</td>
-                        </tr>
-                        <tr>
-                            <td>Jun 13, 2025</td>
-                            <td>Ipsos</td>
-                            <td class="poll-result positive">48.5%</td>
-                            <td class="poll-result negative">48.0%</td>
-                            <td class="poll-result positive">+0.5%</td>
-                            <td>1,250 A</td>
-                        </tr>
-                        <tr>
-                            <td>Jun 12, 2025</td>
-                            <td>Monmouth</td>
-                            <td class="poll-result negative">47.9%</td>
-                            <td class="poll-result positive">48.4%</td>
-                            <td class="poll-result negative">-0.5%</td>
-                            <td>800 RV</td>
-                        </tr>
+                    <tbody id="polling-body">
+                        <!-- injected by JS -->
                     </tbody>
                 </table>
             </div>
         </div>
+
+
+        <div class="header-section">
+            <h1 class="page-title">Latest Polls</h1>
+            <p class="page-subtitle">Most recent polling data from various sources across different races.</p>
+        </div>
+
+        <div class="filter-card">
+
+            <div class="filters-container">
+                <div class="filters-title">
+                    <div class="poll-types-container">
+                        <div class="poll-type-column">
+                            <div class="poll-type-item active">
+                                <i class="fas fa-user"></i> Presidential
+                            </div>
+                            <div class="poll-type-item">
+                                <i class="fas fa-landmark"></i> Senate
+                            </div>
+                            <div class="poll-type-item">
+                                <i class="fas fa-flag-usa"></i> House
+                            </div>
+                            <div class="poll-type-item">
+                                <i class="fas fa-user-tie"></i> Governors
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-option">
+                        <div class="filter-label">State</div>
+                        <select class="filter-select">
+                            <option>All States</option>
+                            <option>Arizona</option>
+                            <option>Florida</option>
+                            <option>Michigan</option>
+                            <option>Ohio</option>
+                            <option>Texas</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-option">
+                        <div class="filter-label">Pollster</div>
+                        <select class="filter-select">
+                            <option>All Pollsters</option>
+                            <option>Gallup</option>
+                            <option>Pew Research</option>
+                            <option>YouGov</option>
+                            <option>Ipsos</option>
+                            <option>Rasmussen</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-option">
+                        <div class="filter-label">Timeframe</div>
+                        <select class="filter-select">
+                            <option>Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Last 90 days</option>
+                            <option>Last 6 months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="apply-btn">Apply Filters</button>
+            </div>
+        </div>
+
+        <div class="no-polls-container">
+            <div class="no-polls-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h2 class="no-polls-title">No polls found with the selected filters</h2>
+            <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
+        </div>
+
+
     </div>
 
     <!-- Sidebar (30%) -->
     <div class="sidebar">
-        <!-- Key Metrics -->
-        <div class="sidebar-card">
-            <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
-            <div class="data-points">
-                <div class="data-card">
-                    <div class="data-value positive">49.7%</div>
-                    <div class="data-label">Current Approval</div>
-                </div>
-                <div class="data-card">
-                    <div class="data-value negative">47.5%</div>
-                    <div class="data-label">Current Disapproval</div>
-                </div>
-                <div class="data-card">
-                    <div class="data-value positive">+2.2%</div>
-                    <div class="data-label">Net Approval</div>
-                </div>
-                <div class="data-card">
-                    <div class="data-value">64%</div>
-                    <div class="data-label">Re-election Chance</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Latest Analysis -->
         <div class="sidebar-card">
             <div class="sidebar-title"><i class="fas fa-newspaper"></i> Latest Analysis</div>
@@ -272,157 +264,297 @@
                 </div>
             </div>
         </div>
+        <!-- Key Metrics -->
+        <div class="sidebar-card">
+            <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
+            <div class="data-points">
+                <div class="data-card">
+                    <div id="avg-approval" class="data-value positive"></div>
+                    <div class="data-label">Current Approval</div>
+                </div>
+                <div class="data-card">
+                    <div id="avg-disapproval" class="data-value negative"></div>
+                    <div class="data-label">Current Disapproval</div>
+                </div>
+                <div class="data-card">
+                    <div id="avg-net" class="data-value positive"></div>
+                    <div class="data-label">Net Approval</div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- jQuery & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
     <script>
-        // Initialize charts after page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Approval trend chart (line)
-            const ctx = document.getElementById('approvalChart').getContext('2d');
-            const approvalChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['May 12', 'May 21', 'May 30', 'Jun 8', 'Jun 17', 'Jun 18'],
-                    datasets: [{
-                        label: 'Approval Rating',
-                        data: [47.2, 47.8, 48.5, 49.1, 49.3, 49.7],
-                        borderColor: '#38a169',
-                        backgroundColor: 'rgba(56, 161, 105, 0.1)',
-                        borderWidth: 3,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#38a169',
-                        fill: true,
-                        tension: 0.2
-                    }, {
-                        label: 'Disapproval Rating',
-                        data: [49.1, 48.5, 48.0, 47.8, 47.6, 47.5],
-                        borderColor: '#e53e3e',
-                        backgroundColor: 'rgba(229, 62, 62, 0.1)',
-                        borderWidth: 3,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#e53e3e',
-                        fill: true,
-                        tension: 0.2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                boxWidth: 15,
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                            padding: 10,
-                            titleFont: {
-                                size: 14
-                            },
-                            bodyFont: {
-                                size: 13
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            title: {
-                                display: true,
-                                text: 'Date'
-                            }
-                        },
-                        y: {
-                            min: 36,
-                            max: 54,
-                            title: {
-                                display: true,
-                                text: 'Percentage'
-                            }
-                        }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
-                    }
+        $(function() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
 
-            // Time filter functionality
-            const timeFilters = document.querySelectorAll('.time-filter');
-            timeFilters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    timeFilters.forEach(f => f.classList.remove('active'));
-                    this.classList.add('active');
-
-                    // In a real app, this would update the chart data
-                    // For this demo, we'll just show a message
-                    const timeText = this.textContent;
-                    let labels, approvalData, disapprovalData;
-
-                    if (timeText === '1D') {
-                        labels = ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM'];
-                        approvalData = [49.2, 49.3, 49.5, 49.7, 49.7];
-                        disapprovalData = [47.8, 47.7, 47.6, 47.5, 47.5];
-                    } else if (timeText === '1W') {
-                        labels = ['Jun 12', 'Jun 13', 'Jun 14', 'Jun 15', 'Jun 16', 'Jun 17',
-                            'Jun 18'
-                        ];
-                        approvalData = [47.9, 48.5, 51.2, 47.3, 49.1, 49.3, 49.7];
-                        disapprovalData = [48.4, 48.0, 46.8, 49.1, 47.8, 47.6, 47.5];
-                    } else if (timeText === '1M') {
-                        labels = ['May 18', 'May 23', 'May 28', 'Jun 2', 'Jun 7', 'Jun 12',
-                            'Jun 18'
-                        ];
-                        approvalData = [46.5, 47.1, 47.8, 48.3, 48.8, 47.9, 49.7];
-                        disapprovalData = [49.5, 48.9, 48.2, 47.7, 47.2, 48.4, 47.5];
-                    } else if (timeText === '1Y') {
-                        labels = ['Jul 2024', 'Oct 2024', 'Jan 2025', 'Apr 2025', 'Jun 2025'];
-                        approvalData = [42.3, 44.7, 46.2, 47.8, 49.7];
-                        disapprovalData = [54.1, 51.3, 49.8, 48.2, 47.5];
-                    } else if (timeText === '5Y') {
-                        labels = ['2020', '2021', '2022', '2023', '2024', '2025'];
-                        approvalData = [45.2, 46.8, 44.3, 43.7, 44.9, 49.7];
-                        disapprovalData = [50.8, 49.2, 51.7, 52.3, 51.1, 47.5];
-                    } else { // ALL
-                        labels = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
-                        approvalData = [43.7, 45.2, 46.8, 44.3, 43.7, 44.9, 49.7];
-                        disapprovalData = [52.3, 50.8, 49.2, 51.7, 52.3, 51.1, 47.5];
+            var table = $('#polling-table').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                columns: [{
+                        title: '',
+                        className: 'details-control',
+                        orderable: false
+                    },
+                    {
+                        title: 'Pollster'
+                    },
+                    {
+                        title: 'Date'
+                    },
+                    {
+                        title: 'Sample'
+                    },
+                    {
+                        title: '1st'
+                    },
+                    {
+                        title: '2nd'
+                    },
+                    {
+                        title: '3rd'
+                    },
+                    {
+                        title: 'Net'
                     }
+                ]
+            });
 
-                    // Update chart
-                    approvalChart.data.labels = labels;
-                    approvalChart.data.datasets[0].data = approvalData;
-                    approvalChart.data.datasets[1].data = disapprovalData;
-                    approvalChart.update();
+            var allResults = [];
+
+            function renderTableHead(names) {
+                var th = '<tr>';
+                th += '<th></th><th>Pollster</th><th>Date</th><th>Sample</th>';
+                names.slice(0, 3).forEach(n => th += `<th>${n}</th>`);
+                th += '<th>Net</th></tr>';
+                $('#poll-table-head').html(th);
+            }
+
+            function buildRow(poll, idx) {
+                var results = (poll.results || []).slice().sort((a, b) => b.pct - a.pct);
+                allResults[idx] = results;
+                var net = ((results[0]?.pct || 0) - (results[1]?.pct || 0)).toFixed(1);
+                var netCls = net >= 0 ? 'positive' : 'negative';
+
+                var row = [];
+                // toggle cell
+                row.push('+');
+                // pollster, date, sample
+                row.push(poll.pollster || poll.pollster_name || '');
+                row.push(poll.date || poll.poll_date || '');
+                row.push(poll.sample || poll.sample_size || '');
+
+                // ensure exactly 3 candidate columns
+                for (var j = 0; j < 3; j++) {
+                    if (results[j]) {
+                        var r = results[j];
+                        var cls = (r.pct === results[0].pct) ?
+                            'poll-result positive' :
+                            'poll-result negative';
+                        row.push(`<span class="${cls}">${r.pct}%</span>`);
+                    } else {
+                        row.push('');
+                    }
+                }
+
+                // net column
+                row.push(`<span class="poll-result ${netCls}">${net>=0?'+':''}${net}%</span>`);
+                return row;
+            }
+
+            function loadPolls(url) {
+                $.getJSON(url, function(list) {
+                    if (!list || !list.length) {
+                        return table.clear().draw();
+                    }
+                    var names = (list[0].results || []).map(r => r.name);
+                    renderTableHead(names);
+                    table.clear();
+                    list.forEach((p, i) => table.row.add(buildRow(p, i)));
+                    table.draw();
+                });
+            }
+
+            // race change
+            $('#race-select').change(function() {
+                var v = $(this).val();
+                v ? loadPolls(`/polls/by-race/${v}`) : table.clear().draw();
+            });
+            // state change
+            $('#state').change(function() {
+                var v = $(this).val();
+                v ? loadPolls(`/polls/by-state/${v}`) : table.clear().draw();
+            });
+
+            // live search suggestions
+            $('#search-input').on('keyup', function() {
+                var q = $(this).val().trim();
+                if (!q) return $('#suggestions').empty();
+                $.getJSON("{{ route('candidates.search') }}", {
+                    search: q
+                }, function(list) {
+                    var html = '';
+                    list.forEach(item => html +=
+                        `<div data-key="${item.key}" style="padding:5px;cursor:pointer;">${item.label}</div>`
+                    );
+                    $('#suggestions').html(html);
                 });
             });
 
-            // Table time filter functionality
-            const tableTimeFilters = document.querySelectorAll('.card .time-filter');
-            tableTimeFilters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    tableTimeFilters.forEach(f => f.classList.remove('active'));
-                    this.classList.add('active');
-
-                    // In a real app, this would filter the table data
-                    alert(`Table data filtered to ${this.textContent} view`);
+            // search selection
+            $('#suggestions').on('click', 'div', function() {
+                var key = $(this).data('key');
+                $('#search-input').val($(this).text());
+                $('#suggestions').empty();
+                $.getJSON(`/polls/results/${key}`, function(data) {
+                    renderTableHead(data.candidate_names);
+                    table.clear();
+                    allResults = [];
+                    data.polls.forEach((p, i) => table.row.add(buildRow(p, i)));
+                    table.draw();
                 });
             });
 
-            // General filter functionality
-            // document.getElementById('poll-filter').addEventListener('change', function () {
-            //     const filterValue = this.value;
-            //     alert(`Filtering to show: ${this.options[this.selectedIndex].text}`);
-            // });
+            // accordion toggle
+            $('#polling-table tbody').on('click', 'td.details-control', function() {
+                var tr = $(this).closest('tr'),
+                    row = table.row(tr),
+                    idx = row.index();
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                    $(this).text('+');
+                } else {
+                    var html = '<div class="row-details"><ul>';
+                    (allResults[idx] || []).forEach(r => html += `<li>${r.name}: ${r.pct}%</li>`);
+                    html += '</ul></div>';
+                    row.child(html).show();
+                    tr.addClass('shown');
+                    $(this).text('−');
+                }
+            });
+
+        });
+    </script>
+
+
+    {{-- <script>
+        // CSRF header for AJAX
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // On Race change → fetch polls and rebuild table
+        $('#race-select').on('change', function() {
+            const rid = $(this).val();
+            $('#poll-table-head, #poll-table-body').empty();
+            if (!rid) return;
+
+            $.getJSON(`/polls/by-race/${rid}`, function(list) {
+                if (!list.length) {
+                    $('#poll-table-body').html(
+                        '<tr><td colspan="6">No polls for this race.</td></tr>'
+                    );
+                    return;
+                }
+
+                // 1) Derive headers from first poll
+                const names = list[0].results.map(r => r.name);
+                let th = '<tr><th>Pollster</th><th>Date</th><th>Sample</th>';
+                names.forEach(n => th += `<th>${n}</th>`);
+                th += '<th>Net</th></tr>';
+                $('#poll-table-head').html(th);
+
+                // 2) Build rows
+                let rows = '';
+                list.forEach(p => {
+                    const top = p.results[0].pct;
+                    const runner = p.results[1]?.pct || 0;
+                    const net = (top - runner).toFixed(1);
+                    const leadClass = net >= 0 ? 'positive' : 'negative';
+
+                    rows += `<tr>
+        <td>${p.pollster}</td>
+        <td>${p.date}</td>
+        <td>${p.sample}</td>`;
+
+                    p.results.forEach((r, i) => {
+                        const cls = i === 0 ? 'poll-result positive' :
+                            'poll-result negative';
+                        rows += `<td class="${cls}">${r.pct}%</td>`;
+                    });
+
+                    rows += `<td class="poll-result ${leadClass}">` +
+                        `${net>=0?'+':''}${net}%` +
+                        `</td></tr>`;
+                });
+                $('#poll-table-body').html(rows);
+            });
+        });
+    </script>
+
+    <script>
+        $('#state').on('change', function() {
+            const sid = $(this).val();
+            $('#poll-table-head, #poll-table-body').empty();
+            if (!sid) return;
+
+            $.getJSON(`/polls/by-state/${sid}`, function(list) {
+                if (list.length === 0) {
+                    $('#poll-table-body').html(
+                        '<tr><td colspan="6">No polls found for this state.</td></tr>'
+                    );
+                    return;
+                }
+
+                // 1) Build header from first poll's result names
+                const names = list[0].results.map(r => r.name);
+                let th = `<tr>
+        <th>Pollster</th>
+        <th>Date</th>
+        <th>Sample</th>`;
+                names.forEach(n => th += `<th>${n}</th>`);
+                th += `<th>Net</th></tr>`;
+                $('#poll-table-head').html(th);
+
+                // 2) Build body rows
+                let rows = '';
+                list.forEach(p => {
+                    const top = p.results[0].pct;
+                    const runner = p.results[1]?.pct || 0;
+                    const net = (top - runner).toFixed(1);
+                    const leadClass = net >= 0 ? 'positive' : 'negative';
+
+                    rows += `<tr>
+          <td>${p.pollster}</td>
+          <td>${p.date}</td>
+          <td>${p.sample}</td>`;
+
+                    p.results.forEach((r, i) => {
+                        const cls = (i === 0) ? 'poll-result positive' :
+                            'poll-result negative';
+                        rows += `<td class="${cls}">${r.pct}%</td>`;
+                    });
+
+                    rows += `<td class="poll-result ${leadClass}">${net >= 0 ? '+' : ''}${net}%</td>
+        </tr>`;
+                });
+
+                $('#poll-table-body').html(rows);
+            });
         });
     </script>
 
@@ -502,46 +634,289 @@
 
             return tr;
         }
+    </script> --}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1) Data from server
+            const rawDates = @json($rawDates); // ["2025-06-17", ...]
+            const fullLabels = @json($labels); // ["Jun 17", ...]
+            const fullApprove = @json($approvalData); // [47.2, ...]
+            const fullDisapprove = @json($disapprovalData);
+
+            // 2) Setup Chart.js
+            const ctx = document.getElementById('approvalChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fullLabels,
+                    datasets: [{
+                            label: 'Approval Rating',
+                            data: fullApprove,
+                            borderColor: '#38a169',
+                            backgroundColor: 'rgba(56,161,105,0.1)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            fill: true,
+                            tension: 0.2
+                        },
+                        {
+                            label: 'Disapproval Rating',
+                            data: fullDisapprove,
+                            borderColor: '#e53e3e',
+                            backgroundColor: 'rgba(229,62,62,0.1)',
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            fill: true,
+                            tension: 0.2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 15,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label(ctx) {
+                                    return ctx.dataset.label + ': ' + ctx.formattedValue + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'category',
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Percentage'
+                            },
+                            ticks: {
+                                callback: v => v + '%'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+
+            // 3) Average helper
+            function average(arr) {
+                if (!Array.isArray(arr) || arr.length === 0) return 0;
+                let sum = 0;
+                for (const v of arr) {
+                    sum += Number(v) || 0;
+                }
+                return sum / arr.length;
+            }
+
+            // 4) Filter helper (does NOT mutate now)
+            function filterBy(tf) {
+                const now = new Date();
+                let thresh;
+                switch (tf) {
+                    case '1D':
+                        thresh = new Date(+now - 1 * 24 * 60 * 60 * 1000);
+                        break;
+                    case '1W':
+                        thresh = new Date(+now - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case '1M':
+                        thresh = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                        break;
+                    case '1Y':
+                        thresh = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+                        break;
+                    case '5Y':
+                        thresh = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate());
+                        break;
+                    default:
+                        thresh = new Date(0);
+                }
+
+                const labs = [],
+                    apps = [],
+                    diss = [];
+                rawDates.forEach((d, i) => {
+                    if (new Date(d) >= thresh) {
+                        labs.push(fullLabels[i]);
+                        apps.push(fullApprove[i]);
+                        diss.push(fullDisapprove[i]);
+                    }
+                });
+
+                console.log(`filterBy(${tf}) →`, {
+                    labs,
+                    apps,
+                    diss
+                });
+                return [labs, apps, diss];
+            }
+
+            // 5) Update sidebar metrics
+            function updateMetrics(appArr, disArr) {
+                console.log('updateMetrics inputs:', {
+                    appArr,
+                    disArr
+                });
+                const avgApp = average(appArr);
+                const avgDis = average(disArr);
+                const net = avgApp - avgDis;
+                console.log('computed avgs:', {
+                    avgApp,
+                    avgDis,
+                    net
+                });
+
+                const aApp = avgApp.toFixed(1);
+                const aDis = avgDis.toFixed(1);
+                const aNet = net.toFixed(1);
+                const sign = net >= 0 ? '+' : '';
+
+                document.getElementById('avg-approval').textContent = `${aApp}%`;
+                document.getElementById('avg-disapproval').textContent = `${aDis}%`;
+
+                const netEl = document.getElementById('avg-net');
+                netEl.textContent = `${sign}${aNet}%`;
+                netEl.classList.toggle('positive', net >= 0);
+                netEl.classList.toggle('negative', net < 0);
+            }
+
+            // 6) Initial draw using the “active” filter (defaults to 1D)
+            const initialTF = document.querySelector('.time-filter.active').textContent;
+            const [initLab, initApp, initDis] = filterBy(initialTF);
+            chart.data.labels = initLab;
+            chart.data.datasets[0].data = initApp;
+            chart.data.datasets[1].data = initDis;
+            chart.update();
+            updateMetrics(initApp, initDis);
+
+            // 7) Wire up the buttons
+            document.querySelectorAll('.time-filter').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.time-filter').forEach(f => f.classList.remove(
+                        'active'));
+                    btn.classList.add('active');
+
+                    const tf = btn.textContent;
+                    const [labs, apps, diss] = filterBy(tf);
+
+                    chart.data.labels = labs;
+                    chart.data.datasets[0].data = apps;
+                    chart.data.datasets[1].data = diss;
+                    chart.update();
+                    updateMetrics(apps, diss);
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1) Bring the PHP data into JS
+            const latestApprovals = @json($latestApprovals);
+
+            // 2) Helpers
+            function filterRecords(tf) {
+                const now = new Date();
+                let thresh;
+                switch (tf) {
+                    case '7D':
+                        thresh = new Date(+now - 7 * 24 * 60 * 60 * 1000);
+                        break;
+                    case '1M':
+                        thresh = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                        break;
+                    case '1Y':
+                        thresh = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+                        break;
+                    default:
+                        thresh = new Date(0);
+                }
+                return latestApprovals.filter(r => new Date(r.rawDate) >= thresh);
+            }
+
+            function renderTable(records) {
+                const body = document.getElementById('polling-body');
+                if (!body) return;
+
+                body.innerHTML = records.map(r => `
+                <tr>
+                    <td>${r.pollster}</td>
+                    <td>${r.displayDate}</td>
+                    <td>${r.sampleSize}</td>
+                    <td class="poll-result ${r.approve >= r.disapprove ? 'positive' : 'negative'}">
+                    ${r.approve}%
+                    </td>
+                    <td class="poll-result ${r.disapprove > r.approve ? 'negative' : 'positive'}">
+                    ${r.disapprove}%
+                    </td>
+                    <td class="poll-result ${r.net >= 0 ? 'positive' : 'negative'}">
+                    ${r.net >= 0 ? '+' + r.net : r.net}%
+                    </td>
+                </tr>
+                `).join('');
+            }
+
+            // 3) Wire up the buttons
+            const buttons = document.querySelectorAll('#table-filters .approvalfilter');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderTable(filterRecords(btn.textContent));
+                });
+            });
+
+            // 4) Initial render (7 days)
+            renderTable(filterRecords('7D'));
+        });
     </script>
 
 
-    <script>
-        // CSRF for AJAX
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+ <script>
+        // Add active state to poll type items
+        document.querySelectorAll('.poll-type-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.poll-type-item').forEach(i => {
+                    i.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
         });
 
-        // On State change, fetch polls
-        $('#state').on('change', function() {
-            const sid = $(this).val();
-            $('#poll-table-body').empty();
+        // Apply filters button functionality
+        document.querySelector('.apply-btn').addEventListener('click', function () {
+            const activePollType = document.querySelector('.poll-type-item.active').textContent.trim();
+            const state = document.querySelector('.filter-select:nth-child(1)').value;
+            const pollster = document.querySelector('.filter-select:nth-child(2)').value;
+            const timeframe = document.querySelector('.filter-select:nth-child(3)').value;
 
-            if (!sid) return;
-
-            $.getJSON(`/polls/by-state/${sid}`, function(list) {
-                if (list.length === 0) {
-                    $('#poll-table-body').html(
-                        '<tr><td colspan="6">No polls found for this state.</td></tr>'
-                    );
-                    return;
-                }
-
-                let rows = '';
-                list.forEach(p => {
-                    rows += `<tr>
-        <td>${p.pollster}</td>
-        <td>${p.date}</td>
-        <td>${p.sample}</td>
-        <td class="poll-result ${p.c1class}">${p.cand1}%</td>
-        <td class="poll-result ${p.c2class}">${p.cand2}%</td>
-        <td class="poll-result ${p.leadClass}">${p.net >= 0? '+' : ''}${p.net}%</td>
-      </tr>`;
-                });
-
-                $('#poll-table-body').html(rows);
-            });
+            alert(`Filters applied:\nPoll Type: ${activePollType}\nState: ${state}\nPollster: ${pollster}\nTimeframe: ${timeframe}`);
         });
     </script>
 @endsection

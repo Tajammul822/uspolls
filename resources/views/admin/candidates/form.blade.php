@@ -30,7 +30,7 @@
         <label for="image" class="col-sm-2 col-form-label">Image</label>
         <div class="col-sm-10">
             <input type="file" id="image" name="image" class="form-control"
-                {{ isset($candidate) ? '' : 'required' }}>
+                {{ isset($candidate) ? '' : '' }}>
         </div>
     </div>
 

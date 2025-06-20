@@ -39,7 +39,7 @@ class CandidateController extends Controller
             'name'   => 'required|string|max:255',
             'party'  => 'nullable|string|max:255',
             'status' => 'required|boolean',
-            'image'  => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image'  => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $imagePath = null;

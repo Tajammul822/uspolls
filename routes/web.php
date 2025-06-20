@@ -26,13 +26,16 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('home');
-
+  Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
+
+Route::get('/home',                          [HomeController::class, 'index']);
+Route::get('/polls/by-race/{raceId}',      [HomeController::class, 'pollsByRace']);
+Route::get('/polls/by-state/{stateId}', [HomeController::class, 'pollsByState']);
+Route::get('/candidates/search', [HomeController::class, 'searchPolls'])->name('candidates.search');
+Route::get('/polls/results/{key}', [HomeController::class, 'getResults']);
 
 Route::get('dashboard', function () {
     return view('admin.dashboard');
@@ -93,8 +96,8 @@ Route::view('/governor', 'frontend.governor')->name('governor');
 // Route::get('/polls/{poll}/results', [HomeController::class, 'getResults'])
 //      ->name('polls.results');
 
-Route::get('/candidates/search', [HomeController::class, 'searchPolls'])->name('candidates.search');
-Route::get('/polls/results/{key}', [HomeController::class, 'getResults']);
 
-Route::get('/home',                          [HomeController::class, 'index']);
-Route::get('/polls/by-state/{stateId}', [HomeController::class, 'pollsByState']);
+
+
+
+
