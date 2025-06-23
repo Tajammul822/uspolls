@@ -11,7 +11,7 @@
                     <select id="race-select">
                         <option value="">-- Select Race --</option>
                         @foreach ($races as $race)
-                            <option value="{{ $race->id }}">{{ $race->race }}</option>
+                            <option value="{{ $race->race_type }}">{{ $race->race_type }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Polling Table -->
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
                 <div class="time-filters"></div>
@@ -50,6 +50,33 @@
                     </thead>
                     <tbody id="poll-table-body">
                         <!-- dynamically injected -->
+                    </tbody>
+                </table>
+            </div>
+        </div> --}}
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
+                <div class="time-filters"></div>
+            </div>
+            <div class="polling-table-container">
+                <table class="polling-table" id="polling-table" style="width:100%">
+                    <thead id="poll-table-head">
+                        <tr>
+                            <th></th>
+                            <th>Pollster</th>
+                            <th>Date</th>
+                            <th>Sample</th>
+                            <!-- Three “generic” result columns; we can leave headers blank or label “Result” -->
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamically injected rows (including group headers and poll rows) -->
                     </tbody>
                 </table>
             </div>
@@ -124,17 +151,18 @@
 
         <div class="header-section">
             <h1 class="page-title">Latest Polls</h1>
-            <p class="page-subtitle">Most recent polling data from various sources across different races.</p>
+            <p class="page-subtitle">
+                Most recent polling data from various sources across different races.
+            </p>
         </div>
 
         <div class="filter-card">
-
             <div class="filters-container">
                 <div class="filters-title">
                     <div class="poll-types-container">
                         <div class="poll-type-column">
                             <div class="poll-type-item active">
-                                <i class="fas fa-user"></i> Presidential
+                                <i class="fas fa-user"></i> President
                             </div>
                             <div class="poll-type-item">
                                 <i class="fas fa-landmark"></i> Senate
@@ -151,36 +179,29 @@
 
                 <div class="filter-row">
                     <div class="filter-option">
-                        <div class="filter-label">State</div>
-                        <select class="filter-select">
-                            <option>All States</option>
-                            <option>Arizona</option>
-                            <option>Florida</option>
-                            <option>Michigan</option>
-                            <option>Ohio</option>
-                            <option>Texas</option>
+                        <select name="state_id" class="filter-select">
+                            <option value="">All States</option>
+                            @foreach ($states as $state)
+                                <option value="{{ $state->id }}">{{ $state->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="filter-option">
-                        <div class="filter-label">Pollster</div>
-                        <select class="filter-select">
-                            <option>All Pollsters</option>
-                            <option>Gallup</option>
-                            <option>Pew Research</option>
-                            <option>YouGov</option>
-                            <option>Ipsos</option>
-                            <option>Rasmussen</option>
+                        <select name="pollster_id" class="filter-select">
+                            <option value="">All Pollsters</option>
+                            @foreach ($pollesters as $pollester)
+                                <option value="{{ $pollester->id }}">{{ $pollester->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="filter-option">
-                        <div class="filter-label">Timeframe</div>
-                        <select class="filter-select">
-                            <option>Last 7 days</option>
-                            <option>Last 30 days</option>
-                            <option>Last 90 days</option>
-                            <option>Last 6 months</option>
+                        <select name="timeframe" class="filter-select">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="180">Last 6 months</option>
                         </select>
                     </div>
                 </div>
@@ -188,14 +209,22 @@
                 <button class="apply-btn">Apply Filters</button>
             </div>
         </div>
+        {{-- 
+    
+        <div class="table-container">
+            <table class="polls-table">
+                <thead id="poll-table-head"></thead>
+                <tbody id="poll-table-body"></tbody>
+            </table>
+            <div id="pagination" class="pagination-container"></div>
+        </div> --}}
 
         <div class="no-polls-container">
-            <div class="no-polls-icon">
-                <i class="fas fa-search"></i>
-            </div>
+            <div class="no-polls-icon"><i class="fas fa-search"></i></div>
             <h2 class="no-polls-title">No polls found with the selected filters</h2>
             <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
         </div>
+
 
 
     </div>
@@ -204,7 +233,7 @@
     <div class="sidebar">
         <!-- Latest Analysis -->
         <div class="sidebar-card">
-            <div class="sidebar-title"><i class="fas fa-newspaper"></i> Latest Analysis</div>
+            {{-- <div class="sidebar-title"><i class="fas fa-newspaper"></i> Latest Analysis</div>
 
             <div class="blog-post">
                 <div class="blog-title">Why Approval Ratings Are Rising Despite Economic Concerns</div>
@@ -236,59 +265,90 @@
                     <span><i class="far fa-clock"></i> 2 days ago</span>
                     <span><i class="far fa-user"></i> Jennifer Demographer</span>
                 </div>
+            </div> --}}
+             <div class="sidebar-title">
+            <i class="fas fa-star"></i> Featured Polls
+        </div>
+
+        @if($featuredPolls->isEmpty())
+            <p class="p-3 text-sm text-gray-500">
+                No featured polls at the moment.
+            </p>
+        @else
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr>
+                        <th class="border-b px-2 py-1">Pollster</th>
+                        <th class="border-b px-2 py-1">Sample Size</th>
+                        <th class="border-b px-2 py-1">Net Margin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($featuredPolls as $fp)
+                        <tr>
+                            <td class="border-b px-2 py-1">{{ $fp['pollster'] }}</td>
+                            <td class="border-b px-2 py-1">{{ number_format($fp['sample_size']) }}</td>
+                            <td class="border-b px-2 py-1">{{ $fp['net_margin'] }}%</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+
+    </div>
+
+
+
+    <!-- Upcoming Events -->
+    <div class="sidebar-card">
+        <div class="sidebar-title"><i class="fas fa-calendar-alt"></i> Upcoming Events</div>
+
+        <div class="blog-post">
+            <div class="blog-title">June Debate: Potential Impact on Approval Ratings</div>
+            <div class="blog-meta">
+                <span><i class="far fa-calendar"></i> Jun 25, 2025</span>
             </div>
         </div>
 
-        <!-- Upcoming Events -->
-        <div class="sidebar-card">
-            <div class="sidebar-title"><i class="fas fa-calendar-alt"></i> Upcoming Events</div>
-
-            <div class="blog-post">
-                <div class="blog-title">June Debate: Potential Impact on Approval Ratings</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-calendar"></i> Jun 25, 2025</span>
-                </div>
-            </div>
-
-            <div class="blog-post">
-                <div class="blog-title">Economic Report Release (Q2 2025)</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-calendar"></i> Jun 28, 2025</span>
-                </div>
-            </div>
-
-            <div class="blog-post">
-                <div class="blog-title">Major Policy Announcement Expected</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-calendar"></i> Jul 2, 2025</span>
-                </div>
+        <div class="blog-post">
+            <div class="blog-title">Economic Report Release (Q2 2025)</div>
+            <div class="blog-meta">
+                <span><i class="far fa-calendar"></i> Jun 28, 2025</span>
             </div>
         </div>
-        <!-- Key Metrics -->
-        <div class="sidebar-card">
-            <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
-            <div class="data-points">
-                <div class="data-card">
-                    <div id="avg-approval" class="data-value positive"></div>
-                    <div class="data-label">Current Approval</div>
-                </div>
-                <div class="data-card">
-                    <div id="avg-disapproval" class="data-value negative"></div>
-                    <div class="data-label">Current Disapproval</div>
-                </div>
-                <div class="data-card">
-                    <div id="avg-net" class="data-value positive"></div>
-                    <div class="data-label">Net Approval</div>
-                </div>
+
+        <div class="blog-post">
+            <div class="blog-title">Major Policy Announcement Expected</div>
+            <div class="blog-meta">
+                <span><i class="far fa-calendar"></i> Jul 2, 2025</span>
             </div>
         </div>
+    </div>
+    <!-- Key Metrics -->
+    <div class="sidebar-card">
+        <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
+        <div class="data-points">
+            <div class="data-card">
+                <div id="avg-approval" class="data-value positive"></div>
+                <div class="data-label">Current Approval</div>
+            </div>
+            <div class="data-card">
+                <div id="avg-disapproval" class="data-value negative"></div>
+                <div class="data-label">Current Disapproval</div>
+            </div>
+            <div class="data-card">
+                <div id="avg-net" class="data-value positive"></div>
+                <div class="data-label">Net Approval</div>
+            </div>
+        </div>
+    </div>
     </div>
 
     <!-- jQuery & DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
-    <script>
+    {{-- <script>
         $(function() {
             $.ajaxSetup({
                 headers: {
@@ -446,195 +506,850 @@
             });
 
         });
-    </script>
-
+    </script> --}}
 
     {{-- <script>
-        // CSRF header for AJAX
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+        $(function() {
+            // 1) Initialize DataTable once with fixed columns
+            var table = $('#polling-table').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                columns: [{
+                        title: '',
+                        className: 'details-control',
+                        orderable: false
+                    },
+                    {
+                        title: 'Pollster'
+                    },
+                    {
+                        title: 'Date'
+                    },
+                    {
+                        title: 'Sample'
+                    },
+                    {
+                        title: ''
+                    }, // result col 1
+                    {
+                        title: ''
+                    }, // result col 2
+                    {
+                        title: ''
+                    }, // result col 3
+                    {
+                        title: 'Net'
+                    }
+                ]
+            });
 
-        // On Race change → fetch polls and rebuild table
-        $('#race-select').on('change', function() {
-            const rid = $(this).val();
-            $('#poll-table-head, #poll-table-body').empty();
-            if (!rid) return;
+            var allResults = []; // array of arrays, each is sorted results for a poll row
 
-            $.getJSON(`/polls/by-race/${rid}`, function(list) {
-                if (!list.length) {
-                    $('#poll-table-body').html(
-                        '<tr><td colspan="6">No polls for this race.</td></tr>'
-                    );
-                    return;
+            // Build a poll row aligned under headerNames (array length 3)
+            function buildPollRow(poll, headerNames, pollIdx) {
+                // poll.results: [ { name, pct }, ... ]
+                // Copy and sort descending for net and detail:
+                var results = (poll.results || []).map(r => ({
+                    name: r.name,
+                    pct: parseFloat(r.pct) || 0
+                }));
+                results.sort((a, b) => b.pct - a.pct);
+                allResults[pollIdx] = results;
+
+                // Compute net = top - second
+                var topPct = results[0]?.pct || 0;
+                var secondPct = results[1]?.pct || 0;
+                var netVal = (topPct - secondPct).toFixed(1);
+                var netCls = (topPct - secondPct) >= 0 ? 'positive' : 'negative';
+                var netDisplay = ((topPct - secondPct) >= 0 ? '+' : '') + netVal + '%';
+
+                var row = [];
+                row.push('+'); // toggle cell
+                row.push(poll.pollster || '');
+                row.push(poll.date || '');
+                row.push(poll.sample || '');
+
+                // For each of the 3 headerNames, put that candidate's pct or blank
+                headerNames.forEach(name => {
+                    var found = results.find(r => r.name === name);
+                    if (found) {
+                        var cls = (found.pct === topPct) ? 'poll-result positive' : 'poll-result negative';
+                        row.push(`<span class="${cls}">${found.pct}%</span>`);
+                    } else {
+                        row.push('');
+                    }
+                });
+                // Pad if fewer than 3 (unlikely because we always supply length-3 array)
+                for (var k = headerNames.length; k < 3; k++) {
+                    row.push('');
                 }
+                row.push(`<span class="poll-result ${netCls}">${netDisplay}</span>`);
+                return row;
+            }
 
-                // 1) Derive headers from first poll
-                const names = list[0].results.map(r => r.name);
-                let th = '<tr><th>Pollster</th><th>Date</th><th>Sample</th>';
-                names.forEach(n => th += `<th>${n}</th>`);
-                th += '<th>Net</th></tr>';
-                $('#poll-table-head').html(th);
+            // Main: load polls from an endpoint that returns JSON array of polls
+            function loadPolls(url) {
+                $.getJSON(url, function(list) {
+                    // Clear existing rows
+                    table.clear().draw();
+                    allResults = [];
 
-                // 2) Build rows
-                let rows = '';
-                list.forEach(p => {
-                    const top = p.results[0].pct;
-                    const runner = p.results[1]?.pct || 0;
-                    const net = (top - runner).toFixed(1);
-                    const leadClass = net >= 0 ? 'positive' : 'negative';
-
-                    rows += `<tr>
-        <td>${p.pollster}</td>
-        <td>${p.date}</td>
-        <td>${p.sample}</td>`;
-
-                    p.results.forEach((r, i) => {
-                        const cls = i === 0 ? 'poll-result positive' :
-                            'poll-result negative';
-                        rows += `<td class="${cls}">${r.pct}%</td>`;
+                    if (!list || !list.length) {
+                        return;
+                    }
+                    // Group by race_id in order of appearance
+                    var groups = [];
+                    var seen = {};
+                    list.forEach(poll => {
+                        var rid = poll.race_id;
+                        if (!seen[rid]) {
+                            seen[rid] = {
+                                race_id: rid,
+                                race_label: poll.race_label || ('Race ' + rid),
+                                polls: []
+                            };
+                            groups.push(seen[rid]);
+                        }
+                        seen[rid].polls.push(poll);
                     });
 
-                    rows += `<td class="poll-result ${leadClass}">` +
-                        `${net>=0?'+':''}${net}%` +
-                        `</td></tr>`;
-                });
-                $('#poll-table-body').html(rows);
-            });
-        });
-    </script>
+                    var pollGlobalIdx = 0; // index for allResults
 
-    <script>
-        $('#state').on('change', function() {
-            const sid = $(this).val();
-            $('#poll-table-head, #poll-table-body').empty();
-            if (!sid) return;
+                    // Insert group-header row and poll rows for each group
+                    groups.forEach(group => {
+                        var polls = group.polls;
 
-            $.getJSON(`/polls/by-state/${sid}`, function(list) {
-                if (list.length === 0) {
-                    $('#poll-table-body').html(
-                        '<tr><td colspan="6">No polls found for this state.</td></tr>'
-                    );
-                    return;
-                }
+                        // Compute top-3 candidate names by average pct in this group
+                        var stats = {}; // name -> { sum, count }
+                        polls.forEach(poll => {
+                            (poll.results || []).forEach(r => {
+                                var name = r.name,
+                                    pct = parseFloat(r.pct) || 0;
+                                if (!stats[name]) stats[name] = {
+                                    sum: 0,
+                                    count: 0
+                                };
+                                stats[name].sum += pct;
+                                stats[name].count++;
+                            });
+                        });
+                        var avgs = Object.entries(stats).map(([name, sc]) => ({
+                            name,
+                            avg: sc.sum / sc.count
+                        }));
+                        avgs.sort((a, b) => b.avg - a.avg);
+                        var headerNames = avgs.slice(0, 3).map(x => x.name);
+                        // Pad to length 3 if fewer:
+                        for (var k = headerNames.length; k < 3; k++) {
+                            headerNames.push('');
+                        }
 
-                // 1) Build header from first poll's result names
-                const names = list[0].results.map(r => r.name);
-                let th = `<tr>
-        <th>Pollster</th>
-        <th>Date</th>
-        <th>Sample</th>`;
-                names.forEach(n => th += `<th>${n}</th>`);
-                th += `<th>Net</th></tr>`;
-                $('#poll-table-head').html(th);
+                        // 1) Insert group-header row: ['', race_label, '', '', cand1, cand2, cand3, '']
+                        var ghRow = [
+                            '',
+                            group.race_label,
+                            '',
+                            '',
+                            headerNames[0],
+                            headerNames[1],
+                            headerNames[2],
+                            ''
+                        ];
+                        var ghNode = table.row.add(ghRow).draw(false).node();
+                        $(ghNode).addClass('group-header');
 
-                // 2) Build body rows
-                let rows = '';
-                list.forEach(p => {
-                    const top = p.results[0].pct;
-                    const runner = p.results[1]?.pct || 0;
-                    const net = (top - runner).toFixed(1);
-                    const leadClass = net >= 0 ? 'positive' : 'negative';
-
-                    rows += `<tr>
-          <td>${p.pollster}</td>
-          <td>${p.date}</td>
-          <td>${p.sample}</td>`;
-
-                    p.results.forEach((r, i) => {
-                        const cls = (i === 0) ? 'poll-result positive' :
-                            'poll-result negative';
-                        rows += `<td class="${cls}">${r.pct}%</td>`;
+                        // 2) Insert each poll row, storing data-poll-row-index on its <tr>
+                        polls.forEach(poll => {
+                            var rowArr = buildPollRow(poll, headerNames, pollGlobalIdx);
+                            var node = table.row.add(rowArr).draw(false).node();
+                            $(node).addClass('poll-row');
+                            $(node).attr('data-poll-row-index', pollGlobalIdx);
+                            pollGlobalIdx++;
+                        });
                     });
 
-                    rows += `<td class="poll-result ${leadClass}">${net >= 0 ? '+' : ''}${net}%</td>
-        </tr>`;
+                    // After rows inserted, bind toggle click
+                    $('#polling-table tbody').off('click').on('click', 'td.details-control', function() {
+                        var tr = $(this).closest('tr');
+                        // If this is a group-header, do nothing
+                        if ($(tr).hasClass('group-header')) return;
+
+                        var row = table.row(tr);
+                        var pollIdx = parseInt($(tr).attr('data-poll-row-index'), 10);
+                        if (row.child.isShown()) {
+                            row.child.hide();
+                            tr.removeClass('shown');
+                            $(this).text('+');
+                        } else {
+                            // Build detail list from allResults[pollIdx]
+                            var details = allResults[pollIdx] || [];
+                            var html = '<div class="row-details"><ul>';
+                            details.forEach(r => {
+                                html += `<li>${r.name}: ${r.pct}%</li>`;
+                            });
+                            html += '</ul></div>';
+                            row.child(html).show();
+                            tr.addClass('shown');
+                            $(this).text('−');
+                        }
+                    });
                 });
-
-                $('#poll-table-body').html(rows);
-            });
-        });
-    </script>
-
-    <script>
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-        });
 
-        $('#search-input').on('keyup', function() {
-            let q = $(this).val().trim();
-            if (!q) return $('#suggestions').empty();
+            // Load by race type when race-select changes
+            $('#race-select').change(function() {
+                var v = $(this).val();
+                if (v) {
+                    loadPolls(`/polls/by-race/${v}`);
+                } else {
+                    table.clear().draw();
+                }
+            });
 
-            $.getJSON("{{ route('candidates.search') }}", {
-                search: q
-            }, function(list) {
-                let html = '';
-                list.forEach(item => {
-                    html +=
-                        `<div data-key="${item.key}" style="padding:5px;cursor:pointer;">${item.label}</div>`;
+            // Load by state when state-select changes
+            $('#state').change(function() {
+                var v = $(this).val();
+                if (v) {
+                    loadPolls(`/polls/by-state/${v}`);
+                } else {
+                    table.clear().draw();
+                }
+            });
+
+            // Live search suggestions and selecting a candidate
+            $('#search-input').on('keyup', function() {
+                var q = $(this).val().trim();
+                if (!q) {
+                    return $('#suggestions').empty();
+                }
+                $.getJSON("{{ route('candidates.search') }}", {
+                    search: q
+                }, function(list) {
+                    var html = '';
+                    list.forEach(item => {
+                        html +=
+                            `<div data-key="${item.key}" style="padding:5px;cursor:pointer;">${item.label}</div>`;
+                    });
+                    $('#suggestions').html(html);
                 });
-                $('#suggestions').html(html);
             });
-        });
-
-        $('#suggestions').on('click', 'div', function() {
-            const key = $(this).data('key');
-            const label = $(this).text();
-            $('#search-input').val(label);
-            $('#suggestions').empty();
-
-            const url = "{{ url('/polls/results') }}/" + key;
-
-            $.getJSON(url, function(data) {
-                const names = data.candidate_names;
-                renderTableHead(names);
-
-                let rows = '';
-                data.polls.forEach(p => {
-                    rows += buildRow(p.pollster_name, p.poll_date, p.sample_size, p.results);
+            $('#suggestions').on('click', 'div', function() {
+                var key = $(this).data('key');
+                $('#search-input').val($(this).text());
+                $('#suggestions').empty();
+                // Call your search endpoint which returns { polls: [...] } or just [...]
+                $.getJSON(`/polls/results/${key}`, function(data) {
+                    // If your endpoint returns { polls: [...] }, extract:
+                    var list = Array.isArray(data) ? data : (data.polls || []);
+                    if (!Array.isArray(list)) list = [];
+                    if (list.length) {
+                        loadPolls(null); // clear first
+                        // Directly feed the list into the grouping logic:
+                        // We can reuse loadPolls logic by temporarily hijacking $.getJSON replacement,
+                        // but simpler: refactor grouping into a separate function that takes the array directly.
+                        // For brevity, we’ll call a helper:
+                        renderFromList(list);
+                    } else {
+                        table.clear().draw();
+                    }
                 });
-                $('#poll-table-body').html(rows);
             });
+
+            // Extract grouping/render logic into a reusable function
+            function renderFromList(list) {
+                // Same as loadPolls but using the provided list instead of URL fetch
+                table.clear().draw();
+                allResults = [];
+                if (!list || !list.length) return;
+
+                // Group by race_id
+                var groups = [];
+                var seen = {};
+                list.forEach(poll => {
+                    var rid = poll.race_id;
+                    if (!seen[rid]) {
+                        seen[rid] = {
+                            race_id: rid,
+                            race_label: poll.race_label || ('Race ' + rid),
+                            polls: []
+                        };
+                        groups.push(seen[rid]);
+                    }
+                    seen[rid].polls.push(poll);
+                });
+
+                var pollGlobalIdx = 0;
+                groups.forEach(group => {
+                    var polls = group.polls;
+                    // Compute top-3 candidate names
+                    var stats = {};
+                    polls.forEach(poll => {
+                        (poll.results || []).forEach(r => {
+                            var name = r.name,
+                                pct = parseFloat(r.pct) || 0;
+                            if (!stats[name]) stats[name] = {
+                                sum: 0,
+                                count: 0
+                            };
+                            stats[name].sum += pct;
+                            stats[name].count++;
+                        });
+                    });
+                    var avgs = Object.entries(stats).map(([name, sc]) => ({
+                        name,
+                        avg: sc.sum / sc.count
+                    }));
+                    avgs.sort((a, b) => b.avg - a.avg);
+                    var headerNames = avgs.slice(0, 3).map(x => x.name);
+                    for (var k = headerNames.length; k < 3; k++) headerNames.push('');
+
+                    // Insert group-header
+                    var ghRow = [
+                        '',
+                        group.race_label,
+                        '',
+                        '',
+                        headerNames[0],
+                        headerNames[1],
+                        headerNames[2],
+                        ''
+                    ];
+                    var ghNode = table.row.add(ghRow).draw(false).node();
+                    $(ghNode).addClass('group-header');
+
+                    // Insert poll rows
+                    polls.forEach(poll => {
+                        var rowArr = buildPollRow(poll, headerNames, pollGlobalIdx);
+                        var node = table.row.add(rowArr).draw(false).node();
+                        $(node).addClass('poll-row');
+                        $(node).attr('data-poll-row-index', pollGlobalIdx);
+                        pollGlobalIdx++;
+                    });
+                });
+
+                // Re-bind toggle click
+                $('#polling-table tbody').off('click').on('click', 'td.details-control', function() {
+                    var tr = $(this).closest('tr');
+                    if ($(tr).hasClass('group-header')) return;
+                    var row = table.row(tr);
+                    var pollIdx = parseInt($(tr).attr('data-poll-row-index'), 10);
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                        $(this).text('+');
+                    } else {
+                        var details = allResults[pollIdx] || [];
+                        var html = '<div class="row-details"><ul>';
+                        details.forEach(r => {
+                            html += `<li>${r.name}: ${r.pct}%</li>`;
+                        });
+                        html += '</ul></div>';
+                        row.child(html).show();
+                        tr.addClass('shown');
+                        $(this).text('−');
+                    }
+                });
+            }
+
+            // Helper: when you call loadPolls(url), it does $.getJSON and grouping.
+            // For search which returns data directly, call renderFromList(list).
         });
-
-        function renderTableHead(candidateNames) {
-            let head = `<tr>
-            <th>Pollster</th>
-            <th>Date</th>
-            <th>Sample</th>`;
-            candidateNames.forEach(name => {
-                head += `<th>${name}</th>`;
-            });
-            head += `<th>Net</th></tr>`;
-            $('#poll-table-head').html(head);
-        }
-
-        function buildRow(pollster, date, sample, results) {
-            results.sort((a, b) => b.pct - a.pct);
-            const maxPct = results[0].pct;
-            const runnerUp = results[1] ? results[1].pct : 0;
-            const net = (maxPct - runnerUp).toFixed(1);
-
-            let tr = `<tr>
-            <td>${pollster}</td>
-            <td>${date}</td>
-            <td>${sample}</td>`;
-
-            results.forEach(r => {
-                const cls = (r.pct === maxPct) ? 'poll-result positive' : 'poll-result negative';
-                tr += `<td class="${cls}">${r.pct}%</td>`;
-            });
-
-            const netClass = net >= 0 ? 'poll-result positive' : 'poll-result negative';
-            tr += `<td class="${netClass}">+${net}%</td></tr>`;
-
-            return tr;
-        }
     </script> --}}
+
+    {{-- <script>
+        $(function() {
+            // Initialize DataTable once
+            var table = $('#polling-table').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                columns: [{
+                        title: '',
+                        className: 'details-control',
+                        orderable: false
+                    },
+                    {
+                        title: 'Pollster'
+                    },
+                    {
+                        title: 'Date'
+                    },
+                    {
+                        title: 'Sample'
+                    },
+                    {
+                        title: ''
+                    },
+                    {
+                        title: ''
+                    },
+                    {
+                        title: ''
+                    },
+                    {
+                        title: 'Net'
+                    }
+                ]
+            });
+
+            var allResults = []; // stores sorted results arrays for detail toggles
+
+            // Build a poll row aligned under headerNames (length 3)
+            function buildPollRow(poll, headerNames, pollIdx) {
+                var results = (poll.results || []).map(r => ({
+                    name: r.name,
+                    pct: parseFloat(r.pct) || 0
+                }));
+                results.sort((a, b) => b.pct - a.pct);
+                allResults[pollIdx] = results;
+
+                var topPct = results[0]?.pct || 0;
+                var secondPct = results[1]?.pct || 0;
+                var netVal = (topPct - secondPct).toFixed(1);
+                var netCls = (topPct - secondPct) >= 0 ? 'positive' : 'negative';
+                var netDisplay = ((topPct - secondPct) >= 0 ? '+' : '') + netVal + '%';
+
+                var row = [];
+                row.push('+');
+                row.push(poll.pollster || '');
+                row.push(poll.date || '');
+                row.push(poll.sample || '');
+
+                headerNames.forEach(name => {
+                    var found = results.find(r => r.name === name);
+                    if (found) {
+                        var cls = (found.pct === topPct) ? 'poll-result positive' : 'poll-result negative';
+                        row.push(`<span class="${cls}">${found.pct}%</span>`);
+                    } else {
+                        row.push('');
+                    }
+                });
+                // pad if fewer than 3 (though headerNames always length 3)
+                for (var k = headerNames.length; k < 3; k++) {
+                    row.push('');
+                }
+                row.push(`<span class="poll-result ${netCls}">${netDisplay}</span>`);
+                return row;
+            }
+
+            // Core rendering: given an array of poll objects, group by race_id and insert rows
+            function renderFromList(list) {
+                table.clear().draw();
+                allResults = [];
+                if (!list || !list.length) return;
+
+                // Group by race_id in order
+                var groups = [],
+                    seen = {};
+                list.forEach(poll => {
+                    var rid = poll.race_id;
+                    if (!seen[rid]) {
+                        seen[rid] = {
+                            race_id: rid,
+                            race_label: poll.race_label || ('Race ' + rid),
+                            polls: []
+                        };
+                        groups.push(seen[rid]);
+                    }
+                    seen[rid].polls.push(poll);
+                });
+
+                var pollGlobalIdx = 0;
+                groups.forEach(group => {
+                    var polls = group.polls;
+                    // Compute top 3 candidate names by average pct
+                    var stats = {};
+                    polls.forEach(poll => {
+                        (poll.results || []).forEach(r => {
+                            var name = r.name,
+                                pct = parseFloat(r.pct) || 0;
+                            if (!stats[name]) stats[name] = {
+                                sum: 0,
+                                count: 0
+                            };
+                            stats[name].sum += pct;
+                            stats[name].count++;
+                        });
+                    });
+                    var avgs = Object.entries(stats).map(([name, sc]) => ({
+                        name,
+                        avg: sc.sum / sc.count
+                    }));
+                    avgs.sort((a, b) => b.avg - a.avg);
+                    var headerNames = avgs.slice(0, 3).map(x => x.name);
+                    for (var k = headerNames.length; k < 3; k++) headerNames.push('');
+
+                    // Insert group-header row: ['', race_label, '', '', cand1, cand2, cand3, '']
+                    var ghRow = [
+                        '',
+                        group.race_label,
+                        '',
+                        '',
+                        headerNames[0],
+                        headerNames[1],
+                        headerNames[2],
+                        ''
+                    ];
+                    var ghNode = table.row.add(ghRow).draw(false).node();
+                    $(ghNode).addClass('group-header');
+
+                    // Insert poll rows
+                    polls.forEach(poll => {
+                        var rowArr = buildPollRow(poll, headerNames, pollGlobalIdx);
+                        var node = table.row.add(rowArr).draw(false).node();
+                        $(node).addClass('poll-row');
+                        $(node).attr('data-poll-row-index', pollGlobalIdx);
+                        pollGlobalIdx++;
+                    });
+                });
+
+                // Bind detail toggle
+                $('#polling-table tbody').off('click').on('click', 'td.details-control', function() {
+                    var tr = $(this).closest('tr');
+                    if ($(tr).hasClass('group-header')) return;
+                    var row = table.row(tr);
+                    var pollIdx = parseInt($(tr).attr('data-poll-row-index'), 10);
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                        $(this).text('+');
+                    } else {
+                        var details = allResults[pollIdx] || [];
+                        var html = '<div class="row-details"><ul>';
+                        details.forEach(r => {
+                            html += `<li>${r.name}: ${r.pct}%</li>`;
+                        });
+                        html += '</ul></div>';
+                        row.child(html).show();
+                        tr.addClass('shown');
+                        $(this).text('−');
+                    }
+                });
+            }
+
+            // Load by race type
+            $('#race-select').change(function() {
+                var v = $(this).val();
+                if (v) {
+                    $.getJSON(`/polls/by-race/${v}`, function(list) {
+                        renderFromList(list);
+                    });
+                } else {
+                    table.clear().draw();
+                }
+            });
+
+            // Load by state
+            $('#state').change(function() {
+                var v = $(this).val();
+                if (v) {
+                    $.getJSON(`/polls/by-state/${v}`, function(list) {
+                        renderFromList(list);
+                    });
+                } else {
+                    table.clear().draw();
+                }
+            });
+
+            // Live search suggestions
+            $('#search-input').on('keyup', function() {
+                var q = $(this).val().trim();
+                if (!q) {
+                    $('#suggestions').empty();
+                    return;
+                }
+                $.getJSON("{{ route('candidates.search') }}", {
+                    search: q
+                }, function(list) {
+                    var html = '';
+                    list.forEach(item => {
+                        html +=
+                            `<div data-key="${item.key}" style="padding:5px;cursor:pointer;">${item.label}</div>`;
+                    });
+                    $('#suggestions').html(html);
+                });
+            });
+
+            // Click on suggestion
+            $('#suggestions').on('click', 'div', function() {
+                var key = $(this).data('key');
+                $('#search-input').val($(this).text());
+                $('#suggestions').empty();
+                $.getJSON(`/polls/results/${key}`, function(data) {
+                    var list = Array.isArray(data) ? data : (data.polls || []);
+                    if (!Array.isArray(list)) list = [];
+                    renderFromList(list);
+                }).fail(function() {
+                    table.clear().draw();
+                });
+            });
+        });
+    </script> --}}
+
+    <script>
+        $(function() {
+            // Initialize DataTable once
+            var table = $('#polling-table').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                columns: [{
+                        title: '',
+                        className: 'details-control',
+                        orderable: false
+                    },
+                    {
+                        title: 'Pollster'
+                    },
+                    {
+                        title: 'Date'
+                    },
+                    {
+                        title: 'Sample'
+                    },
+                    {
+                        title: ''
+                    },
+                    {
+                        title: ''
+                    },
+                    {
+                        title: ''
+                    },
+                    {
+                        title: 'Net'
+                    }
+                ]
+            });
+            var allResults = [];
+
+            // Party → color mapping
+            function getPartyColor(party) {
+                if (!party) return 'gray';
+                const p = party.toLowerCase();
+                if (p.includes('democrat')) return 'blue';
+                if (p.includes('republican')) return 'red';
+                if (p.includes('libertarian')) return '#F39835';
+                if (p.includes('green')) return 'green';
+                // add more as needed
+                return 'gray';
+            }
+
+            // Build one poll row aligned under headerNames (length 3)
+            function buildPollRow(poll, headerNames, pollIdx) {
+                // poll.results entries: { name, pct, party }
+                var results = (poll.results || []).map(r => ({
+                    name: r.name,
+                    pct: parseFloat(r.pct) || 0,
+                    party: r.party || ''
+                }));
+                results.sort((a, b) => b.pct - a.pct);
+                allResults[pollIdx] = results;
+
+                var top = results[0] || {
+                    pct: 0,
+                    party: ''
+                };
+                var second = results[1] || {
+                    pct: 0,
+                    party: ''
+                };
+                var netVal = (top.pct - second.pct).toFixed(1);
+                var netDisplay = ((top.pct - second.pct) >= 0 ? '▲' : '') + netVal + '%';
+                var netColor = getPartyColor(top.party);
+
+                var row = [];
+                row.push('+');
+                row.push(poll.pollster || '');
+                row.push(poll.date || '');
+                row.push(poll.sample || '');
+
+                headerNames.forEach(name => {
+                    var found = results.find(r => r.name === name);
+                    if (found) {
+                        var color = getPartyColor(found.party);
+                        var signClass = (found.pct === top.pct) ? 'poll-result positive' :
+                            'poll-result negative';
+                        row.push(`<span class="${signClass}" style="color:${color}">${found.pct}%</span>`);
+                    } else {
+                        row.push('');
+                    }
+                });
+                // pad if fewer than 3
+                for (var k = headerNames.length; k < 3; k++) row.push('');
+                row.push(`<span class="poll-result" style="color:${netColor}">${netDisplay}</span>`);
+                return row;
+            }
+
+            // Core: render from a list of poll objects
+            function renderFromList(list) {
+                table.clear().draw();
+                allResults = [];
+                if (!list || !list.length) return;
+
+                // Group by race_id in order of appearance
+                var groups = [],
+                    seen = {};
+                list.forEach(poll => {
+                    var rid = poll.race_id;
+                    if (!seen[rid]) {
+                        seen[rid] = {
+                            race_id: rid,
+                            race_label: poll.race_label || ('Race ' + rid),
+                            polls: []
+                        };
+                        groups.push(seen[rid]);
+                    }
+                    seen[rid].polls.push(poll);
+                });
+
+                var pollGlobalIdx = 0;
+                groups.forEach(group => {
+                    var polls = group.polls;
+                    // Compute top-3 candidate names by average pct
+                    var stats = {};
+                    polls.forEach(poll => {
+                        (poll.results || []).forEach(r => {
+                            var name = r.name,
+                                pct = parseFloat(r.pct) || 0;
+                            if (!stats[name]) stats[name] = {
+                                sum: 0,
+                                count: 0
+                            };
+                            stats[name].sum += pct;
+                            stats[name].count++;
+                        });
+                    });
+                    var avgs = Object.entries(stats).map(([name, sc]) => ({
+                        name,
+                        avg: sc.sum / sc.count
+                    }));
+                    avgs.sort((a, b) => b.avg - a.avg);
+                    var headerNames = avgs.slice(0, 3).map(x => x.name);
+                    for (var k = headerNames.length; k < 3; k++) headerNames.push('');
+
+                    // Determine party for each headerName (first occurrence in polls)
+                    var headerParties = headerNames.map(name => {
+                        if (!name) return '';
+                        for (let poll of polls) {
+                            let found = (poll.results || []).find(r => r.name === name);
+                            if (found && found.party) return found.party;
+                        }
+                        return '';
+                    });
+                    // Build colored candidate-name cells
+                    var candCells = headerNames.map((name, i) => {
+                        if (!name) return '';
+                        var color = getPartyColor(headerParties[i]);
+                        return `<span style="color:${color}">${name}</span>`;
+                    });
+
+                    // Insert group-header row: ['', race_label, '', '', cand1, cand2, cand3, '']
+                    var ghRow = [
+                        '',
+                        group.race_label,
+                        '',
+                        '',
+                        candCells[0],
+                        candCells[1],
+                        candCells[2],
+                        ''
+                    ];
+                    var ghNode = table.row.add(ghRow).draw(false).node();
+                    $(ghNode).addClass('group-header');
+
+                    // Insert poll rows
+                    polls.forEach(poll => {
+                        var rowArr = buildPollRow(poll, headerNames, pollGlobalIdx);
+                        var node = table.row.add(rowArr).draw(false).node();
+                        $(node).addClass('poll-row').attr('data-poll-row-index', pollGlobalIdx);
+                        pollGlobalIdx++;
+                    });
+                });
+
+                // Bind detail toggle
+                $('#polling-table tbody').off('click').on('click', 'td.details-control', function() {
+                    var tr = $(this).closest('tr');
+                    if ($(tr).hasClass('group-header')) return;
+                    var row = table.row(tr);
+                    var idx = parseInt($(tr).attr('data-poll-row-index'), 10);
+                    if (row.child.isShown()) {
+                        row.child.hide();
+                        tr.removeClass('shown');
+                        $(this).text('+');
+                    } else {
+                        var details = allResults[idx] || [];
+                        var html = '<div class="row-details"><ul>';
+                        details.forEach(r => {
+                            var color = getPartyColor(r.party);
+                            html +=
+                                `<li><span style="color:${color}">${r.name}</span>: ${r.pct}%</li>`;
+                        });
+                        html += '</ul></div>';
+                        row.child(html).show();
+                        tr.addClass('shown');
+                        $(this).text('−');
+                    }
+                });
+            }
+
+            // Load by race type
+            $('#race-select').change(function() {
+                var v = $(this).val();
+                if (v) {
+                    $.getJSON(`/polls/by-race/${v}`, renderFromList)
+                        .fail(() => table.clear().draw());
+                } else {
+                    table.clear().draw();
+                }
+            });
+            // Load by state
+            $('#state').change(function() {
+                var v = $(this).val();
+                if (v) {
+                    $.getJSON(`/polls/by-state/${v}`, renderFromList)
+                        .fail(() => table.clear().draw());
+                } else {
+                    table.clear().draw();
+                }
+            });
+            // Search suggestions
+            $('#search-input').on('keyup', function() {
+                var q = $(this).val().trim();
+                if (!q) {
+                    $('#suggestions').empty();
+                    return;
+                }
+                $.getJSON("{{ route('candidates.search') }}", {
+                    search: q
+                }, function(list) {
+                    var html = '';
+                    list.forEach(item => {
+                        html +=
+                            `<div data-key="${item.key}" style="padding:5px;cursor:pointer;">${item.label}</div>`;
+                    });
+                    $('#suggestions').html(html);
+                });
+            });
+            // Click suggestion
+            $('#suggestions').on('click', 'div', function() {
+                var key = $(this).data('key');
+                $('#search-input').val($(this).text());
+                $('#suggestions').empty();
+                $.getJSON(`/polls/results/${key}`, function(resp) {
+                    var list = Array.isArray(resp) ? resp : (resp.polls || []);
+                    renderFromList(list);
+                }).fail(() => table.clear().draw());
+            });
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -769,28 +1484,28 @@
                     }
                 });
 
-                console.log(`filterBy(${tf}) →`, {
-                    labs,
-                    apps,
-                    diss
-                });
+                // console.log(`filterBy(${tf}) →`, {
+                //     labs,
+                //     apps,
+                //     diss
+                // });
                 return [labs, apps, diss];
             }
 
             // 5) Update sidebar metrics
             function updateMetrics(appArr, disArr) {
-                console.log('updateMetrics inputs:', {
-                    appArr,
-                    disArr
-                });
+                // console.log('updateMetrics inputs:', {
+                //     appArr,
+                //     disArr
+                // });
                 const avgApp = average(appArr);
                 const avgDis = average(disArr);
                 const net = avgApp - avgDis;
-                console.log('computed avgs:', {
-                    avgApp,
-                    avgDis,
-                    net
-                });
+                // console.log('computed avgs:', {
+                //     avgApp,
+                //     avgDis,
+                //     net
+                // });
 
                 const aApp = avgApp.toFixed(1);
                 const aDis = avgDis.toFixed(1);
@@ -898,10 +1613,10 @@
     </script>
 
 
- <script>
+    <script>
         // Add active state to poll type items
         document.querySelectorAll('.poll-type-item').forEach(item => {
-            item.addEventListener('click', function () {
+            item.addEventListener('click', function() {
                 document.querySelectorAll('.poll-type-item').forEach(i => {
                     i.classList.remove('active');
                 });
@@ -910,13 +1625,145 @@
         });
 
         // Apply filters button functionality
-        document.querySelector('.apply-btn').addEventListener('click', function () {
+        document.querySelector('.apply-btn').addEventListener('click', function() {
             const activePollType = document.querySelector('.poll-type-item.active').textContent.trim();
             const state = document.querySelector('.filter-select:nth-child(1)').value;
             const pollster = document.querySelector('.filter-select:nth-child(2)').value;
             const timeframe = document.querySelector('.filter-select:nth-child(3)').value;
 
-            alert(`Filters applied:\nPoll Type: ${activePollType}\nState: ${state}\nPollster: ${pollster}\nTimeframe: ${timeframe}`);
+
+            console.log(activePollType);
+            alert(
+                `Filters applied:\nPoll Type: ${activePollType}\nState: ${state}\nPollster: ${pollster}\nTimeframe: ${timeframe}`
+            );
+        });
+    </script>
+
+    {{-- <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        // ... your poll-type click handler stays the same ...
+
+        document.querySelector('.apply-btn').addEventListener('click', async () => {
+            const activePollType = document.querySelector('.poll-type-item.active').textContent.trim();
+            const [stateSelect, pollsterSelect, timeframeSelect] = document.querySelectorAll('.filter-select');
+
+            // if value is "", we send null
+            const state_id = stateSelect.value === "" ? null : parseInt(stateSelect.value);
+            const pollster_id = pollsterSelect.value === "" ? null : parseInt(pollsterSelect.value);
+            // timeframeSelect.value is like "7", "30", etc.
+            const days = parseInt(timeframeSelect.value);
+
+            try {
+                const res = await fetch("{{ route('polls.filter') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        pollType: activePollType,
+                        state_id: state_id,
+                        pollster_id: pollster_id,
+                        timeframe: days,
+                    })
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                console.log('Filtered polls:', data);
+              
+            } catch (err) {
+               
+            }
+        });
+    </script> --}}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            document.querySelector('.apply-btn').addEventListener('click', async () => {
+                // --- 1) Gather filters ---
+                const activeTab = document.querySelector('.poll-type-item.active');
+                const pollType = activeTab ?
+                    activeTab.textContent.trim() :
+                    'President';
+
+                const stateId = +document.querySelector('select[name="state_id"]').value || null;
+                const pollsterId = +document.querySelector('select[name="pollster_id"]').value || null;
+                const timeframe = +document.querySelector('select[name="timeframe"]').value;
+
+                // --- 2) Fetch AJAX ---
+                let data = [];
+                try {
+                    const res = await fetch("{{ route('polls.filter') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id: stateId,
+                            pollster_id: pollsterId,
+                            timeframe
+                        })
+                    });
+                    if (!res.ok) throw new Error(res.statusText);
+                    data = await res.json();
+                } catch (err) {
+                    console.error('AJAX error:', err);
+                    data = [];
+                }
+
+                // --- 3) Render into .no-polls-container ---
+                const container = document.querySelector('.no-polls-container');
+                container.innerHTML = ''; // wipe it out
+
+                if (!data.length) {
+                    // re-insert the original “no polls” message
+                    container.innerHTML = `
+                                            <div class="no-polls-icon"><i class="fas fa-search"></i></div>
+                                            <h2 class="no-polls-title">No polls found with the selected filters</h2>
+                                            <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
+                                        `;
+                    return;
+                }
+
+                // build header + body
+                let html = '<table class="polls-table">';
+                html += `
+                        <thead>
+                            <tr>
+                            <th>Pollster</th>
+                            <th>Date</th>
+                            <th>Sample</th>
+                            <th>Net</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        `;
+
+                data.forEach(p => {
+                    // p.pollster, p.date, p.sample, p.net OR whatever your AJAX returns
+                    html += `
+                            <tr>
+                            <td>${p.pollster}</td>
+                            <td>${p.date}</td>
+                            <td>${p.sample}</td>
+                            <td class="poll-result ${p.net >= 0 ? 'positive' : 'negative'}">
+                                ${p.net >= 0 ? '+' : ''}${p.net}%
+                            </td>
+                            </tr>
+                        `;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            });
         });
     </script>
 @endsection

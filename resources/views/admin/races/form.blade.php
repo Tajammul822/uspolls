@@ -166,7 +166,7 @@
 
 
 <!-- JavaScript -->
-<script>
+{{-- <script>
     // Global list of all candidates for reference
     const allCandidates = [
         @foreach ($candidates as $c)
@@ -278,8 +278,155 @@
             fillParty(approvalCandidate);
         }
     });
-</script>
+</script> --}}
 
+<script>
+    // Global list of all candidates for reference
+    const allCandidates = [
+        @foreach ($candidates as $c)
+            {
+                id: "{{ $c->id }}",
+                name: "{{ $c->name }}",
+                party: "{{ $c->party }}"
+            },
+        @endforeach
+    ];
+
+    function updateCandidateDropdowns() {
+        // Gather selected candidate IDs and their parties
+        const selects = Array.from(document.querySelectorAll('.candidate-select'));
+        const selectedInfo = selects
+            .map(select => {
+                const val = select.value;
+                if (!val) return null;
+                const opt = select.options[select.selectedIndex];
+                const party = opt ? opt.getAttribute('data-party') : null;
+                return {
+                    id: val,
+                    party
+                };
+            })
+            .filter(x => x);
+
+        const selectedIds = selectedInfo.map(x => x.id);
+        const selectedParties = selectedInfo.map(x => x.party);
+
+        selects.forEach(select => {
+            const currentId = select.value;
+            // Rebuild options from scratch
+            select.innerHTML = '<option value="">Select Candidate</option>';
+            allCandidates.forEach(candidate => {
+                // Always allow the currently selected candidate
+                if (candidate.id === currentId) {
+                    const option = document.createElement('option');
+                    option.value = candidate.id;
+                    option.textContent = candidate.name;
+                    option.setAttribute('data-party', candidate.party);
+                    option.selected = true;
+                    select.appendChild(option);
+                } else {
+                    // Exclude if already selected by id, or if their party is already selected
+                    if (!selectedIds.includes(candidate.id) && !selectedParties.includes(candidate
+                            .party)) {
+                        const option = document.createElement('option');
+                        option.value = candidate.id;
+                        option.textContent = candidate.name;
+                        option.setAttribute('data-party', candidate.party);
+                        select.appendChild(option);
+                    }
+                }
+            });
+
+            // After rebuilding options, ensure onchange points to updatePartyField + re-run filtering
+            select.onchange = () => {
+                updatePartyField(select);
+                updateCandidateDropdowns();
+            };
+        });
+    }
+
+    function updatePartyField(selectElement) {
+        const partyInput = selectElement.closest('.candidate-group').querySelector('.party-input');
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        partyInput.value = selectedOption ? (selectedOption.getAttribute('data-party') || '') : '';
+    }
+
+    function addCandidate() {
+        const container = document.getElementById('candidates-container');
+        const index = container.children.length;
+        const div = document.createElement('div');
+        div.className = 'candidate-group mb-2';
+        // Use template literal but escape Blade tags properly
+        div.innerHTML = `
+            <select name="candidates[${index}][candidate_id]" class="form-select mb-1 candidate-select" onchange="updatePartyField(this); updateCandidateDropdowns()">
+                <option value="">Select Candidate</option>
+                @foreach ($candidates as $c)
+                    <option value="{{ $c->id }}" data-party="{{ $c->party }}">{{ $c->name }}</option>
+                @endforeach
+            </select>
+            <input type="text" name="candidates[${index}][party]" class="form-control mb-1 party-input" placeholder="Party" readonly>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeCandidate(this)">Remove</button>
+        `;
+        container.appendChild(div);
+        updateCandidateDropdowns();
+    }
+
+    function removeCandidate(button) {
+        button.closest('.candidate-group').remove();
+        updateCandidateDropdowns();
+    }
+
+    function toggleRaceFields() {
+        const race = document.getElementById('race').value;
+        document.getElementById('election-fields').style.display = race === 'election' ? 'block' : 'none';
+        document.getElementById('approval-fields').style.display = race === 'approval' ? 'block' : 'none';
+
+        // If switching to approval, clear election selections
+        if (race === 'approval') {
+            document.querySelectorAll('.candidate-select').forEach(select => select.value = '');
+            document.querySelectorAll('.party-input').forEach(input => input.value = '');
+            updateCandidateDropdowns();
+        }
+    }
+
+    function fillParty(selectElement) {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const partyInput = document.getElementById('party');
+
+        if (selectedOption && selectedOption.hasAttribute('data-party')) {
+            partyInput.value = selectedOption.getAttribute('data-party');
+        } else {
+            partyInput.value = '';
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+        toggleRaceFields();
+
+        // Attach updatePartyField + filtering for existing selects
+        document.querySelectorAll('.candidate-select').forEach(select => {
+            select.onchange = () => {
+                updatePartyField(select);
+                updateCandidateDropdowns();
+            };
+            if (select.value) {
+                updatePartyField(select);
+            }
+        });
+
+        // Fill party for approval mode on load
+        const approvalCandidate = document.getElementById('candidate_id');
+        if (approvalCandidate) {
+            approvalCandidate.onchange = () => fillParty(approvalCandidate);
+            if (approvalCandidate.value) {
+                fillParty(approvalCandidate);
+            }
+        }
+
+        // Initial filtering pass
+        updateCandidateDropdowns();
+    });
+</script>
 
 <style>
     .candidate-group {
