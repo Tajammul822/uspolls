@@ -150,7 +150,7 @@
         }
 
         #suggestions div:hover {
-            background: #eee;
+            background: #e0e0e0;
         }
 
         /* Accordion detail row styling */
@@ -175,24 +175,31 @@
         }
 
 
-      
-    /* Accordion detail row styling */
-    .row-details {
-      background: #f9f9f9;
-      padding: 0.5em 1em;
-    }
-    .details-control {
-      cursor: pointer;
-      text-align: center;
-      font-weight: bold;
-    }
-    /* Positive / negative colors */
-    .poll-result.positive { color: green; }
-    .poll-result.negative { color: red; }
+
+        /* Accordion detail row styling */
+        .row-details {
+            background: #f9f9f9;
+            padding: 0.5em 1em;
+        }
+
+        .details-control {
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Positive / negative colors */
+        .poll-result.positive {
+            color: green;
+        }
+
+        .poll-result.negative {
+            color: red;
+        }
 
 
 
-    /* Header styles */
+        /* Header styles */
         .header-section {
             background: linear-gradient(to right, #1a3a6c, #2c5282);
             color: white;
@@ -257,6 +264,12 @@
             text-align: center;
             padding-bottom: 10px;
             border-bottom: 2px solid #e2e8f0;
+        }
+
+
+        #polling-table tbody tr.group-header td {
+            font-weight: bold;
+            background-color: #f0f0f0;
         }
 
         .poll-type-item {
@@ -388,6 +401,67 @@
             margin: 0 auto;
         }
 
+
+
+        /* Polls table styling */
+        .polls-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .polls-table thead {
+            background-color: #f5f7fa;
+        }
+
+        .polls-table th,
+        .polls-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e1e4e8;
+        }
+
+        .polls-table th {
+            font-size: 14px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .polls-table tbody tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+        .polls-table tbody tr:hover {
+            background-color: #f1f8ff;
+        }
+
+        .polls-table .positive {
+            color: #2e7d32;
+            /* green */
+            font-weight: 600;
+        }
+
+        .polls-table .negative {
+            color: #c62828;
+            /* red */
+            font-weight: 600;
+        }
+
+        /* Responsive wrap */
+        @media (max-width: 600px) {
+
+            .polls-table th,
+            .polls-table td {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 
@@ -405,10 +479,10 @@
             <!-- Navigation Menu -->
             <nav class="d-none d-md-flex gap-3 menu_list">
                 <a href="{{ route('homeboard') }}" class="text-decoration-none active-link">Home</a>
-                <a href="{{ route('presidential') }}" class="text-decoration-none hover-opacity-100">Presidential</a>
+                {{-- <a href="{{ route('presidential') }}" class="text-decoration-none hover-opacity-100">Presidential</a>
                 <a href="{{ route('senate') }}" class="text-decoration-none hover-opacity-100">Senate</a>
                 <a href="{{ route('house') }}" class="text-decoration-none hover-opacity-100">House</a>
-                <a href="{{ route('governor') }}" class="text-decoration-none hover-opacity-100">Governor</a>
+                <a href="{{ route('governor') }}" class="text-decoration-none hover-opacity-100">Governor</a> --}}
             </nav>
         </div>
 

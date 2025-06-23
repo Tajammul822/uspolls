@@ -33,12 +33,18 @@ Route::middleware('web')->group(function () {
 
 Route::get('/home',                          [HomeController::class, 'index']);
 Route::get('/polls/by-race/{raceId}',      [HomeController::class, 'pollsByRace']);
-Route::get('/polls/by-state/{stateId}', [HomeController::class, 'pollsByState']);
+
+// Route::get('/polls/by-state/{stateId}', [HomeController::class, 'pollsByState']);
 Route::get('/candidates/search', [HomeController::class, 'searchPolls'])->name('candidates.search');
-Route::get('/polls/results/{key}', [HomeController::class, 'getResults']);
+// Route::get('/polls/results/{key}', [HomeController::class, 'getResults']);
+
+Route::get('/polls/results/{candidateKey}', [HomeController::class, 'pollsByCandidate']);
+Route::get('/polls/by-state/{stateId}', [HomeController::class, 'pollsByState']);
 
 Route::get('dashboard', function () {
+
     return view('admin.dashboard');
+
 })->name('dashboard')->middleware('auth');
 
 
@@ -89,6 +95,9 @@ Route::view('/presidential', 'frontend.presidential')->name('presidential');
 Route::view('/senate', 'frontend.senate')->name('senate');
 Route::view('/house', 'frontend.house')->name('house');
 Route::view('/governor', 'frontend.governor')->name('governor');
+
+Route::post('/filter-polls', [HomeController::class, 'filterPolls'])
+     ->name('polls.filter');
 
 // Route::get('/polls/search', [HomeController::class, 'searchPolls'])
 //      ->name('polls.search');

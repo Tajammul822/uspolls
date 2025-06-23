@@ -52,4 +52,6 @@ class Race extends Model
     {
         return $this->hasMany(RaceApproval::class);
     }
+
+    
 }
