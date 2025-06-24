@@ -1,5 +1,76 @@
 @extends('frontend.layout')
 @section('content')
+
+    <style>
+        .arrow-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            font-size: 16px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .arrow-link:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
+
+
+
+
+        /* apporval */
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .approval-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .approval-card-body {
+            padding: 1rem;
+        }
+
+        .approval-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .approval-link {
+            position: absolute;
+            top: 0.75rem;
+            background: #0d6efd;
+            right: 0.75rem;
+            font-size: 21px;
+            margin: 0 auto;
+            width: 35px;
+            height: 35px;
+            text-align: center;
+            border-radius: 100%;
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .approval-link:hover {
+            color: #333;
+        }
+    </style>
     <!-- Main Content (70%) -->
     <div class="main-content">
         <!-- Filters -->
@@ -8,7 +79,7 @@
             <div class="filters">
                 <div class="filter-group">
                     <label for="race-select"><i class="fas fa-flag"></i> Race:</label>
-                    <select id="race-select">
+                    <select id="race-select" name="race_type">
                         <option value="">-- Select Race --</option>
                         @foreach ($races as $race)
                             <option value="{{ $race->race_type }}">{{ $race->race_type }}</option>
@@ -21,7 +92,7 @@
             <div class="filters">
                 <div class="filter-group">
                     <label for="state"><i class="fas fa-map-marker-alt"></i> State:</label>
-                    <select id="state">
+                    <select id="state-select" name="state_id">
                         <option value="">-- Select State --</option>
                         @foreach ($states as $st)
                             <option value="{{ $st->id }}">{{ $st->name }}</option>
@@ -30,11 +101,11 @@
                 </div>
             </div>
 
-            <div class="filter-group">
+            {{-- <div class="filter-group">
                 <label for="search-input"><i class="fas fa-search"></i> Find a Poll</label>
                 <input type="text" id="search-input" placeholder="Search by candidate…">
                 <div id="suggestions"></div>
-            </div>
+            </div> --}}
         </div>
 
         <!-- Polling Table -->
@@ -55,33 +126,47 @@
             </div>
         </div> --}}
 
+        {{-- <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-table"></i> Races</div>
+            </div>
+            <div class="card-body polling-table-container">
+                <table id="races-table" class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Race_Type</th>
+                            <th>Election Round</th>
+                            <th>State</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div> --}}
+
+
         <div class="card">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
                 <div class="time-filters"></div>
             </div>
             <div class="polling-table-container">
-                <table class="polling-table" id="polling-table" style="width:100%">
-                    <thead id="poll-table-head">
+                <table id="races-table" class="table table-striped" style="width:100%">
+                    <thead>
                         <tr>
-                            <th></th>
-                            <th>Pollster</th>
-                            <th>Date</th>
-                            <th>Sample</th>
-                            <!-- Three “generic” result columns; we can leave headers blank or label “Result” -->
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th>Net</th>
+                            <th>Race_Type</th>
+                            <th>Election Round</th>
+                            <th>State</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Dynamically injected rows (including group headers and poll rows) -->
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
-
         <div class="chart-container">
             {{-- Time filters --}}
             <div class="time-filters">
@@ -120,7 +205,7 @@
         </div>
 
         <!-- Polling Table -->
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table"></i> Latest Approval Data</div>
                 <div class=" approvalfilters" id="table-filters">
@@ -146,6 +231,48 @@
                     </tbody>
                 </table>
             </div>
+        </div> --}}
+
+
+        {{-- <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-table"></i> Latest Approval Data</div>
+            </div>
+            <div class="polling-table-container">
+                <table class="polling-table">
+                    <thead>
+                        <tr>
+                            <th>Race_Type</th>
+                            <th>Election Round</th>
+                            <th>State</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="polling-body">
+                        <!-- injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div> --}}
+
+
+        <div class="card-grid">
+            @foreach ($latestApprovals as $race)
+                @foreach ($race['candidates'] as $name)
+                    <div class="approval-card">
+                        <div class="approval-card-body">
+                            <h3 class="approval-title">
+                                {{ $name }} Job Approval
+                            </h3>
+                            <a href="{{ route('approval.details', ['race_id' => $race['race_id']]) }}"
+                                class="approval-link">
+                                &rarr;
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            @endforeach
         </div>
 
 
@@ -242,106 +369,83 @@
                     <span><i class="far fa-user"></i> John Pollster</span>
                 </div>
             </div>
+            --}}
 
-            <div class="blog-post">
-                <div class="blog-title">Regional Breakdown: Approval Strong in Swing States</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-clock"></i> 5 hours ago</span>
-                    <span><i class="far fa-user"></i> Sarah Analyst</span>
-                </div>
+            <div class="sidebar-title">
+                <i class="fas fa-star"></i> Featured Polls
             </div>
 
-            <div class="blog-post">
-                <div class="blog-title">Historical Comparison: How This President Stacks Up</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-clock"></i> 1 day ago</span>
-                    <span><i class="far fa-user"></i> Michael Historian</span>
-                </div>
-            </div>
-
-            <div class="blog-post">
-                <div class="blog-title">Demographic Shifts in Approval Ratings Since June</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-clock"></i> 2 days ago</span>
-                    <span><i class="far fa-user"></i> Jennifer Demographer</span>
-                </div>
-            </div> --}}
-             <div class="sidebar-title">
-            <i class="fas fa-star"></i> Featured Polls
-        </div>
-
-        @if($featuredPolls->isEmpty())
-            <p class="p-3 text-sm text-gray-500">
-                No featured polls at the moment.
-            </p>
-        @else
-            <table class="w-full text-left text-sm">
-                <thead>
-                    <tr>
-                        <th class="border-b px-2 py-1">Pollster</th>
-                        <th class="border-b px-2 py-1">Sample Size</th>
-                        <th class="border-b px-2 py-1">Net Margin</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($featuredPolls as $fp)
+            @if ($featuredPolls->isEmpty())
+                <p class="p-3 text-sm text-gray-500">
+                    No featured polls at the moment.
+                </p>
+            @else
+                <table class="w-full text-left text-sm">
+                    <thead>
                         <tr>
-                            <td class="border-b px-2 py-1">{{ $fp['pollster'] }}</td>
-                            <td class="border-b px-2 py-1">{{ number_format($fp['sample_size']) }}</td>
-                            <td class="border-b px-2 py-1">{{ $fp['net_margin'] }}%</td>
+                            <th class="border-b px-2 py-1">Pollster</th>
+                            <th class="border-b px-2 py-1">Sample Size</th>
+                            <th class="border-b px-2 py-1">Net Margin</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-
-    </div>
-
-
-
-    <!-- Upcoming Events -->
-    <div class="sidebar-card">
-        <div class="sidebar-title"><i class="fas fa-calendar-alt"></i> Upcoming Events</div>
-
-        <div class="blog-post">
-            <div class="blog-title">June Debate: Potential Impact on Approval Ratings</div>
-            <div class="blog-meta">
-                <span><i class="far fa-calendar"></i> Jun 25, 2025</span>
-            </div>
+                    </thead>
+                    <tbody>
+                        @foreach ($featuredPolls as $fp)
+                            <tr>
+                                <td class="border-b px-2 py-1">{{ $fp['pollster'] }}</td>
+                                <td class="border-b px-2 py-1">{{ number_format($fp['sample_size']) }}</td>
+                                <td class="border-b px-2 py-1">{{ $fp['net_margin'] }}%</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
 
-        <div class="blog-post">
-            <div class="blog-title">Economic Report Release (Q2 2025)</div>
-            <div class="blog-meta">
-                <span><i class="far fa-calendar"></i> Jun 28, 2025</span>
-            </div>
-        </div>
 
-        <div class="blog-post">
-            <div class="blog-title">Major Policy Announcement Expected</div>
-            <div class="blog-meta">
-                <span><i class="far fa-calendar"></i> Jul 2, 2025</span>
+
+        <!-- Upcoming Events -->
+        <div class="sidebar-card">
+            <div class="sidebar-title"><i class="fas fa-calendar-alt"></i> Upcoming Events</div>
+
+            <div class="blog-post">
+                <div class="blog-title">June Debate: Potential Impact on Approval Ratings</div>
+                <div class="blog-meta">
+                    <span><i class="far fa-calendar"></i> Jun 25, 2025</span>
+                </div>
+            </div>
+
+            <div class="blog-post">
+                <div class="blog-title">Economic Report Release (Q2 2025)</div>
+                <div class="blog-meta">
+                    <span><i class="far fa-calendar"></i> Jun 28, 2025</span>
+                </div>
+            </div>
+
+            <div class="blog-post">
+                <div class="blog-title">Major Policy Announcement Expected</div>
+                <div class="blog-meta">
+                    <span><i class="far fa-calendar"></i> Jul 2, 2025</span>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- Key Metrics -->
-    <div class="sidebar-card">
-        <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
-        <div class="data-points">
-            <div class="data-card">
-                <div id="avg-approval" class="data-value positive"></div>
-                <div class="data-label">Current Approval</div>
-            </div>
-            <div class="data-card">
-                <div id="avg-disapproval" class="data-value negative"></div>
-                <div class="data-label">Current Disapproval</div>
-            </div>
-            <div class="data-card">
-                <div id="avg-net" class="data-value positive"></div>
-                <div class="data-label">Net Approval</div>
+        <!-- Key Metrics -->
+        <div class="sidebar-card">
+            <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
+            <div class="data-points">
+                <div class="data-card">
+                    <div id="avg-approval" class="data-value positive"></div>
+                    <div class="data-label">Current Approval</div>
+                </div>
+                <div class="data-card">
+                    <div id="avg-disapproval" class="data-value negative"></div>
+                    <div class="data-label">Current Disapproval</div>
+                </div>
+                <div class="data-card">
+                    <div id="avg-net" class="data-value positive"></div>
+                    <div class="data-label">Net Approval</div>
+                </div>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- jQuery & DataTables JS -->
@@ -1091,7 +1195,7 @@
         });
     </script> --}}
 
-    <script>
+    {{-- <script>
         $(function() {
             // Initialize DataTable once
             var table = $('#polling-table').DataTable({
@@ -1349,6 +1453,76 @@
                 }).fail(() => table.clear().draw());
             });
         });
+    </script> --}}
+
+    <script>
+        $(function() {
+            // init DataTable once
+            var table = $('#races-table').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                columns: [{
+                        data: 'race_type'
+                    },
+                    {
+                        data: 'election_round'
+                    },
+                    {
+                        data: 'state_name'
+                    },
+                    {
+                        data: 'status'
+                    },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        render: id => `
+                            <a href="/details?race_id=${id}" 
+                            class="arrow-link" 
+                            title="View Details">
+                                ➔
+                            </a>
+                        `
+                    }
+                ]
+            });
+
+            // When race_type changes, reset state, load by race_type only
+            $('#race-select').on('change', function() {
+                var rt = $(this).val();
+                $('#state-select').val(''); // clear state dropdown
+
+                var url = '/Apiracesdata' + (rt ? '?race_type=' + encodeURIComponent(rt) : '');
+                $.getJSON(url)
+                    .done(function(list) {
+                        table.clear().rows.add(list).draw();
+                    })
+                    .fail(function() {
+                        table.clear().draw();
+                    });
+            });
+
+            // When state changes, reset race_type, load by state_id only
+            $('#state-select').on('change', function() {
+                var sid = $(this).val();
+                $('#race-select').val(''); // clear race dropdown
+
+                var url = '/Apiracesdata' + (sid ? '?state_id=' + encodeURIComponent(sid) : '');
+                $.getJSON(url)
+                    .done(function(list) {
+                        table.clear().rows.add(list).draw();
+                    })
+                    .fail(function() {
+                        table.clear().draw();
+                    });
+            });
+
+            // Optional: initial empty table or load all
+            table.clear().draw();
+        });
     </script>
 
     <script>
@@ -1550,7 +1724,7 @@
         });
     </script>
 
-    <script>
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 1) Bring the PHP data into JS
             const latestApprovals = @json($latestApprovals);
@@ -1610,7 +1784,7 @@
             // 4) Initial render (7 days)
             renderTable(filterRecords('7D'));
         });
-    </script>
+    </script> --}}
 
 
     <script>

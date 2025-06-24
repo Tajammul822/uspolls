@@ -106,6 +106,12 @@ Route::post('/filter-polls', [HomeController::class, 'filterPolls'])
 //      ->name('polls.results');
 
 
+Route::get('/details', [HomeController::class, 'show'])->name('races.show');
+Route::get('/Apiracesdata', [HomeController::class, 'apiIndex']);
+Route::get('/approval/{race_id}', [HomeController::class, 'approvalDetails'])
+     ->name('approval.details');
+
+
 
 
 
