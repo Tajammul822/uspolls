@@ -103,7 +103,7 @@
         .chart-wrapper {
             position: relative;
             width: 100%;
-            padding-bottom: 75%;
+            /* padding-bottom: 75%; */
         }
 
         .chart-wrapper canvas {
@@ -166,6 +166,7 @@
                     <canvas id="trendBarChart"></canvas>
                 </div>
             </div>
+
         </div>
         <!-- Chart 3: Approval Trend (Last 30 Days) (LINE) -->
         <div class="chart-container">

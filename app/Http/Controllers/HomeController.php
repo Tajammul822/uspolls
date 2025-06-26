@@ -10,6 +10,8 @@ use App\Models\Race;
 use App\Models\RaceApproval;
 use App\Models\State;
 use Illuminate\Support\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 use Illuminate\Support\Facades\Response;
 
 class HomeController extends Controller
@@ -17,11 +19,10 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        // 1) Dropdown data
+      
         $states = State::orderBy('name')->get(['id', 'name']);
         $races = Race::where('race', 'election')->select('race_type')->distinct()->orderBy('race_type')->get();
         $pollesters  = Pollster::orderBy('name')->get(['id', 'name']);
-
 
         $rac  = Race::where('race', 'approval')->orderBy('race')->get(['id', 'race']);
 
@@ -64,20 +65,13 @@ class HomeController extends Controller
 
         $latestApprovals = $this->getLatestApprovals();
 
-        // 3) Featured polls table
-        $featuredPolls = Poll::with(['pollster', 'results'])
-            ->where('is_featured', 1)
-            ->get()
-            ->map(function ($poll) {
-                $pct    = $poll->results->pluck('result_percentage')->sortDesc()->values();
-                $top    = $pct->get(0, 0);
-                $runner = $pct->get(1, 0);
-                return [
-                    'pollster'    => $poll->pollster->name,
-                    'sample_size' => $poll->sample_size,
-                    'net_margin'  => $top - $runner,
-                ];
-            });
+
+        $featuredRaces = Race::where('is_featured', 1)->with('state', 'candidates')->get();
+
+
+        if ($request->ajax()) {
+            return view('frontend.approval-cards', compact('latestApprovals'))->render();
+        }
 
         return view('frontend.home', compact(
             'states',
@@ -89,57 +83,36 @@ class HomeController extends Controller
             'disapprovalData',
             'approvalStats',
             'latestApprovals',
-            'featuredPolls'
+            'featuredRaces'
         ));
     }
 
 
-    // protected function getLatestApprovals(): array
-    // {
-    //     // 1) Get all approval races
-    //     $races = Race::where('race', 'approval')->getAll();
-
-    //     if ($races->isEmpty()) {
-    //         return [];
-    //     }
-    //     return $races;
 
 
-    //     //     // 2) Fetch all related race approvals, flatten them, sort by race_date, and map
-    //     //     return $races->flatMap(function ($race) {
-    //     //         return $race->raceApproval()->get();
-    //     //     })
-    //     //         ->sortByDesc('race_date')
-    //     //         ->map(function ($a) {
-    //     //             return [
-    //     //                 'pollster'    => $a->pollster->name,
-    //     //                 'rawDate'     => $a->race_date->toDateString(),
-    //     //                 'displayDate' => $a->race_date->format('M d, Y'),
-    //     //                 'sampleSize'  => number_format($a->sample_size),
-    //     //                 'approve'     => round($a->approve_rating, 1),
-    //     //                 'disapprove'  => round($a->disapprove_rating, 1),
-    //     //                 'net'         => round($a->approve_rating - $a->disapprove_rating, 1),
-    //     //             ];
-    //     //         })
-    //     //         ->values()
-    //     //         ->toArray();
-    // }
-
-
-    protected function getLatestApprovals(): array
+    protected function getLatestApprovals(): LengthAwarePaginator
     {
-        // 1) Grab only “approval” races, eager-load their candidates
-        $races = Race::where('race', 'approval')
-            ->with(['candidates:id,name'])  // assumes a Race→candidates() relation
-            ->orderBy('id', 'desc')
-            ->get();
+        $perPage = 8;
 
-        // 2) Map to simple arrays
-        return $races->map(fn($race) => [
-            'race_id'    => $race->id,
-            'candidates' => $race->candidates->pluck('name')->toArray(),
-        ])->toArray();
+        // Paginate approval races
+        $races = Race::where('race', 'approval')
+            ->with(['candidates:id,name'])
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
+
+        // Transform items before returning
+        $races->getCollection()->transform(function ($race) {
+            return [
+                'race_id'    => $race->id,
+                'candidates' => $race->candidates->pluck('name')->toArray(),
+            ];
+        });
+
+        return $races;
     }
+
+
+
 
     public function approvalDetails($race_id)
     {
@@ -245,24 +218,159 @@ class HomeController extends Controller
         });
 
 
-        $featuredPolls = Poll::with(['pollster', 'results'])
-            ->where('is_featured', 1)
-            ->get()
-            ->map(function ($poll) {
-                $pct    = $poll->results->pluck('result_percentage')->sortDesc()->values();
-                $top    = $pct->get(0, 0);
-                $runner = $pct->get(1, 0);
-                return [
-                    'pollster'    => $poll->pollster->name,
-                    'sample_size' => $poll->sample_size,
-                    'net_margin'  => $top - $runner,
-                ];
-            });
+        $featuredRaces = Race::where('is_featured', 1)->with('state', 'candidates')->get();
 
-        return view('frontend.details', compact('data', 'featuredPolls'));
+        return view('frontend.details', compact('data', 'featuredRaces'));
     }
 
 
+    public function filterOptions(Request $request)
+    {
+        $request->validate(['pollType' => 'required|string']);
+        $type = strtolower($request->input('pollType'));
+
+
+        // Race IDs for this type
+        $raceIds = Race::where('race_type', $type)->pluck('id');
+
+        $stateIds = Race::where('race_type', $type)
+            ->pluck('state_id')
+            ->unique();
+
+        $states   = State::whereIn('id', $stateIds)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+
+        // Pollester IDs from those races’ polls
+        $pollesterIds = Poll::whereIn('race_id', $raceIds)
+            ->pluck('pollster_id')
+            ->unique()
+            ->filter();
+        $pollesters = Pollster::whereIn('id', $pollesterIds)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json([
+            'states'    => $states,
+            'pollesters' => $pollesters,
+        ]);
+    }
+
+    public function filterPolls(Request $request)
+    {
+        $params = $request->validate([
+            'pollType'    => 'required|string',
+            'state_id'    => 'nullable|integer',
+            'pollster_id' => 'nullable|integer',
+            'timeframe'   => 'required|integer',
+        ]);
+
+        $pollType = strtolower($params['pollType']);
+
+        $raceId = Race::where('race_type', $pollType)
+            ->when($params['state_id'], fn($q) => $q->where('state_id', $params['state_id']))
+            ->value('id');
+
+        if (! $raceId) {
+            return response()->json([]);
+        }
+
+        $polls = Poll::with(['pollster', 'candidate'])
+            ->where('race_id', $raceId)
+            ->when($params['pollster_id'], fn($q) => $q->where('pollster_id', $params['pollster_id']))
+            ->when($params['timeframe'], fn($q) => $q->where('poll_date', '>=', now()->subDays($params['timeframe'])))
+            ->orderBy('poll_date', 'desc')
+            ->get();
+
+        $result = $polls->map(fn($poll) => [
+            'pollster' => $poll->pollster->name ?? 'N/A',
+            'date'     => $poll->poll_date,
+            'sample'   => $poll->sample_size,
+            'net'      => round(
+                (
+                    ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->first() ?? 0)
+                    -
+                    ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->skip(1)->first() ?? 0)
+                ),
+                1
+            ),
+        ]);
+
+        return response()->json($result);
+    }
+
+
+    public function getPollstersByState(Request $request)
+    {
+        $type     = strtolower($request->input('pollType'));
+        $stateId  = $request->input('state_id');
+
+        // Get all races for this type and state
+        $raceIds = Race::where('race_type', $type)
+            ->when($stateId, fn($q) => $q->where('state_id', $stateId))
+            ->pluck('id');
+
+        // Get all pollster IDs from polls of those races
+        $pollsterIds = Poll::whereIn('race_id', $raceIds)
+            ->pluck('pollster_id')
+            ->unique();
+
+        $pollsters = Pollster::whereIn('id', $pollsterIds)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json([
+            'pollesters' => $pollsters
+        ]);
+    }
+
+    // protected function getLatestApprovals(): array
+    // {
+    //     // 1) Get all approval races
+    //     $races = Race::where('race', 'approval')->getAll();
+
+    //     if ($races->isEmpty()) {
+    //         return [];
+    //     }
+    //     return $races;
+
+
+    //         // 2) Fetch all related race approvals, flatten them, sort by race_date, and map
+    //         return $races->flatMap(function ($race) {
+    //             return $race->raceApproval()->get();
+    //         })
+    //             ->sortByDesc('race_date')
+    //             ->map(function ($a) {
+    //                 return [
+    //                     'pollster'    => $a->pollster->name,
+    //                     'rawDate'     => $a->race_date->toDateString(),
+    //                     'displayDate' => $a->race_date->format('M d, Y'),
+    //                     'sampleSize'  => number_format($a->sample_size),
+    //                     'approve'     => round($a->approve_rating, 1),
+    //                     'disapprove'  => round($a->disapprove_rating, 1),
+    //                     'net'         => round($a->approve_rating - $a->disapprove_rating, 1),
+    //                 ];
+    //             })
+    //             ->values()
+    //             ->toArray();
+    // }
+
+
+    // protected function getLatestApprovals(): array
+    // {
+    //     // 1) Grab only “approval” races, eager-load their candidates
+    //     $races = Race::where('race', 'approval')
+    //         ->with(['candidates:id,name'])  // assumes a Race→candidates() relation
+    //         ->orderBy('id', 'desc')
+    //         ->get();
+
+    //     // 2) Map to simple arrays
+    //     return $races->map(fn($race) => [
+    //         'race_id'    => $race->id,
+    //         'candidates' => $race->candidates->pluck('name')->toArray(),
+    //     ])->toArray();
+    // }
 
 
     // public function pollsByRace($raceType)
@@ -591,57 +699,5 @@ class HomeController extends Controller
     //     ]);
 
     //     return response()->json(['polls' => $data]);
-    // }
-
-    public function filterPolls(Request $request)
-    {
-        $params = $request->validate([
-            'pollType'    => 'required|string',
-            'state_id'    => 'nullable|integer',
-            'pollster_id' => 'nullable|integer',
-            'timeframe'   => 'required|integer', // in days
-        ]);
-
-        $params['pollType'] = strtolower($params['pollType']);
-
-        // Get race ID
-        $raceId = Race::where('race_type', $params['pollType'])
-            ->when($params['state_id'], fn($q) => $q->where('state_id', $params['state_id']))
-            ->value('id');
-
-        if (!$raceId) {
-            return response()->json([]);
-        }
-
-        // Fetch polls with candidates and pollster
-        $polls = Poll::with(['pollster', 'candidate'])
-            ->where('race_id', $raceId)
-            ->when($params['pollster_id'], fn($q) => $q->where('pollster_id', $params['pollster_id']))
-            ->when($params['timeframe'], fn($q) => $q->where('poll_date', '>=', now()->subDays($params['timeframe'])))
-            ->orderBy('poll_date', 'desc')
-            ->get();
-
-        // Transform response
-        $result = $polls->map(function ($poll) {
-            $results = $poll->candidate->map(function ($cand) {
-                return [
-                    'name' => $cand->name,
-                    'pct'  => $cand->pivot->result_percentage,
-                ];
-            })->sortByDesc('pct')->values();
-
-            $top = $results[0]['pct'] ?? 0;
-            $second = $results[1]['pct'] ?? 0;
-            $net = round($top - $second, 1);
-
-            return [
-                'pollster' => $poll->pollster->name ?? 'N/A',
-                'date'     => $poll->poll_date,
-                'sample'   => $poll->sample_size,
-                'net'      => $net,
-            ];
-        });
-
-        return response()->json($result);
-    }
+    // // }
 }

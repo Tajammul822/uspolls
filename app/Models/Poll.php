@@ -14,7 +14,6 @@ class Poll extends Model
         'poll_date',
         'pollster_id',
         'sample_size',
-        'is_featured',
     ];
 
     protected $casts = [

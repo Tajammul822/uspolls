@@ -36,10 +36,16 @@ class RaceController extends Controller
             $request->merge(['state_id' => null]);
         }
 
+        $request->merge([
+            'is_featured' => $request->has('is_featured') ? 1 : 0,
+        ]);
+
+
         $validated = $request->validate([
             'race' => 'required|in:election,approval',
             'race_type' => 'nullable|in:president,senate,house,governor,other',
             'state_id' => 'nullable|exists:states,id',
+            'is_featured'      => 'nullable|integer|between:0,1',
             'election_round' => 'nullable|in:primary,general',
         ]);
 
@@ -89,10 +95,7 @@ class RaceController extends Controller
 
         $approvalCandidate = $race->raceCandidates()->first();
 
-        return view(
-            'admin.races.edit',
-            compact('race', 'candidates', 'approvalCandidate', 'states')
-        );
+        return view('admin.races.edit', compact('race', 'candidates', 'approvalCandidate', 'states'));
     }
 
     public function update(Request $request, Race $race)
@@ -100,11 +103,16 @@ class RaceController extends Controller
         if ($request->input('state_id') === 'general') {
             $request->merge(['state_id' => null]);
         }
-        
+
+         $request->merge([
+            'is_featured' => $request->has('is_featured') ? 1 : 0,
+        ]);
+
         $validated = $request->validate([
             'race'      => 'required|in:election,approval',
             'race_type'      => 'nullable|in:president,senate,house,governor,other',
             'state_id'      => 'nullable|exists:states,id',
+            'is_featured'      => 'nullable|integer|between:0,1',
             'election_round' => 'nullable|in:primary,general',
         ]);
         $race->update($validated);

@@ -43,30 +43,23 @@ class PollController extends Controller
     public function store(Request $request)
     {
 
-        $request->merge([
-            'is_featured' => $request->has('is_featured') ? 1 : 0,
-        ]);
-
         $data = $request->validate([
             'race_id'          => 'required|exists:races,id',
             'poll_date'        => 'required|date',
             'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
-            'is_featured'      => 'nullable|integer|between:0,1',
             'candidate_ids'    => 'required|array',
             'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
             'results'          => 'required|array',
             'results.*'        => 'required|numeric|min:0|max:100',
         ]);
 
-        $data['is_featured'] = $request->has('is_featured') ? 1 : 0;
-
+       
         $poll = Poll::create(Arr::only($data, [
             'race_id',
             'poll_date',
             'pollster_id',
             'sample_size',
-            'is_featured',
         ]));
 
         // 2) Insert each result
@@ -103,16 +96,10 @@ class PollController extends Controller
      */
     public function update(Request $request, Poll $poll)
     {
-        $request->merge([
-            'is_featured' => $request->has('is_featured') ? 1 : 0,
-        ]);
-
-
         $data = $request->validate([
             'poll_date'        => 'required|date',
             'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
-            'is_featured'      => 'nullable|integer|between:0,1',
             'candidate_ids'    => 'required|array',
             'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
             'results'          => 'required|array',
@@ -124,7 +111,6 @@ class PollController extends Controller
             'poll_date',
             'pollster_id',
             'sample_size',
-            'is_featured',
         ]));
 
         // 2) Upsert each result

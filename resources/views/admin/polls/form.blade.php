@@ -65,14 +65,6 @@
         </div>
     </div>
 
-    {{-- 4) Sample Size --}}
-    <div class="mb-3 row">
-        <label for="is_featured" class="col-sm-2 col-form-label">Is_featured</label>
-        <div class="col-sm-10">
-            <input type="checkbox" name="is_featured" id="is_featured" value="1"
-                {{ old('is_featured', $poll->is_featured ?? false) ? 'checked' : '' }}>
-        </div>
-    </div>
 
     {{-- 5) Results by Candidate --}}
     <h5 class="mt-4 mb-2">Results by Candidate</h5>

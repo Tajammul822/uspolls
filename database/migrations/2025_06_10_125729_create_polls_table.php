@@ -18,7 +18,6 @@ return new class extends Migration
             $table->date('poll_date');
             $table->foreignId('pollster_id')->constrained('pollsters')->onDelete('cascade');
             $table->unsignedInteger('sample_size');
-            $table->unsignedInteger('is_featured')->nullable()->default(0);
             $table->timestamps();
         });
     }

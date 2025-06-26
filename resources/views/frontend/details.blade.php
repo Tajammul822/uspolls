@@ -104,6 +104,25 @@
             color: var(--text-medium);
         }
 
+         .arrow-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            font-size: 16px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .arrow-link:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
+
     </style>
 
     <div class="main-content">
@@ -199,26 +218,48 @@
 
     <!-- Sidebar (unchanged) -->
     <div class="sidebar">
-        <!-- Featured Polls -->
+        <!-- Featured Races -->
         <div class="sidebar-card">
-            <div class="sidebar-title"><i class="fas fa-star"></i> Featured Polls</div>
-            @if ($featuredPolls->isEmpty())
-                <p class="p-3 text-sm text-gray-500">No featured polls at the moment.</p>
+            <div class="sidebar-title">
+                <i class="fas fa-star"></i> Featured Races
+            </div>
+
+            @if ($featuredRaces->isEmpty())
+                <p class="p-3 text-sm text-gray-500">
+                    No featured races at the moment.
+                </p>
             @else
                 <table class="w-full text-left text-sm">
                     <thead>
                         <tr>
-                            <th class="border-b px-2 py-1">Pollster</th>
-                            <th class="border-b px-2 py-1">Sample Size</th>
-                            <th class="border-b px-2 py-1">Net Margin</th>
+                            <th class="border-b px-2 py-1">Race</th>
+                            <th class="border-b px-2 py-1">Election_round</th>
+                            <th class="border-b px-2 py-1">State</th>
+                            <th class="border-b px-2 py-1">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($featuredPolls as $fp)
+                        @foreach ($featuredRaces as $fp)
                             <tr>
-                                <td class="border-b px-2 py-1">{{ $fp['pollster'] }}</td>
-                                <td class="border-b px-2 py-1">{{ number_format($fp['sample_size']) }}</td>
-                                <td class="border-b px-2 py-1">{{ $fp['net_margin'] }}%</td>
+                                @if ($fp->race == 'election')
+                                    <td class="border-b px-2 py-1">{{ $fp->race_type . ' ' . $fp->race }}</td>
+                                @elseif($fp->race == 'approval')
+                                    <td class="border-b px-2 py-1">
+                                        {{ optional($fp->candidates->first())->name . ' ' . $fp->race }}</td>
+                                @endif
+
+                                <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
+                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+
+                                <td class="border-b px-2 py-1">
+                                    @if ($fp->race == 'election')
+                                        <a href="/details?race_id={{ $fp->id }}" class="arrow-link"
+                                            title="View Details">➔</a>
+                                    @elseif($fp->race == 'approval')
+                                        <a href="{{ route('approval.details', ['race_id' => $fp->id]) }}"
+                                            class="arrow-link" title="View Details">➔</a>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

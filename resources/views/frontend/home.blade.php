@@ -21,9 +21,6 @@
             color: #fff;
         }
 
-
-
-
         /* apporval */
 
         .card-grid {
@@ -69,6 +66,28 @@
 
         .approval-link:hover {
             color: #333;
+        }
+
+
+        /* Pagination Css*/
+
+        .pagination-wrapper nav {
+            display: flex;
+            justify-content: center;
+        }
+
+        .page-item .page-link {
+            margin: 0 4px;
+            border-radius: 6px;
+            color: #000;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+
+        .page-item.active .page-link {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
         }
     </style>
     <!-- Main Content (70%) -->
@@ -257,30 +276,15 @@
         </div> --}}
 
 
-        <div class="card-grid">
-            @foreach ($latestApprovals as $race)
-                @foreach ($race['candidates'] as $name)
-                    <div class="approval-card">
-                        <div class="approval-card-body">
-                            <h3 class="approval-title">
-                                {{ $name }} Job Approval
-                            </h3>
-                            <a href="{{ route('approval.details', ['race_id' => $race['race_id']]) }}"
-                                class="approval-link">
-                                &rarr;
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            @endforeach
-        </div>
+        {{-- Approval Section Card --}}
 
+        <div id="approval-cards-container">
+            @include('frontend.approval-cards')
+        </div>
 
         <div class="header-section">
             <h1 class="page-title">Latest Polls</h1>
-            <p class="page-subtitle">
-                Most recent polling data from various sources across different races.
-            </p>
+            <p class="page-subtitle">Most recent polling data from various sources across different races.</p>
         </div>
 
         <div class="filter-card">
@@ -288,41 +292,25 @@
                 <div class="filters-title">
                     <div class="poll-types-container">
                         <div class="poll-type-column">
-                            <div class="poll-type-item active">
-                                <i class="fas fa-user"></i> President
-                            </div>
-                            <div class="poll-type-item">
-                                <i class="fas fa-landmark"></i> Senate
-                            </div>
-                            <div class="poll-type-item">
-                                <i class="fas fa-flag-usa"></i> House
-                            </div>
-                            <div class="poll-type-item">
-                                <i class="fas fa-user-tie"></i> Governors
-                            </div>
+                            <div class="poll-type-item active"><i class="fas fa-user"></i> President</div>
+                            <div class="poll-type-item"><i class="fas fa-landmark"></i> Senate</div>
+                            <div class="poll-type-item"><i class="fas fa-flag-usa"></i> House</div>
+                            <div class="poll-type-item"><i class="fas fa-user-tie"></i> Governor</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="filter-row">
                     <div class="filter-option">
-                        <select name="state_id" class="filter-select">
+                        <select name="filter_state_id" class="filter-select">
                             <option value="">All States</option>
-                            @foreach ($states as $state)
-                                <option value="{{ $state->id }}">{{ $state->name }}</option>
-                            @endforeach
                         </select>
                     </div>
-
                     <div class="filter-option">
                         <select name="pollster_id" class="filter-select">
                             <option value="">All Pollsters</option>
-                            @foreach ($pollesters as $pollester)
-                                <option value="{{ $pollester->id }}">{{ $pollester->name }}</option>
-                            @endforeach
                         </select>
                     </div>
-
                     <div class="filter-option">
                         <select name="timeframe" class="filter-select">
                             <option value="7">Last 7 days</option>
@@ -336,64 +324,59 @@
                 <button class="apply-btn">Apply Filters</button>
             </div>
         </div>
-        {{-- 
-    
-        <div class="table-container">
-            <table class="polls-table">
-                <thead id="poll-table-head"></thead>
-                <tbody id="poll-table-body"></tbody>
-            </table>
-            <div id="pagination" class="pagination-container"></div>
-        </div> --}}
 
         <div class="no-polls-container">
             <div class="no-polls-icon"><i class="fas fa-search"></i></div>
             <h2 class="no-polls-title">No polls found with the selected filters</h2>
             <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
         </div>
-
-
-
     </div>
+
+
 
     <!-- Sidebar (30%) -->
     <div class="sidebar">
-        <!-- Latest Analysis -->
         <div class="sidebar-card">
-            {{-- <div class="sidebar-title"><i class="fas fa-newspaper"></i> Latest Analysis</div>
-
-            <div class="blog-post">
-                <div class="blog-title">Why Approval Ratings Are Rising Despite Economic Concerns</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-clock"></i> 2 hours ago</span>
-                    <span><i class="far fa-user"></i> John Pollster</span>
-                </div>
-            </div>
-            --}}
-
             <div class="sidebar-title">
-                <i class="fas fa-star"></i> Featured Polls
+                <i class="fas fa-star"></i> Featured Races
             </div>
 
-            @if ($featuredPolls->isEmpty())
+            @if ($featuredRaces->isEmpty())
                 <p class="p-3 text-sm text-gray-500">
-                    No featured polls at the moment.
+                    No featured races at the moment.
                 </p>
             @else
                 <table class="w-full text-left text-sm">
                     <thead>
                         <tr>
-                            <th class="border-b px-2 py-1">Pollster</th>
-                            <th class="border-b px-2 py-1">Sample Size</th>
-                            <th class="border-b px-2 py-1">Net Margin</th>
+                            <th class="border-b px-2 py-1">Race</th>
+                            <th class="border-b px-2 py-1">Election_round</th>
+                            <th class="border-b px-2 py-1">State</th>
+                            <th class="border-b px-2 py-1">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($featuredPolls as $fp)
+                        @foreach ($featuredRaces as $fp)
                             <tr>
-                                <td class="border-b px-2 py-1">{{ $fp['pollster'] }}</td>
-                                <td class="border-b px-2 py-1">{{ number_format($fp['sample_size']) }}</td>
-                                <td class="border-b px-2 py-1">{{ $fp['net_margin'] }}%</td>
+                                @if ($fp->race == 'election')
+                                    <td class="border-b px-2 py-1">{{ $fp->race_type . ' ' . $fp->race }}</td>
+                                @elseif($fp->race == 'approval')
+                                    <td class="border-b px-2 py-1">
+                                        {{ optional($fp->candidates->first())->name . ' ' . $fp->race }}</td>
+                                @endif
+
+                                <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
+                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+
+                                <td class="border-b px-2 py-1">
+                                    @if ($fp->race == 'election')
+                                        <a href="/details?race_id={{ $fp->id }}" class="arrow-link"
+                                            title="View Details">➔</a>
+                                    @elseif($fp->race == 'approval')
+                                        <a href="{{ route('approval.details', ['race_id' => $fp->id]) }}"
+                                            class="arrow-link" title="View Details">➔</a>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -401,33 +384,6 @@
             @endif
         </div>
 
-
-
-        <!-- Upcoming Events -->
-        <div class="sidebar-card">
-            <div class="sidebar-title"><i class="fas fa-calendar-alt"></i> Upcoming Events</div>
-
-            <div class="blog-post">
-                <div class="blog-title">June Debate: Potential Impact on Approval Ratings</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-calendar"></i> Jun 25, 2025</span>
-                </div>
-            </div>
-
-            <div class="blog-post">
-                <div class="blog-title">Economic Report Release (Q2 2025)</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-calendar"></i> Jun 28, 2025</span>
-                </div>
-            </div>
-
-            <div class="blog-post">
-                <div class="blog-title">Major Policy Announcement Expected</div>
-                <div class="blog-meta">
-                    <span><i class="far fa-calendar"></i> Jul 2, 2025</span>
-                </div>
-            </div>
-        </div>
         <!-- Key Metrics -->
         <div class="sidebar-card">
             <div class="sidebar-title"><i class="fas fa-tachometer-alt"></i> Key Metrics</div>
@@ -451,6 +407,147 @@
     <!-- jQuery & DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const tabs = document.querySelectorAll('.poll-type-item');
+            const stateSel = document.querySelector('select[name="filter_state_id"]');
+            const pollSel = document.querySelector('select[name="pollster_id"]');
+
+            async function loadOptions(pollType) {
+                let opts = {
+                    states: [],
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.options') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType
+                        })
+                    });
+                    if (res.ok) opts = await res.json();
+                } catch (e) {
+                    console.error('Options load failed', e);
+                }
+
+                // stateSel.innerHTML = '<option value="">All States</option>' +
+                // opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+                stateSel.innerHTML = '<option value="">All States</option>' +
+                    opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    opts.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadOptions(tab.textContent.trim());
+                });
+            });
+
+
+            stateSel.addEventListener('change', async () => {
+                const selectedState = stateSel.value;
+                const activeTab = document.querySelector('.poll-type-item.active');
+                const pollType = activeTab.textContent.trim();
+
+                let result = {
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.pollsters') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id: selectedState
+                        })
+                    });
+
+                    if (res.ok) {
+                        result = await res.json();
+                    }
+                } catch (e) {
+                    console.error('Pollster load failed', e);
+                }
+
+                // Rebuild pollster dropdown
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    result.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            });
+
+            // initial load for President
+            document.querySelector('.poll-type-item.active').click();
+
+            // Apply Filters (exactly as you had it)
+            document.querySelector('.apply-btn').addEventListener('click', async () => {
+                const activeTab = document.querySelector('.poll-type-item.active');
+                const pollType = activeTab.textContent.trim();
+                const state_id = +stateSel.value || null;
+                const pollster_id = +pollSel.value || null;
+                const timeframe = +document.querySelector('select[name="timeframe"]').value;
+
+                let data = [];
+                try {
+                    const res = await fetch("{{ route('polls.filter') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id,
+                            pollster_id,
+                            timeframe
+                        })
+                    });
+                    data = res.ok ? await res.json() : [];
+                } catch (err) {
+                    console.error('AJAX error:', err);
+                }
+
+                const container = document.querySelector('.no-polls-container');
+                if (!data.length) {
+                    container.innerHTML =
+                        `
+                                            <div class="no-polls-icon"><i class="fas fa-search"></i></div>
+                                            <h2 class="no-polls-title">No polls found with the selected filters</h2>
+                                            <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>`;
+                    return;
+                }
+
+                let html = '<table class="polls-table"><thead><tr>' +
+                    '<th>Pollster</th><th>Date</th><th>Sample</th><th>Net</th>' +
+                    '</tr></thead><tbody>';
+                data.forEach(p => {
+                    html += `<tr>
+                                    <td>${p.pollster}</td>
+                                    <td>${p.date}</td>
+                                    <td>${p.sample}</td>
+                                    <td class="poll-result ${p.net >= 0 ? 'positive' : 'negative'}">
+                                        ${p.net >= 0 ? '+' : ''}${p.net}%
+                                    </td>
+                                    </tr>`;
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            });
+        });
+    </script>
 
     {{-- <script>
         $(function() {
@@ -1474,7 +1571,14 @@
                         data: 'state_name'
                     },
                     {
-                        data: 'status'
+                        data: 'status',
+                        render: function(data, type, row) {
+                            if (data == 1) {
+                                return '<span style="color: green; font-weight: bold;">Active</span>';
+                            } else {
+                                return '<span style="color: #ff9f43; font-weight: bold;">Inactive</span>';
+                            }
+                        }
                     },
                     {
                         data: 'id',
@@ -1854,7 +1958,10 @@
         });
     </script> --}}
 
-    <script>
+
+
+
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', () => {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -1938,6 +2045,26 @@
                 html += '</tbody></table>';
                 container.innerHTML = html;
             });
+        });
+    </script> --}}
+
+    <script>
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('.pagination a');
+            if (link) {
+                e.preventDefault();
+                fetch(link.href, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        document.querySelector('#approval-cards-container').innerHTML = html;
+                        window.history.pushState({}, '', link.href);
+                    })
+                    .catch(err => console.error('Pagination load failed', err));
+            }
         });
     </script>
 @endsection

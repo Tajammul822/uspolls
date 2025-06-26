@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
   Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+  Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
 
@@ -43,8 +43,7 @@ Route::get('/polls/by-state/{stateId}', [HomeController::class, 'pollsByState'])
 
 Route::get('dashboard', function () {
 
-    return view('admin.dashboard');
-
+  return view('admin.dashboard');
 })->name('dashboard')->middleware('auth');
 
 
@@ -97,7 +96,13 @@ Route::view('/house', 'frontend.house')->name('house');
 Route::view('/governor', 'frontend.governor')->name('governor');
 
 Route::post('/filter-polls', [HomeController::class, 'filterPolls'])
-     ->name('polls.filter');
+  ->name('polls.filter');
+
+Route::post('/filter-options', [HomeController::class, 'filterOptions'])
+  ->name('polls.options');
+
+Route::post('/filter-pollsters', [HomeController::class, 'getPollstersByState'])
+  ->name('polls.pollsters');
 
 // Route::get('/polls/search', [HomeController::class, 'searchPolls'])
 //      ->name('polls.search');
@@ -109,10 +114,4 @@ Route::post('/filter-polls', [HomeController::class, 'filterPolls'])
 Route::get('/details', [HomeController::class, 'show'])->name('races.show');
 Route::get('/Apiracesdata', [HomeController::class, 'apiIndex']);
 Route::get('/approval/{race_id}', [HomeController::class, 'approvalDetails'])
-     ->name('approval.details');
-
-
-
-
-
-
+  ->name('approval.details');

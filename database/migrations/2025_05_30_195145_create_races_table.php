@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->enum('race', ['election', 'approval']);
             $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'other'])->nullable();
-            $table->enum('election_round', ['primary', 'general'])->nullable(); 
+            $table->enum('election_round', ['primary', 'general'])->nullable();
             $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
+            $table->unsignedInteger('is_featured')->nullable()->default(0);
             $table->integer('status')->default(1);
-            $table->timestamps(); 
+            $table->timestamps();
         });
     }
 
