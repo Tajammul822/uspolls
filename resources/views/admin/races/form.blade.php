@@ -183,7 +183,7 @@
 
 
 <!-- JavaScript -->
-{{-- <script>
+<script>
     // Global list of all candidates for reference
     const allCandidates = [
         @foreach ($candidates as $c)
@@ -295,9 +295,9 @@
             fillParty(approvalCandidate);
         }
     });
-</script> --}}
+</script>
 
-<script>
+{{-- <script>
     // Global list of all candidates for reference
     const allCandidates = [
         @foreach ($candidates as $c)
@@ -443,7 +443,7 @@
         // Initial filtering pass
         updateCandidateDropdowns();
     });
-</script>
+</script> --}}
 
 <style>
     .candidate-group {

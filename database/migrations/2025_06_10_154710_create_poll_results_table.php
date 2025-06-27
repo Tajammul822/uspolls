@@ -13,9 +13,9 @@ return new class extends Migration
     {
          Schema::create('poll_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade');
-            $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade');
-            $table->decimal('result_percentage', 5, 2);
+            $table->foreignId('poll_id')->constrained('polls')->onDelete('cascade')->nullable();
+            $table->foreignId('candidate_id')->constrained('candidates')->onDelete('cascade')->nullable();
+            $table->decimal('result_percentage', 5, 2)->nullable();
             $table->timestamps();
         });
     }

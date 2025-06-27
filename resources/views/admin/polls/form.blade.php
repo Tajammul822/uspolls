@@ -85,7 +85,7 @@
                         'results.' . $candidate->id,
                         optional($poll?->results->firstWhere('candidate_id', $candidate->id))?->result_percentage,
                     ) }}"
-                    placeholder="0.00" required>
+                    placeholder="0.00" >
             </div>
         </div>
     @endforeach

@@ -89,9 +89,124 @@
             color: #fff;
             border-color: #007bff;
         }
+
+
+        /* Table reset for clarity */
+        .polls-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+        }
+
+        .polls-table th,
+        .polls-table td {
+            padding: 0.5em 0.75em;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Date‐separator styling */
+        .date-separator td {
+            /* make it noticeably smaller text */
+            font-size: 0.85em;
+            /* light background highlight */
+            background: rgba(200, 200, 255, 0.2);
+            /* subtle, slightly bold text */
+            font-weight: 600;
+            /* lighter text color */
+            color: #444;
+            /* more padding left, less top/bottom */
+            padding: 0.25em 0.75em;
+            /* remove bottom border so it merges visually */
+            border-bottom: none;
+        }
+
+        /* Poll rows styling */
+        .polls-table tbody tr:not(.date-separator) td {
+            font-size: 1em;
+            color: #222;
+        }
+
+        /* Spread arrow link */
+        .arrow-link {
+            margin-left: 0.3em;
+            text-decoration: none;
+            font-size: 1.1em;
+            vertical-align: middle;
+            opacity: 0.6;
+        }
+
+        .arrow-link:hover {
+            opacity: 1;
+        }
+
+        /* Positive/negative spread colors */
+        .poll-spread.positive {
+            color: #027502;
+        }
+
+        .poll-spread.negative {
+            color: #a00;
+        }
     </style>
     <!-- Main Content (70%) -->
     <div class="main-content">
+
+        <div class="header-section">
+            <h1 class="page-title">Latest Polls</h1>
+            <p class="page-subtitle">Most recent polling data from various sources across different races.</p>
+        </div>
+
+        <div class="filter-card">
+            <div class="filters-container">
+                <div class="filters-title">
+                    <div class="poll-types-container">
+                        <div class="poll-type-column">
+                            <div class="poll-type-item active"><i class="fas fa-user"></i> President</div>
+                            <div class="poll-type-item"><i class="fas fa-landmark"></i> Senate</div>
+                            <div class="poll-type-item"><i class="fas fa-flag-usa"></i> House</div>
+                            <div class="poll-type-item"><i class="fas fa-user-tie"></i> Governor</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-row">
+                    <div class="filter-option">
+                        <select name="filter_state_id" class="filter-select">
+                            <option value="">All States</option>
+                        </select>
+                    </div>
+                    <div class="filter-option">
+                        <select name="pollster_id" class="filter-select">
+                            <option value="">All Pollsters</option>
+                        </select>
+                    </div>
+                    <div class="filter-option">
+                        <select name="timeframe" class="filter-select">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90" selected>Last 90 days</option>
+                            <option value="180">Last 6 months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="apply-btn">Apply Filters</button>
+            </div>
+        </div>
+
+        <template id="no-polls-template">
+            <div class="no-polls-container">
+                <div class="no-polls-icon"><i class="fas fa-search"></i></div>
+                <h2 class="no-polls-title">No polls found with the selected filters</h2>
+                <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
+            </div>
+        </template>
+
+        <div class="polls-results">
+
+        </div>
+
         <!-- Filters -->
         <div class="filters">
             <!-- Race Filter -->
@@ -99,7 +214,7 @@
                 <div class="filter-group">
                     <label for="race-select"><i class="fas fa-flag"></i> Race:</label>
                     <select id="race-select" name="race_type">
-                        <option value="">-- Select Race --</option>
+                        <option value="" disabled>-- Select Race --</option>
                         @foreach ($races as $race)
                             <option value="{{ $race->race_type }}">{{ $race->race_type }}</option>
                         @endforeach
@@ -113,19 +228,21 @@
                     <label for="state"><i class="fas fa-map-marker-alt"></i> State:</label>
                     <select id="state-select" name="state_id">
                         <option value="">-- Select State --</option>
+                        <option value="temp">All States</option>
                         @foreach ($states as $st)
                             <option value="{{ $st->id }}">{{ $st->name }}</option>
                         @endforeach
                     </select>
                 </div>
             </div>
+        </div>
 
-            {{-- <div class="filter-group">
+        {{-- <div class="filter-group">
                 <label for="search-input"><i class="fas fa-search"></i> Find a Poll</label>
                 <input type="text" id="search-input" placeholder="Search by candidate…">
                 <div id="suggestions"></div>
             </div> --}}
-        </div>
+
 
         <!-- Polling Table -->
         {{-- <div class="card">
@@ -168,7 +285,7 @@
 
         <div class="card">
             <div class="card-header">
-                <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
+                <div class="card-title"><i class="fas fa-table"></i> Race Data</div>
                 <div class="time-filters"></div>
             </div>
             <div class="polling-table-container">
@@ -186,6 +303,13 @@
                 </table>
             </div>
         </div>
+
+        {{-- Approval Section Card --}}
+
+        <div id="approval-cards-container">
+            @include('frontend.approval-cards')
+        </div>
+
         <div class="chart-container">
             {{-- Time filters --}}
             <div class="time-filters">
@@ -274,62 +398,6 @@
                 </table>
             </div>
         </div> --}}
-
-
-        {{-- Approval Section Card --}}
-
-        <div id="approval-cards-container">
-            @include('frontend.approval-cards')
-        </div>
-
-        <div class="header-section">
-            <h1 class="page-title">Latest Polls</h1>
-            <p class="page-subtitle">Most recent polling data from various sources across different races.</p>
-        </div>
-
-        <div class="filter-card">
-            <div class="filters-container">
-                <div class="filters-title">
-                    <div class="poll-types-container">
-                        <div class="poll-type-column">
-                            <div class="poll-type-item active"><i class="fas fa-user"></i> President</div>
-                            <div class="poll-type-item"><i class="fas fa-landmark"></i> Senate</div>
-                            <div class="poll-type-item"><i class="fas fa-flag-usa"></i> House</div>
-                            <div class="poll-type-item"><i class="fas fa-user-tie"></i> Governor</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="filter-row">
-                    <div class="filter-option">
-                        <select name="filter_state_id" class="filter-select">
-                            <option value="">All States</option>
-                        </select>
-                    </div>
-                    <div class="filter-option">
-                        <select name="pollster_id" class="filter-select">
-                            <option value="">All Pollsters</option>
-                        </select>
-                    </div>
-                    <div class="filter-option">
-                        <select name="timeframe" class="filter-select">
-                            <option value="7">Last 7 days</option>
-                            <option value="30">Last 30 days</option>
-                            <option value="90">Last 90 days</option>
-                            <option value="180">Last 6 months</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button class="apply-btn">Apply Filters</button>
-            </div>
-        </div>
-
-        <div class="no-polls-container">
-            <div class="no-polls-icon"><i class="fas fa-search"></i></div>
-            <h2 class="no-polls-title">No polls found with the selected filters</h2>
-            <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
-        </div>
     </div>
 
 
@@ -436,8 +504,520 @@
                     console.error('Options load failed', e);
                 }
 
-                // stateSel.innerHTML = '<option value="">All States</option>' +
-                // opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                stateSel.innerHTML = '<option value="">All States</option>' +
+                    opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    opts.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadOptions(tab.textContent.trim());
+                });
+            });
+
+
+            stateSel.addEventListener('change', async () => {
+                const selectedState = stateSel.value;
+                const activeTab = document.querySelector('.poll-type-item.active');
+                const pollType = activeTab.textContent.trim();
+
+                let result = {
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.pollsters') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id: selectedState
+                        })
+                    });
+
+                    if (res.ok) {
+                        result = await res.json();
+                    }
+                } catch (e) {
+                    console.error('Pollster load failed', e);
+                }
+
+                // Rebuild pollster dropdown
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    result.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            });
+
+            // initial load for President
+            document.querySelector('.poll-type-item.active').click();
+
+            // Apply Filters (exactly as you had it)
+            document.querySelector('.apply-btn').addEventListener('click', async () => {
+                const pollType = document.querySelector('.poll-type-item.active').textContent.trim();
+                const state_id = +document.querySelector('select[name="filter_state_id"]').value ||
+                    null;
+                const pollster_id = +document.querySelector('select[name="pollster_id"]').value || null;
+                const timeframe = +document.querySelector('select[name="timeframe"]').value;
+
+                let data = [];
+                try {
+                    const res = await fetch("{{ route('polls.filter') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id,
+                            pollster_id,
+                            timeframe
+                        })
+                    });
+                    data = res.ok ? await res.json() : [];
+                } catch (err) {
+                    console.error('AJAX error:', err);
+                }
+
+                const container = document.querySelector('.polls-results');
+
+                const noResultsHTML = document.getElementById('no-polls-template').innerHTML;
+                if (!data.length) {
+                    container.innerHTML = noResultsHTML;
+                    return;
+                }
+
+                // Group by date
+                const grouped = data.reduce((acc, poll) => {
+                    (acc[poll.date] = acc[poll.date] || []).push(poll);
+                    return acc;
+                }, {});
+
+                // Start one table with a single header
+                let html = `
+                    <table class="polls-table">
+                        <thead>
+                        <tr>
+                            <th>Race</th>
+                            <th>Pollster</th>
+                            <th>Result</th>
+                            <th>Spread</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                    `;
+
+                // For each date group, emit a “date row” then its polls
+                Object.keys(grouped).forEach(dateKey => {
+                    const group = grouped[dateKey];
+                    // date separator row (spans all columns)
+                    html += `
+                            <tr class="date-separator">
+                            <td colspan="4">${group[0].dateFormatted}</td>
+                            </tr>
+                        `;
+                    // then each poll row
+                    group.forEach(poll => {
+                        const sign = poll.spread >= 0 ? '+' : '';
+                        html += `
+                                <tr>
+                                <td>${poll.race}</td>
+                                <td>${poll.pollster}</td>
+                                <td>${poll.result}</td>
+                                <td class="poll-spread ${poll.spread >= 0 ? 'positive' : 'negative'}">
+                                    ${sign}${poll.spread}% 
+                                    <a href="/details?race_id=${poll.race_id}"
+                                        class="arrow-link" title="View Details">➔</a>
+                                </td>
+                                </tr>
+                                                    `;
+                    });
+                });
+
+                html += `
+                                </tbody>
+                                </table>
+                                `;
+
+                container.innerHTML = html;
+            });
+
+            // trigger initial load
+            document.querySelector('.poll-type-item.active').click();
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const tabs = document.querySelectorAll('.poll-type-item');
+            const stateSel = document.querySelector('select[name="filter_state_id"]');
+            const pollSel = document.querySelector('select[name="pollster_id"]');
+            const timeframeSel = document.querySelector('select[name="timeframe"]');
+
+            async function loadOptions(pollType) {
+                let opts = {
+                    states: [],
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.options') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType
+                        })
+                    });
+                    if (res.ok) opts = await res.json();
+                } catch (e) {
+                    console.error('Options load failed', e);
+                }
+
+                stateSel.innerHTML = '<option value="">All States</option>' +
+                    opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    opts.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadOptions(tab.textContent.trim());
+                });
+            });
+
+            stateSel.addEventListener('change', async () => {
+                const selectedState = stateSel.value;
+                const activeTab = document.querySelector('.poll-type-item.active');
+                const pollType = activeTab.textContent.trim();
+
+                let result = {
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.pollsters') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id: selectedState
+                        })
+                    });
+                    if (res.ok) result = await res.json();
+                } catch (e) {
+                    console.error('Pollster load failed', e);
+                }
+
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    result.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            });
+
+            // Auto-trigger filter with default values on load
+            const initialTab = document.querySelector('.poll-type-item[data-default="true"]') || document
+                .querySelector('.poll-type-item');
+            if (initialTab) {
+                initialTab.classList.add('active');
+                loadOptions(initialTab.textContent.trim()).then(() => {
+                    // Set default values
+                    stateSel.value = "";
+                    pollSel.value = "";
+                    if (timeframeSel) timeframeSel.value = "90";
+
+                    // Trigger the apply filter
+                    document.querySelector('.apply-btn').click();
+                });
+            }
+
+            document.querySelector('.apply-btn').addEventListener('click', async () => {
+                const pollType = document.querySelector('.poll-type-item.active').textContent.trim();
+                const state_id = +stateSel.value || null;
+                const pollster_id = +pollSel.value || null;
+                const timeframe = +timeframeSel.value;
+
+                let data = [];
+                try {
+                    const res = await fetch("{{ route('polls.filter') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id,
+                            pollster_id,
+                            timeframe
+                        })
+                    });
+                    data = res.ok ? await res.json() : [];
+                } catch (err) {
+                    console.error('AJAX error:', err);
+                }
+
+                const container = document.querySelector('.polls-results');
+                const noResultsHTML = document.getElementById('no-polls-template').innerHTML;
+
+                if (!data.length) {
+                    container.innerHTML = noResultsHTML;
+                    return;
+                }
+
+                const grouped = data.reduce((acc, poll) => {
+                    (acc[poll.date] = acc[poll.date] || []).push(poll);
+                    return acc;
+                }, {});
+
+                let html = `
+            <table class="polls-table">
+                <thead>
+                    <tr>
+                        <th>Race</th>
+                        <th>Pollster</th>
+                        <th>Result</th>
+                        <th>Spread</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+                Object.keys(grouped).forEach(dateKey => {
+                    const group = grouped[dateKey];
+                    html += `
+                <tr class="date-separator">
+                    <td colspan="4">${group[0].dateFormatted}</td>
+                </tr>`;
+                    group.forEach(poll => {
+                        const sign = poll.spread >= 0 ? '+' : '';
+                        html += `
+                    <tr>
+                        <td>${poll.race}</td>
+                        <td>${poll.pollster}</td>
+                        <td>${poll.result}</td>
+                        <td class="poll-spread ${poll.spread >= 0 ? 'positive' : 'negative'}">
+                            ${sign}${poll.spread}% <a href="/details?race_id=${poll.race_id}" class="arrow-link" title="View Details">➔</a>
+                        </td>
+                    </tr>`;
+                    });
+                });
+
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            });
+        });
+    </script>
+
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const tabs = document.querySelectorAll('.poll-type-item');
+            const stateSel = document.querySelector('select[name="filter_state_id"]');
+            const pollSel = document.querySelector('select[name="pollster_id"]');
+            const timeSel = document.querySelector('select[name="timeframe"]');
+            const container = document.querySelector('.polls-results');
+            const applyBtn = document.querySelector('.apply-btn');
+
+            // Fetch & render helper (used on both Apply click and initial load)
+            async function doFilter() {
+                const pollType = document.querySelector('.poll-type-item.active').textContent.trim();
+                const state_id = +stateSel.value || null;
+                const pollster_id = +pollSel.value || null;
+                const timeframe = +timeSel.value;
+
+                let data = [];
+                try {
+                    const res = await fetch("{{ route('polls.filter') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id,
+                            pollster_id,
+                            timeframe
+                        })
+                    });
+                    data = res.ok ? await res.json() : [];
+                } catch (err) {
+                    console.error('Filter error:', err);
+                }
+
+                if (!data.length) {
+                    container.innerHTML = document.querySelector('.no-polls-container').outerHTML;
+                    return;
+                }
+
+                // Group by date
+                const grouped = data.reduce((g, p) => {
+                    (g[p.date] = g[p.date] || []).push(p);
+                    return g;
+                }, {});
+
+                // Build table
+                let html = `
+                            <table class="polls-table">
+                                <thead>
+                                <tr>
+                                    <th>Race</th>
+                                    <th>Pollster</th>
+                                    <th>Result</th>
+                                    <th>Spread</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                            `;
+                Object.values(grouped).forEach(group => {
+                    // date bar
+                    html += `
+                                <tr class="date-separator">
+                                <td colspan="4">${group[0].dateFormatted}</td>
+                                </tr>
+                            `;
+                    group.forEach(p => {
+                        const sign = p.spread >= 0 ? '+' : '';
+                        html += `
+                            <tr>
+                                <td>${p.race}</td>
+                                <td>${p.pollster}</td>
+                                <td>${p.result}</td>
+                                <td class="poll-spread ${p.spread >= 0 ? 'positive' : 'negative'}">
+                                ${sign}${p.spread}% 
+                                <a href="/details?race_id=${p.race_id}"
+                                    class="arrow-link" title="View Details">➔</a>
+                                </td>
+                            </tr>
+                            `;
+                    });
+                });
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            }
+
+            // Load state & pollster dropdowns
+            async function loadOptions(pollType) {
+                let opts = {
+                    states: [],
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.options') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType
+                        })
+                    });
+                    if (res.ok) opts = await res.json();
+                } catch (e) {
+                    console.error('Options load failed:', e);
+                }
+                stateSel.innerHTML = `<option value="">All States</option>` +
+                    opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                pollSel.innerHTML = `<option value="">All Pollsters</option>` +
+                    opts.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+
+            // Tab clicks
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadOptions(tab.textContent.trim());
+                });
+            });
+
+            // State → reload pollsters
+            stateSel.addEventListener('change', async () => {
+                const pollType = document.querySelector('.poll-type-item.active').textContent.trim();
+                let resJs = {
+                    pollesters: []
+                };
+                try {
+                    const resp = await fetch("{{ route('polls.pollsters') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id: +stateSel.value || null
+                        })
+                    });
+                    if (resp.ok) resJs = await resp.json();
+                } catch (e) {
+                    console.error('Pollsters reload failed:', e);
+                }
+                pollSel.innerHTML = `<option value="">All Pollsters</option>` +
+                    resJs.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            });
+
+            // Wire Apply button
+            applyBtn.addEventListener('click', doFilter);
+
+            // —— INITIAL LOAD: President + 90 days via Apply click ——
+            // 1) Activate the “President” tab
+            const presidentTab = Array.from(tabs)
+                .find(t => /president/i.test(t.textContent)) || tabs[0];
+            presidentTab.click();
+
+            // 2) Set timeframe to 90
+            timeSel.value = 90;
+
+            // 3) Trigger the exact same flow as the user clicking “Apply”
+            applyBtn.click();
+        });
+    </script> --}}
+
+
+
+
+
+
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const tabs = document.querySelectorAll('.poll-type-item');
+            const stateSel = document.querySelector('select[name="filter_state_id"]');
+            const pollSel = document.querySelector('select[name="pollster_id"]');
+
+            async function loadOptions(pollType) {
+                let opts = {
+                    states: [],
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.options') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType
+                        })
+                    });
+                    if (res.ok) opts = await res.json();
+                } catch (e) {
+                    console.error('Options load failed', e);
+                }
 
                 stateSel.innerHTML = '<option value="">All States</option>' +
                     opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
@@ -547,7 +1127,7 @@
                 container.innerHTML = html;
             });
         });
-    </script>
+    </script> --}}
 
     {{-- <script>
         $(function() {
@@ -1552,7 +2132,7 @@
         });
     </script> --}}
 
-    <script>
+    {{-- <script>
         $(function() {
             // init DataTable once
             var table = $('#races-table').DataTable({
@@ -1627,7 +2207,82 @@
             // Optional: initial empty table or load all
             table.clear().draw();
         });
+    </script> --}}
+
+    <script>
+        $(function() {
+            var table = $('#races-table').DataTable({
+                pageLength: 10,
+                lengthChange: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                columns: [{
+                        data: 'race_type'
+                    },
+                    {
+                        data: 'election_round'
+                    },
+                    {
+                        data: 'state_name'
+                    },
+                    {
+                        data: 'status',
+                        render: function(data) {
+                            return data == 1 ?
+                                '<span style="color: green; font-weight: bold;">Active</span>' :
+                                '<span style="color: #ff9f43; font-weight: bold;">Inactive</span>';
+                        }
+                    },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        render: id => `
+                    <a href="/details?race_id=${id}" class="arrow-link" title="View Details">
+                        ➔
+                    </a>`
+                    }
+                ]
+            });
+
+            // Fetch by race_type
+            $('#race-select').on('change', function() {
+                var rt = $(this).val();
+                $('#state-select').val(''); // clear state dropdown
+
+                var url = '/Apiracesdata' + (rt ? '?race_type=' + encodeURIComponent(rt) : '');
+                $.getJSON(url)
+                    .done(function(list) {
+                        table.clear().rows.add(list).draw();
+                    })
+                    .fail(function() {
+                        table.clear().draw();
+                    });
+            });
+
+            // Fetch by state_id (or, if blank, only elections)
+            $('#state-select').on('change', function() {
+                var sid = $(this).val(); // either "null" or a real ID
+                $('#race-select').val(''); // clear the race dropdown
+
+                // build URL with state_id=xxx (xxx can be "null")
+                var url = '/Apiracesdata?state_id=' + encodeURIComponent(sid);
+
+                $.getJSON(url)
+                    .done(function(list) {
+                        table.clear().rows.add(list).draw();
+                    })
+                    .fail(function() {
+                        table.clear().draw();
+                    });
+            });
+
+            // initial load: whatever you already have here
+            $('#race-select').trigger('change');
+        });
     </script>
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1762,28 +2417,16 @@
                     }
                 });
 
-                // console.log(`filterBy(${tf}) →`, {
-                //     labs,
-                //     apps,
-                //     diss
-                // });
                 return [labs, apps, diss];
             }
 
             // 5) Update sidebar metrics
             function updateMetrics(appArr, disArr) {
-                // console.log('updateMetrics inputs:', {
-                //     appArr,
-                //     disArr
-                // });
+
                 const avgApp = average(appArr);
                 const avgDis = average(disArr);
                 const net = avgApp - avgDis;
-                // console.log('computed avgs:', {
-                //     avgApp,
-                //     avgDis,
-                //     net
-                // });
+
 
                 const aApp = avgApp.toFixed(1);
                 const aDis = avgDis.toFixed(1);
@@ -1828,68 +2471,6 @@
         });
     </script>
 
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1) Bring the PHP data into JS
-            const latestApprovals = @json($latestApprovals);
-
-            // 2) Helpers
-            function filterRecords(tf) {
-                const now = new Date();
-                let thresh;
-                switch (tf) {
-                    case '7D':
-                        thresh = new Date(+now - 7 * 24 * 60 * 60 * 1000);
-                        break;
-                    case '1M':
-                        thresh = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                        break;
-                    case '1Y':
-                        thresh = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-                        break;
-                    default:
-                        thresh = new Date(0);
-                }
-                return latestApprovals.filter(r => new Date(r.rawDate) >= thresh);
-            }
-
-            function renderTable(records) {
-                const body = document.getElementById('polling-body');
-                if (!body) return;
-
-                body.innerHTML = records.map(r => `
-                <tr>
-                    <td>${r.pollster}</td>
-                    <td>${r.displayDate}</td>
-                    <td>${r.sampleSize}</td>
-                    <td class="poll-result ${r.approve >= r.disapprove ? 'positive' : 'negative'}">
-                    ${r.approve}%
-                    </td>
-                    <td class="poll-result ${r.disapprove > r.approve ? 'negative' : 'positive'}">
-                    ${r.disapprove}%
-                    </td>
-                    <td class="poll-result ${r.net >= 0 ? 'positive' : 'negative'}">
-                    ${r.net >= 0 ? '+' + r.net : r.net}%
-                    </td>
-                </tr>
-                `).join('');
-            }
-
-            // 3) Wire up the buttons
-            const buttons = document.querySelectorAll('#table-filters .approvalfilter');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    buttons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderTable(filterRecords(btn.textContent));
-                });
-            });
-
-            // 4) Initial render (7 days)
-            renderTable(filterRecords('7D'));
-        });
-    </script> --}}
-
 
     <script>
         // Add active state to poll type items
@@ -1916,137 +2497,6 @@
             );
         });
     </script>
-
-    {{-- <script>
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-        // ... your poll-type click handler stays the same ...
-
-        document.querySelector('.apply-btn').addEventListener('click', async () => {
-            const activePollType = document.querySelector('.poll-type-item.active').textContent.trim();
-            const [stateSelect, pollsterSelect, timeframeSelect] = document.querySelectorAll('.filter-select');
-
-            // if value is "", we send null
-            const state_id = stateSelect.value === "" ? null : parseInt(stateSelect.value);
-            const pollster_id = pollsterSelect.value === "" ? null : parseInt(pollsterSelect.value);
-            // timeframeSelect.value is like "7", "30", etc.
-            const days = parseInt(timeframeSelect.value);
-
-            try {
-                const res = await fetch("{{ route('polls.filter') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        pollType: activePollType,
-                        state_id: state_id,
-                        pollster_id: pollster_id,
-                        timeframe: days,
-                    })
-                });
-
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                console.log('Filtered polls:', data);
-              
-            } catch (err) {
-               
-            }
-        });
-    </script> --}}
-
-
-
-
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
-            document.querySelector('.apply-btn').addEventListener('click', async () => {
-                // --- 1) Gather filters ---
-                const activeTab = document.querySelector('.poll-type-item.active');
-                const pollType = activeTab ?
-                    activeTab.textContent.trim() :
-                    'President';
-
-                const stateId = +document.querySelector('select[name="state_id"]').value || null;
-                const pollsterId = +document.querySelector('select[name="pollster_id"]').value || null;
-                const timeframe = +document.querySelector('select[name="timeframe"]').value;
-
-                // --- 2) Fetch AJAX ---
-                let data = [];
-                try {
-                    const res = await fetch("{{ route('polls.filter') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            pollType,
-                            state_id: stateId,
-                            pollster_id: pollsterId,
-                            timeframe
-                        })
-                    });
-                    if (!res.ok) throw new Error(res.statusText);
-                    data = await res.json();
-                } catch (err) {
-                    console.error('AJAX error:', err);
-                    data = [];
-                }
-
-                // --- 3) Render into .no-polls-container ---
-                const container = document.querySelector('.no-polls-container');
-                container.innerHTML = ''; // wipe it out
-
-                if (!data.length) {
-                    // re-insert the original “no polls” message
-                    container.innerHTML = `
-                                            <div class="no-polls-icon"><i class="fas fa-search"></i></div>
-                                            <h2 class="no-polls-title">No polls found with the selected filters</h2>
-                                            <p class="no-polls-text">Try adjusting your filters to see more polling results.</p>
-                                        `;
-                    return;
-                }
-
-                // build header + body
-                let html = '<table class="polls-table">';
-                html += `
-                        <thead>
-                            <tr>
-                            <th>Pollster</th>
-                            <th>Date</th>
-                            <th>Sample</th>
-                            <th>Net</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        `;
-
-                data.forEach(p => {
-                    // p.pollster, p.date, p.sample, p.net OR whatever your AJAX returns
-                    html += `
-                            <tr>
-                            <td>${p.pollster}</td>
-                            <td>${p.date}</td>
-                            <td>${p.sample}</td>
-                            <td class="poll-result ${p.net >= 0 ? 'positive' : 'negative'}">
-                                ${p.net >= 0 ? '+' : ''}${p.net}%
-                            </td>
-                            </tr>
-                        `;
-                });
-
-                html += '</tbody></table>';
-                container.innerHTML = html;
-            });
-        });
-    </script> --}}
 
     <script>
         document.addEventListener('click', function(e) {

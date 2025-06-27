@@ -19,7 +19,7 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-      
+
         $states = State::orderBy('name')->get(['id', 'name']);
         $races = Race::where('race', 'election')->select('race_type')->distinct()->orderBy('race_type')->get();
         $pollesters  = Pollster::orderBy('name')->get(['id', 'name']);
@@ -88,8 +88,6 @@ class HomeController extends Controller
     }
 
 
-
-
     protected function getLatestApprovals(): LengthAwarePaginator
     {
         $perPage = 8;
@@ -141,31 +139,72 @@ class HomeController extends Controller
 
 
 
+    // public function apiIndex(Request $request)
+    // {
+    //     $q = Race::query();
+
+    //     if ($rt = $request->query('race_type')) {
+    //         $q->where('race_type', $rt);
+    //     }
+    //     if ($sid = $request->query('state_id')) {
+    //         $q->where('state_id', $sid);
+    //     }
+
+    //     $races = $q->with('state')  // eager-load your state relationship
+    //         ->get(['id', 'race_type', 'election_round', 'state_id', 'status'])
+    //         ->map(function ($r) {
+    //             return [
+    //                 'id'             => $r->id,
+    //                 'race_type'      => ucfirst($r->race_type),
+    //                 'election_round' => $r->election_round,
+    //                 'state_name'     => $r->state->name,
+    //                 'status'         => $r->status,
+    //             ];
+    //         });
+
+    //     return response()->json($races);
+    // }
+
+
     public function apiIndex(Request $request)
     {
+        $rt  = $request->query('race_type');
+        $sid = $request->query('state_id', null);
+
         $q = Race::query();
 
-        if ($rt = $request->query('race_type')) {
-            $q->where('race_type', $rt);
-        }
-        if ($sid = $request->query('state_id')) {
-            $q->where('state_id', $sid);
+        // Special case: All States (i.e. global elections)
+        if ($sid === 'temp') {
+            $q->where('race', 'election')->whereNull('state_id');
+        } else {
+            // Apply race_type filter if provided
+            if (!empty($rt)) {
+                $q->where('race_type', $rt);
+            }
+
+            // Apply state_id filter only if a real state ID is selected
+            if (!empty($sid)) {
+                $q->where('state_id', $sid);
+            }
         }
 
-        $races = $q->with('state')  // eager-load your state relationship
+        $races = $q->with('state')
             ->get(['id', 'race_type', 'election_round', 'state_id', 'status'])
             ->map(function ($r) {
                 return [
                     'id'             => $r->id,
                     'race_type'      => ucfirst($r->race_type),
                     'election_round' => $r->election_round,
-                    'state_name'     => $r->state->name,
+                    'state_name'     => $r->state_id
+                        ? $r->state->name
+                        : 'All States',
                     'status'         => $r->status,
                 ];
             });
 
         return response()->json($races);
     }
+
 
     public function show(Request $request)
     {
@@ -257,6 +296,94 @@ class HomeController extends Controller
         ]);
     }
 
+    // public function filterPolls(Request $request)
+    // {
+    //     $params = $request->validate([
+    //         'pollType'    => 'required|string',
+    //         'state_id'    => 'nullable|integer',
+    //         'pollster_id' => 'nullable|integer',
+    //         'timeframe'   => 'required|integer',
+    //     ]);
+
+    //     dd($params);
+    //     $pollType = strtolower($params['pollType']);
+    //     //     $raceId = Race::where('race_type', $pollType)
+    //     //         ->when($params['state_id'], fn($q) => $q->where('state_id', $params['state_id']))
+    //     //         ->value('id');
+
+    //     //     if (! $raceId) {
+    //     //         return response()->json([]);
+    //     //     }
+
+    //     //     $polls = Poll::with(['pollster', 'candidate', 'race'])
+    //     //         ->where('race_id', $raceId)
+    //     //         ->when($params['pollster_id'], fn($q) => $q->where('pollster_id', $params['pollster_id']))
+    //     //         ->when($params['timeframe'], fn($q) => $q->where('poll_date', '>=', now()->subDays($params['timeframe'])))
+    //     //         ->orderBy('poll_date', 'desc')
+    //     //         ->get();
+
+    //     //     $result = $polls->map(fn($poll) => [
+    //     //         'race'           => ucfirst($poll->race->race_type),
+    //     //         'pollster'       => $poll->pollster->name ?? 'N/A',
+    //     //         'date'           => $poll->poll_date->format('Y-m-d'),
+    //     //         'dateFormatted'  => $poll->poll_date->format('D, j M'),
+    //     //         'result'         => tap(
+    //     //             $poll->candidate
+    //     //                 ->sortByDesc(fn($c) => $c->pivot->result_percentage)
+    //     //                 ->take(2)
+    //     //                 ->map(fn($c) => "{$c->name} {$c->pivot->result_percentage}%")
+    //     //                 ->implode(' – '),
+    //     //             fn(&$s) => $s = $s ?: 'N/A'
+    //     //         ),
+    //     //         'spread'         => round(
+    //     //             ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->first() ?? 0)
+    //     //                 -
+    //     //                 ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->skip(1)->first() ?? 0),
+    //     //             1
+    //     //         ),
+    //     //         'race_id'        => $poll->race_id,
+    //     //     ]);
+
+    //     //     return response()->json($result);
+    //     $raceIds = Race::where('race_type', $pollType)
+    //         ->when(!is_null($params['state_id']), function ($q) use ($params) {
+    //             $q->where('state_id', $params['state_id']);
+    //         })
+    //         ->pluck('id');
+
+    //     $polls = Poll::with(['candidate' => fn($q) => $q->withPivot('result_percentage')])
+    //         ->whereIn('race_id', $raceIds)
+    //         ->when($params['pollster_id'], fn($q) => $q->where('pollster_id', $params['pollster_id']))
+    //         ->when($params['timeframe'], fn($q) => $q->where('poll_date', '>=', now()->subDays($params['timeframe'])))
+    //         ->orderBy('poll_date', 'desc')
+    //         // ->latest('poll_date')
+    //         ->get();
+
+    //     $result = $polls->map(fn($poll) => [
+    //         'race'           => ucfirst($poll->race->race_type),
+    //         'pollster'       => $poll->pollster->name ?? 'N/A',
+    //         'date'           => $poll->poll_date->format('Y-m-d'),
+    //         'dateFormatted'  => $poll->poll_date->format('D, j M'),
+    //         'result'         => tap(
+    //             $poll->candidate
+    //                 ->sortByDesc(fn($c) => $c->pivot->result_percentage)
+    //                 ->take(2)
+    //                 ->map(fn($c) => "{$c->name} {$c->pivot->result_percentage}%")
+    //                 ->implode(' – '),
+    //             fn(&$s) => $s = $s ?: 'N/A'
+    //         ),
+    //         'spread'         => round(
+    //             ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->first() ?? 0)
+    //                 -
+    //                 ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->skip(1)->first() ?? 0),
+    //             1
+    //         ),
+    //         'race_id'        => $poll->race_id,
+    //     ]);
+
+    //     return response()->json($result);
+    // }
+
     public function filterPolls(Request $request)
     {
         $params = $request->validate([
@@ -268,38 +395,55 @@ class HomeController extends Controller
 
         $pollType = strtolower($params['pollType']);
 
-        $raceId = Race::where('race_type', $pollType)
+        // 1) figure out which race IDs to include (single state or ALL for that type)
+        $raceIds = Race::where('race_type', $pollType)
             ->when($params['state_id'], fn($q) => $q->where('state_id', $params['state_id']))
-            ->value('id');
+            ->pluck('id');
 
-        if (! $raceId) {
-            return response()->json([]);
-        }
-
-        $polls = Poll::with(['pollster', 'candidate'])
-            ->where('race_id', $raceId)
-            ->when($params['pollster_id'], fn($q) => $q->where('pollster_id', $params['pollster_id']))
-            ->when($params['timeframe'], fn($q) => $q->where('poll_date', '>=', now()->subDays($params['timeframe'])))
+        // 2) pull polls with all your filters
+        $polls = Poll::with([
+            'candidate' => fn($q) => $q->withPivot('result_percentage'),
+            'race',
+            'pollster',
+        ])
+            ->whereIn('race_id', $raceIds)
+            ->when(
+                $params['pollster_id'],
+                fn($q) =>
+                $q->where('pollster_id', $params['pollster_id'])
+            )
+            ->when(
+                $params['timeframe'],
+                fn($q) =>
+                $q->where('poll_date', '>=', now()->subDays($params['timeframe']))
+            )
             ->orderBy('poll_date', 'desc')
             ->get();
 
+        // 3) map into your exact JSON shape
         $result = $polls->map(fn($poll) => [
-            'pollster' => $poll->pollster->name ?? 'N/A',
-            'date'     => $poll->poll_date,
-            'sample'   => $poll->sample_size,
-            'net'      => round(
-                (
-                    ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->first() ?? 0)
+            'race'          => ucfirst($poll->race->race_type),
+            'pollster'      => $poll->pollster->name ?? 'N/A',
+            'date'          => $poll->poll_date->format('Y-m-d'),
+            'dateFormatted' => $poll->poll_date->format('D, j M'),
+            'result'        => tap(
+                $poll->candidate
+                    ->sortByDesc(fn($c) => $c->pivot->result_percentage)
+                    ->take(2)
+                    ->map(fn($c) => "{$c->name} {$c->pivot->result_percentage}%")
+                    ->implode(' – '),
+                fn(&$s) => $s = $s ?: 'N/A'
+            ),
+            'spread'        => round(
+                ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->first() ?? 0)
                     -
-                    ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->skip(1)->first() ?? 0)
-                ),
+                    ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->skip(1)->first() ?? 0),
                 1
             ),
+            'race_id'       => $poll->race_id,
         ]);
-
         return response()->json($result);
     }
-
 
     public function getPollstersByState(Request $request)
     {
@@ -324,6 +468,50 @@ class HomeController extends Controller
             'pollesters' => $pollsters
         ]);
     }
+
+    // public function filterPolls(Request $request)
+    // {
+    //     $params = $request->validate([
+    //         'pollType'    => 'required|string',
+    //         'state_id'    => 'nullable|integer',
+    //         'pollster_id' => 'nullable|integer',
+    //         'timeframe'   => 'required|integer',
+    //     ]);
+
+    //     $pollType = strtolower($params['pollType']);
+
+    //     $raceId = Race::where('race_type', $pollType)
+    //         ->when($params['state_id'], fn($q) => $q->where('state_id', $params['state_id']))
+    //         ->value('id');
+
+    //     if (! $raceId) {
+    //         return response()->json([]);
+    //     }
+
+    //     $polls = Poll::with(['pollster', 'candidate'])
+    //         ->where('race_id', $raceId)
+    //         ->when($params['pollster_id'], fn($q) => $q->where('pollster_id', $params['pollster_id']))
+    //         ->when($params['timeframe'], fn($q) => $q->where('poll_date', '>=', now()->subDays($params['timeframe'])))
+    //         ->orderBy('poll_date', 'desc')
+    //         ->get();
+
+    //     $result = $polls->map(fn($poll) => [
+    //         'pollster' => $poll->pollster->name ?? 'N/A',
+    //         'date'     => \Carbon\Carbon::parse($poll->poll_date)->format('Y-m-d'),
+    //         'sample'   => $poll->sample_size,
+    //         'net'      => round(
+    //             (
+    //                 ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->first() ?? 0)
+    //                 -
+    //                 ($poll->candidate->pluck('pivot.result_percentage')->sortDesc()->skip(1)->first() ?? 0)
+    //             ),
+    //             1
+    //         ),
+    //     ]);
+
+    //     return response()->json($result);
+    // }
+
 
     // protected function getLatestApprovals(): array
     // {

@@ -39,10 +39,10 @@
                                             <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
                                                  @if ($cand->image)
                                                     <img src="{{ asset($cand->image) }}" alt="Candidate Image"
-                                                        class="rounded-circle" style="width: 50px; height: 50px;">
+                                                        class="rounded-circle" style="width: 50px; height: 50px; background-color: #e2e2e2;">
                                                 @else
                                                     <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image"
-                                                        class="rounded-circle" style="width: 50px; height: 50px;">
+                                                        class="rounded-circle" style="width: 50px; height: 50px; background-color: #e2e2e2;">
                                                 @endif
                                                 {{ $cand->name }}</td>
                                             <td>{{ $cand->party ?? '—' }}</td>

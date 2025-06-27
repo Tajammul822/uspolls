@@ -201,10 +201,11 @@
 
         /* Header styles */
         .header-section {
-            background: linear-gradient(to right, #1a3a6c, #2c5282);
-            color: white;
-            padding: 30px;
-            text-align: center;
+                background: linear-gradient(to right, #1a3a6c, #2c5282);
+                color: white;
+                padding: 30px;
+                border-radius: 10px 10px 0px 0px;
+                text-align: center;
         }
 
         .page-title {
@@ -374,10 +375,11 @@
 
         /* No polls message */
         .no-polls-container {
-            padding: 50px 30px;
-            text-align: center;
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
+                padding: 30px 30px;
+                border-radius: 0px 0px 10px 10px;
+                text-align: center;
+                background: #f8fafc;
+                border-top: 1px solid #e2e8f0;
         }
 
         .no-polls-icon {
@@ -407,7 +409,6 @@
         .polls-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
             font-family: Arial, sans-serif;
             background: #fff;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

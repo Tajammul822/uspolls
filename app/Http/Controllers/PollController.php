@@ -48,13 +48,13 @@ class PollController extends Controller
             'poll_date'        => 'required|date',
             'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
-            'candidate_ids'    => 'required|array',
-            'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
-            'results'          => 'required|array',
-            'results.*'        => 'required|numeric|min:0|max:100',
+            'candidate_ids'    => 'nullable|array',
+            'candidate_ids.*'  => 'nullable|distinct|exists:candidates,id',
+            'results'          => 'nullable|array',
+            'results.*'        => 'nullable|numeric|min:0|max:100',
         ]);
 
-       
+
         $poll = Poll::create(Arr::only($data, [
             'race_id',
             'poll_date',
@@ -64,11 +64,13 @@ class PollController extends Controller
 
         // 2) Insert each result
         foreach ($data['candidate_ids'] as $candId) {
-            PollResult::create([
-                'poll_id' => $poll->id,
-                'candidate_id'     => $candId,
-                'result_percentage' => $data['results'][$candId]
-            ]);
+            if (!empty($data['results'][$candId]) || $data['results'][$candId] === '0' || $data['results'][$candId] === 0) {
+                PollResult::create([
+                    'poll_id' => $poll->id,
+                    'candidate_id' => $candId,
+                    'result_percentage' => $data['results'][$candId]
+                ]);
+            }
         }
 
         return redirect()
@@ -100,10 +102,10 @@ class PollController extends Controller
             'poll_date'        => 'required|date',
             'pollster_id'      => 'required|exists:pollsters,id',
             'sample_size'      => 'required|integer',
-            'candidate_ids'    => 'required|array',
-            'candidate_ids.*'  => 'required|distinct|exists:candidates,id',
-            'results'          => 'required|array',
-            'results.*'        => 'required|numeric|min:0|max:100',
+            'candidate_ids'    => 'nullable|array',
+            'candidate_ids.*'  => 'nullable|distinct|exists:candidates,id',
+            'results'          => 'nullable|array',
+            'results.*'        => 'nullable|numeric|min:0|max:100',
         ]);
 
         // 1) Update the Poll
@@ -115,13 +117,15 @@ class PollController extends Controller
 
         // 2) Upsert each result
         foreach ($data['candidate_ids'] as $candId) {
-            PollResult::updateOrCreate(
-                [
-                    'poll_id' => $poll->id,
-                    'candidate_id'     => $candId
-                ],
-                ['result_percentage' => $data['results'][$candId]]
-            );
+            if (!empty($data['results'][$candId]) || $data['results'][$candId] === '0' || $data['results'][$candId] === 0) {
+                PollResult::updateOrCreate(
+                    [
+                        'poll_id' => $poll->id,
+                        'candidate_id'     => $candId
+                    ],
+                    ['result_percentage' => $data['results'][$candId]]
+                );
+            }
         }
 
         return redirect()

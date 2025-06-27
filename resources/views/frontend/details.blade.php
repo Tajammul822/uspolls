@@ -104,7 +104,7 @@
             color: var(--text-medium);
         }
 
-         .arrow-link {
+        .arrow-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -122,17 +122,24 @@
             background-color: #0056b3;
             color: #fff;
         }
-
     </style>
 
     <div class="main-content">
+
+        @php
+            // Build candidate “template” once from the first poll
+            $template = $data[0]['results'] ?? [];
+            $colCount = count($template);
+        @endphp
+
+
         <!-- Polling Table -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
             </div>
             <div class="polling-table-container">
-                <table class="polling-table">
+                {{-- <table class="polling-table">
                     <thead>
                         <tr>
                             <th>race_type</th>
@@ -158,11 +165,77 @@
                                 <td>{{ $poll['pollster'] }}</td>
                                 <td>{{ $poll['date'] }}</td>
                                 <td>{{ $poll['sample'] }}</td>
-                                @foreach ($poll['results'] as $cand)
-                                    <td style="color: {{ $cand['color'] }}">
-                                        {{ number_format($cand['pct'], 1) }}%
+                                @php
+                                    // how many candidates we should always show
+                                    $colCount = count($data[0]['results']);
+                                @endphp
+                                @for ($i = 0; $i < $colCount; $i++)
+                                    @php
+                                        // pull out this slot if it exists, otherwise default
+                                        $pct = $poll['results'][$i]['pct'] ?? 0;
+                                        $color = $poll['results'][$i]['color'] ?? $data[0]['results'][$i]['color'];
+                                    @endphp
+                                    <td style="color: {{ $color }}">
+                                        {{ number_format($pct, 1) }}%
                                     </td>
-                                @endforeach
+                                @endfor
+                                <td style="color: {{ $poll['net_color'] }}">
+                                    {{ $poll['net'] }}%
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table> --}}
+                <table class="polling-table">
+                    <thead>
+                        <tr>
+                            <th>race_type</th>
+                            <th>race_label</th>
+                            <th>Pollster</th>
+                            <th>Date</th>
+                            <th>Sample</th>
+
+                            {{-- Candidate headers --}}
+                            @foreach ($template as $cand)
+                                <th style="color: {{ $cand['color'] }}">
+                                    {{ $cand['name'] }}
+                                </th>
+                            @endforeach
+
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($data as $poll)
+                            <tr>
+                                <td>{{ $poll['race_type'] }}</td>
+                                <td>{{ $poll['race_label'] }}</td>
+                                <td>{{ $poll['pollster'] }}</td>
+                                <td>{{ $poll['date'] }}</td>
+                                <td>{{ $poll['sample'] }}</td>
+
+                                @php
+                                    // Map this poll's results by candidate name
+$pctMap = [];
+$colorMap = [];
+foreach ($poll['results'] as $r) {
+    $pctMap[$r['name']] = $r['pct'];
+    $colorMap[$r['name']] = $r['color'];
+                                    }
+                                @endphp
+
+                                {{-- Always emit one <td> per template candidate --}}
+                                @for ($i = 0; $i < $colCount; $i++)
+                                    @php
+                                        $name = $template[$i]['name'];
+                                        $pct = $pctMap[$name] ?? 0;
+                                        $color = $colorMap[$name] ?? $template[$i]['color'];
+                                    @endphp
+                                    <td style="color: {{ $color }}">
+                                        {{ number_format($pct, 1) }}%
+                                    </td>
+                                @endfor
+
                                 <td style="color: {{ $poll['net_color'] }}">
                                     {{ $poll['net'] }}%
                                 </td>
@@ -178,31 +251,43 @@
             <h2 class="section-title">
                 <i class="fas fa-chart-bar"></i> Demographic Breakdown by Party
             </h2>
-            <div class="demographic-grid">
+              <div class="demographic-grid">
                 <div class="demographic-card">
                     <div class="demographic-title">Party Avg %</div>
+
                     @php
-                        // precompute averages in Blade
-                        $num = $data->count();
+                        $num      = $data->count();
                         $averages = [];
-                        for ($i = 0; $i < count($data[0]['results']); $i++) {
+
+                        // Compute average pct per template candidate
+                        for ($i = 0; $i < $colCount; $i++) {
                             $sum = 0;
                             foreach ($data as $poll) {
-                                $sum += $poll['results'][$i]['pct'];
+                                // look up in the map you just built
+                                $pctMap = collect($poll['results'])
+                                          ->keyBy('name')
+                                          ->map->pct
+                                          ->toArray();
+                                $name   = $template[$i]['name'];
+                                $sum   += $pctMap[$name] ?? 0;
                             }
-                            $averages[$i] = round($sum / $num, 1);
+                            $averages[$i] = round($sum / max($num, 1), 1);
                         }
                     @endphp
 
-                    @foreach ($data[0]['results'] as $i => $cand)
+                    @for ($i = 0; $i < $colCount; $i++)
+                        @php
+                            $cand  = $template[$i];
+                            $avg   = $averages[$i] ?? 0;
+                        @endphp
                         <div class="demographic-item">
                             <div class="group-label">
                                 <span>{{ $cand['party'] }}</span>
-                                <span>{{ $averages[$i] }}%</span>
+                                <span>{{ number_format($avg, 1) }}%</span>
                             </div>
                             <div class="demographic-bar">
                                 <div class="demographic-fill"
-                                    style="width: {{ $averages[$i] }}%; background-color: {{ $cand['color'] }};">
+                                     style="width: {{ $avg }}%; background-color: {{ $cand['color'] }};">
                                 </div>
                             </div>
                             <div class="demographic-labels">
@@ -210,7 +295,8 @@
                                 <span>100%</span>
                             </div>
                         </div>
-                    @endforeach
+                    @endfor
+
                 </div>
             </div>
         </div>
@@ -289,22 +375,28 @@
         document.addEventListener('DOMContentLoaded', function() {
             const pollData = @json($data);
             const numPolls = pollData.length;
-            const candidateCount = pollData[0].results.length;
+            const template = pollData[0].results;
+            const candidateCount = template.length;
 
             // compute avg % per candidate
             const avgs = Array(candidateCount).fill(0);
             pollData.forEach(p => {
-                p.results.forEach((r, idx) => {
-                    avgs[idx] += r.pct;
+                // map by name for this poll
+                const map = p.results.reduce((m, r) => {
+                    m[r.name] = r.pct;
+                    return m;
+                }, {});
+                template.forEach((t, idx) => {
+                    avgs[idx] += (map[t.name] ?? 0);
                 });
             });
             for (let i = 0; i < candidateCount; i++) {
                 avgs[i] = parseFloat((avgs[i] / numPolls).toFixed(1));
             }
 
-            // prepare labels & colors
-            const labels = pollData[0].results.map(r => r.name);
-            const colors = pollData[0].results.map(r => r.color);
+            // labels & colors from template
+            const labels = template.map(r => r.name);
+            const colors = template.map(r => r.color);
 
             // render combined pie
             const ctx = document.getElementById('allCandidatesPie').getContext('2d');
