@@ -479,7 +479,7 @@
 
             <!-- Navigation Menu -->
             <nav class="d-none d-md-flex gap-3 menu_list">
-                <a href="{{ route('homeboard') }}" class="text-decoration-none active-link">Home</a>
+                {{-- <a href="{{ route('homeboard') }}" class="text-decoration-none active-link">Home</a> --}}
                 {{-- <a href="{{ route('presidential') }}" class="text-decoration-none hover-opacity-100">Presidential</a>
                 <a href="{{ route('senate') }}" class="text-decoration-none hover-opacity-100">Senate</a>
                 <a href="{{ route('house') }}" class="text-decoration-none hover-opacity-100">House</a>

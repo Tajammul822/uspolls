@@ -33,18 +33,18 @@
                                 <tbody>
                                     @forelse($candidates as $cand)
                                         <tr>
-                                            {{-- <td>
-                                               
-                                            </td> --}}
-                                            <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                 @if ($cand->image)
+                                            <td class="align-items-center" style="gap: 5px;">
+                                                @if ($cand->image)
                                                     <img src="{{ asset($cand->image) }}" alt="Candidate Image"
-                                                        class="rounded-circle" style="width: 50px; height: 50px; background-color: #e2e2e2;">
+                                                        class="rounded-circle"
+                                                        style="width: 50px; height: 50px; background-color: #e2e2e2;">
                                                 @else
                                                     <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image"
-                                                        class="rounded-circle" style="width: 50px; height: 50px; background-color: #e2e2e2;">
+                                                        class="rounded-circle"
+                                                        style="width: 50px; height: 50px; background-color: #e2e2e2;">
                                                 @endif
-                                                {{ $cand->name }}</td>
+                                                {{ $cand->name }}
+                                            </td>
                                             <td>{{ $cand->party ?? '—' }}</td>
                                             <td>
                                                 @if ($cand->status == 1)
@@ -54,23 +54,27 @@
                                                 @endif
                                             </td>
 
-                                            <td class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
-                                                <a href="{{ route('candidates.edit', $cand->id) }}"
-                                                    class="btn btn-primary btn-sm float-left mr-1"
-                                                    style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip"
-                                                    title="edit" data-placement="bottom">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form method="POST" action="{{ route('candidates.destroy', $cand->id) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm dltBtn"
-                                                        data-id="{{ $cand->id }}"
+                                            <td>
+                                                <div class="d-flex justify-evenly-space align-items-center" style="gap: 5px;">
+                                                    <a href="{{ route('candidates.edit', $cand->id) }}"
+                                                        class="btn btn-primary btn-sm float-left mr-1"
                                                         style="height:30px; width:30px;border-radius:50%"
-                                                        data-toggle="tooltip" data-placement="bottom" title="Delete">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
+                                                        data-toggle="tooltip" title="edit" data-placement="bottom">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form method="POST"
+                                                        action="{{ route('candidates.destroy', $cand->id) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="btn btn-danger btn-sm dltBtn"
+                                                            data-id="{{ $cand->id }}"
+                                                            style="height:30px; width:30px;border-radius:50%"
+                                                            data-toggle="tooltip" data-placement="bottom" title="Delete">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+
                                             </td>
                                         </tr>
                                     @empty
