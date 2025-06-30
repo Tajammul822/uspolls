@@ -16,6 +16,9 @@
 /public/build
 /public/hot
 /public/assets
+/resources/views/frontend/layout.blade.php
+/resources/views/admin/candidates/form.blade.php
+/resources/views/admin/candidates/index.blade.php
 /public/storage
 /storage/*.key
 /storage/pail

@@ -208,11 +208,21 @@ class HomeController extends Controller
 
     public function show(Request $request)
     {
-        $raceIds   = $request->race_id;
-        $polls     = Poll::where('race_id', $raceIds)
-            ->with(['candidate', 'pollster'])
-            ->get();
+        $raceId = $request->race_id;
 
+        // Load race with its candidates
+        $race = Race::with('candidates')->findOrFail($raceId);
+        $isPrimary = ($race->election_round === 'primary');
+
+        // Generate a single color per candidate (only for primary)
+        $candidateColors = [];
+        if ($isPrimary) {
+            foreach ($race->candidates as $c) {
+                $candidateColors[$c->id] = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+            }
+        }
+
+        // Predefined party colors for general election
         $partyColors = [
             'Democratic Party'  => 'blue',
             'Republican Party'  => 'red',
@@ -220,47 +230,116 @@ class HomeController extends Controller
             'Green Party'       => 'green',
         ];
 
-        $data = $polls->map(function ($poll) use ($partyColors) {
-            // 1) build unsorted results array
-            $unsorted = $poll->candidate->map(function ($c) use ($partyColors) {
+        // Fetch related polls
+        $polls = Poll::where('race_id', $raceId)
+            ->with(['candidate', 'pollster', 'race.state'])
+            ->get();
+
+        // Build data for view
+        $data = $polls->map(function ($poll) use ($isPrimary, $candidateColors, $partyColors) {
+            // Build results with consistent colors
+            $results = $poll->candidate->map(function ($c) use ($isPrimary, $candidateColors, $partyColors) {
+                $color = $isPrimary
+                    ? ($candidateColors[$c->id] ?? 'gray')
+                    : ($partyColors[$c->party] ?? 'gray');
+
                 return [
+                    'id'    => $c->id,
                     'name'  => $c->name,
-                    'pct'   => (float)$c->pivot->result_percentage,
-                    'party' => $c->party,
-                    'color' => $partyColors[$c->party] ?? 'gray',
+                    'pct'   => (float) $c->pivot->result_percentage,
+                    'color' => $color,
                 ];
             })->toArray();
 
-            // 2) separately sort a copy for net margin
-            $sorted = collect($unsorted)
-                ->sortByDesc('pct')
-                ->values();
-
-            $top      = $sorted->get(0)['pct'] ?? 0;
-            $runnerUp = $sorted->get(1)['pct'] ?? 0;
-            $net      = round($top - $runnerUp, 1);
-            // net color = color of the top candidate
+            // Sort for net margin
+            $sorted = collect($results)->sortByDesc('pct')->values();
+            $net = round(($sorted->get(0)['pct'] ?? 0) - ($sorted->get(1)['pct'] ?? 0), 1);
             $netColor = $sorted->get(0)['color'] ?? 'gray';
 
             return [
-                'race_id'    => $poll->race_id,
-                'race_type'    => $poll->race->race_type,
-                'race_label' => ($poll->race->state->name ?? '') . ' ' . $poll->race->election_round,
-                'pollster'   => $poll->pollster->name ?? 'N/A',
-                'date'       => Carbon::parse($poll->poll_date)->format('Y-m-d'),
-                'sample'     => $poll->sample_size,
-                // **unsorted** so each name lines up with its own pct
-                'results'    => $unsorted,
-                'net'        => $net,
-                'net_color'  => $netColor,
+                'race_id'   => $poll->race_id,
+                'race_type' => $poll->race->race_type,
+                'race_label' => trim(($poll->race->state->name ?? '') . ' ' . $poll->race->election_round),
+                'pollster'  => $poll->pollster->name ?? 'N/A',
+                'date'      => Carbon::parse($poll->poll_date)->format('Y-m-d'),
+                'sample'    => $poll->sample_size,
+                'results'   => $results,
+                'net'       => $net,
+                'net_color' => $netColor,
             ];
         });
 
+        $featuredRaces = Race::where('is_featured', 1)
+            ->with('state', 'candidates')
+            ->get();
 
-        $featuredRaces = Race::where('is_featured', 1)->with('state', 'candidates')->get();
+        // Select view based on election round
+        $view = $isPrimary ? 'frontend.primarydetails' : 'frontend.details';
 
-        return view('frontend.details', compact('data', 'featuredRaces'));
+        return view($view, compact('data', 'featuredRaces'));
     }
+
+
+    // public function show(Request $request)
+    // {
+    //     $raceIds = $request->race_id;
+    //     $polls = Poll::where('race_id', $raceIds)
+    //         ->with(['candidate', 'pollster'])
+    //         ->get();
+
+
+    //     $primaryIds = Race::where('election_round', 'primary')->where('id', $raceIds)->pluck('id');
+    //     if ($raceIds == $primaryIds){
+
+    //     }
+    //     $partyColors = [
+    //         'Democratic Party'  => 'blue',
+    //         'Republican Party'  => 'red',
+    //         'Libertarian Party' => '#F39835',
+    //         'Green Party'       => 'green',
+    //     ];
+
+    //     $data = $polls->map(function ($poll) use ($partyColors) {
+    //         // 1) build unsorted results array
+    //         $unsorted = $poll->candidate->map(function ($c) use ($partyColors) {
+    //             return [
+    //                 'name'  => $c->name,
+    //                 'pct'   => (float)$c->pivot->result_percentage,
+    //                 'party' => $c->party,
+    //                 'color' => $partyColors[$c->party] ?? 'gray',
+    //             ];
+    //         })->toArray();
+
+    //         // 2) separately sort a copy for net margin
+    //         $sorted = collect($unsorted)
+    //             ->sortByDesc('pct')
+    //             ->values();
+
+    //         $top      = $sorted->get(0)['pct'] ?? 0;
+    //         $runnerUp = $sorted->get(1)['pct'] ?? 0;
+    //         $net      = round($top - $runnerUp, 1);
+    //         // net color = color of the top candidate
+    //         $netColor = $sorted->get(0)['color'] ?? 'gray';
+
+    //         return [
+    //             'race_id'    => $poll->race_id,
+    //             'race_type'    => $poll->race->race_type,
+    //             'race_label' => ($poll->race->state->name ?? '') . ' ' . $poll->race->election_round,
+    //             'pollster'   => $poll->pollster->name ?? 'N/A',
+    //             'date'       => Carbon::parse($poll->poll_date)->format('Y-m-d'),
+    //             'sample'     => $poll->sample_size,
+    //             // **unsorted** so each name lines up with its own pct
+    //             'results'    => $unsorted,
+    //             'net'        => $net,
+    //             'net_color'  => $netColor,
+    //         ];
+    //     });
+
+
+    //     $featuredRaces = Race::where('is_featured', 1)->with('state', 'candidates')->get();
+
+    //     return view('frontend.details', compact('data', 'featuredRaces'));
+    // }
 
 
     public function filterOptions(Request $request)
