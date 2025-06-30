@@ -107,17 +107,11 @@
 
         /* Date‐separator styling */
         .date-separator td {
-            /* make it noticeably smaller text */
             font-size: 0.85em;
-            /* light background highlight */
-            background: rgba(200, 200, 255, 0.2);
-            /* subtle, slightly bold text */
-            font-weight: 600;
-            /* lighter text color */
+            background: rgb(200 200 255);
+            font-weight: 800;
             color: #444;
-            /* more padding left, less top/bottom */
             padding: 0.25em 0.75em;
-            /* remove bottom border so it merges visually */
             border-bottom: none;
         }
 
@@ -128,11 +122,17 @@
         }
 
         /* Spread arrow link */
+        .poll-spread {
+            display: flex;
+            align-items: center;
+            gap: 0.2em;
+            /* space between number and arrow */
+            white-space: nowrap;
+        }
+
         .arrow-link {
-            margin-left: 0.3em;
             text-decoration: none;
             font-size: 1.1em;
-            vertical-align: middle;
             opacity: 0.6;
         }
 
@@ -140,7 +140,6 @@
             opacity: 1;
         }
 
-        /* Positive/negative spread colors */
         .poll-spread.positive {
             color: #027502;
         }
@@ -608,6 +607,7 @@
                             <th>Pollster</th>
                             <th>Result</th>
                             <th>Spread</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -619,7 +619,7 @@
                     // date separator row (spans all columns)
                     html += `
                             <tr class="date-separator">
-                            <td colspan="4">${group[0].dateFormatted}</td>
+                            <td colspan="5">${group[0].dateFormatted}</td>
                             </tr>
                         `;
                     // then each poll row
@@ -630,10 +630,12 @@
                                 <td>${poll.race}</td>
                                 <td>${poll.pollster}</td>
                                 <td>${poll.result}</td>
-                                <td class="poll-spread ${poll.spread >= 0 ? 'positive' : 'negative'}">
+                                <td ${poll.spread >= 0 ? 'positive' : 'negative'}">
                                     ${sign}${poll.spread}% 
-                                    <a href="/details?race_id=${poll.race_id}"
-                                        class="arrow-link" title="View Details">➔</a>
+                                </td>
+                                <td>
+                                     <a href="/details?race_id=${poll.race_id}"
+                                     class="arrow-link" title="View Details">➔</a> 
                                 </td>
                                 </tr>
                                                     `;
@@ -789,6 +791,7 @@
                         <th>Pollster</th>
                         <th>Result</th>
                         <th>Spread</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>`;
@@ -797,7 +800,7 @@
                     const group = grouped[dateKey];
                     html += `
                 <tr class="date-separator">
-                    <td colspan="4">${group[0].dateFormatted}</td>
+                    <td colspan="5">${group[0].dateFormatted}</td>
                 </tr>`;
                     group.forEach(poll => {
                         const sign = poll.spread >= 0 ? '+' : '';
@@ -806,8 +809,12 @@
                         <td>${poll.race}</td>
                         <td>${poll.pollster}</td>
                         <td>${poll.result}</td>
-                        <td class="poll-spread ${poll.spread >= 0 ? 'positive' : 'negative'}">
-                            ${sign}${poll.spread}% <a href="/details?race_id=${poll.race_id}" class="arrow-link" title="View Details">➔</a>
+                        <td ${poll.spread >= 0 ? 'positive' : 'negative'}">
+                            <span class="spread-value">${sign}${poll.spread}%</span>
+                        </td>
+                        <td>
+                                     <a href="/details?race_id=${poll.race_id}"
+                                     class="arrow-link" title="View Details">➔</a> 
                         </td>
                     </tr>`;
                     });
