@@ -653,7 +653,171 @@
         });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const tabs = document.querySelectorAll('.poll-type-item');
+            const stateSel = document.querySelector('select[name="filter_state_id"]');
+            const pollSel = document.querySelector('select[name="pollster_id"]');
+            const timeframeSel = document.querySelector('select[name="timeframe"]');
 
+            async function loadOptions(pollType) {
+                let opts = {
+                    states: [],
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.options') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType
+                        })
+                    });
+                    if (res.ok) opts = await res.json();
+                } catch (e) {
+                    console.error('Options load failed', e);
+                }
+
+                stateSel.innerHTML = '<option value="">All States</option>' +
+                    opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    opts.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    loadOptions(tab.textContent.trim());
+                });
+            });
+
+            stateSel.addEventListener('change', async () => {
+                const selectedState = stateSel.value;
+                const activeTab = document.querySelector('.poll-type-item.active');
+                const pollType = activeTab.textContent.trim();
+
+                let result = {
+                    pollesters: []
+                };
+                try {
+                    const res = await fetch("{{ route('polls.pollsters') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id: selectedState
+                        })
+                    });
+                    if (res.ok) result = await res.json();
+                } catch (e) {
+                    console.error('Pollster load failed', e);
+                }
+
+                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
+                    result.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            });
+
+            // Auto-trigger filter with default values on load
+            const initialTab = document.querySelector('.poll-type-item[data-default="true"]') || document
+                .querySelector('.poll-type-item');
+            if (initialTab) {
+                initialTab.classList.add('active');
+                loadOptions(initialTab.textContent.trim()).then(() => {
+                    // Set default values
+                    stateSel.value = "";
+                    pollSel.value = "";
+                    if (timeframeSel) timeframeSel.value = "90";
+
+                    // Trigger the apply filter
+                    document.querySelector('.apply-btn').click();
+                });
+            }
+
+            document.querySelector('.apply-btn').addEventListener('click', async () => {
+                const pollType = document.querySelector('.poll-type-item.active').textContent.trim();
+                const state_id = +stateSel.value || null;
+                const pollster_id = +pollSel.value || null;
+                const timeframe = +timeframeSel.value;
+
+                let data = [];
+                try {
+                    const res = await fetch("{{ route('polls.filter') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({
+                            pollType,
+                            state_id,
+                            pollster_id,
+                            timeframe
+                        })
+                    });
+                    data = res.ok ? await res.json() : [];
+                } catch (err) {
+                    console.error('AJAX error:', err);
+                }
+
+                const container = document.querySelector('.polls-results');
+                const noResultsHTML = document.getElementById('no-polls-template').innerHTML;
+
+                if (!data.length) {
+                    container.innerHTML = noResultsHTML;
+                    return;
+                }
+
+                const grouped = data.reduce((acc, poll) => {
+                    (acc[poll.date] = acc[poll.date] || []).push(poll);
+                    return acc;
+                }, {});
+
+                let html = `
+            <table class="polls-table">
+                <thead>
+                    <tr>
+                        <th>Race</th>
+                        <th>Pollster</th>
+                        <th>Result</th>
+                        <th>Spread</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+                Object.keys(grouped).forEach(dateKey => {
+                    const group = grouped[dateKey];
+                    html += `
+                <tr class="date-separator">
+                    <td colspan="4">${group[0].dateFormatted}</td>
+                </tr>`;
+                    group.forEach(poll => {
+                        const sign = poll.spread >= 0 ? '+' : '';
+                        html += `
+                    <tr>
+                        <td>${poll.race}</td>
+                        <td>${poll.pollster}</td>
+                        <td>${poll.result}</td>
+                        <td class="poll-spread ${poll.spread >= 0 ? 'positive' : 'negative'}">
+                            ${sign}${poll.spread}% <a href="/details?race_id=${poll.race_id}" class="arrow-link" title="View Details">➔</a>
+                        </td>
+                    </tr>`;
+                    });
+                });
+
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            });
+        });
+    </script>
 
     {{-- <script>
         document.addEventListener('DOMContentLoaded', () => {

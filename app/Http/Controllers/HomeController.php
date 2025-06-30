@@ -210,62 +210,61 @@ class HomeController extends Controller
     {
         $raceId = $request->race_id;
 
-        // Load race with its candidates
+        // Load race and its candidates
         $race = Race::with('candidates')->findOrFail($raceId);
         $isPrimary = ($race->election_round === 'primary');
 
-        // Generate a single color per candidate (only for primary)
-        $candidateColors = [];
+        // Prepare colors
         if ($isPrimary) {
-            foreach ($race->candidates as $c) {
-                $candidateColors[$c->id] = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
-            }
+            // One random hex per candidate
+            $candidateColors = $race->candidates
+                ->pluck('id')
+                ->mapWithKeys(fn($id) => [$id => sprintf('#%06X', mt_rand(0, 0xFFFFFF))])
+                ->all();
+        } else {
+            // Fixed party colors
+            $candidateColors = [
+                'Democratic Party'  => 'blue',
+                'Republican Party'  => 'red',
+                'Libertarian Party' => '#F39835',
+                'Green Party'       => 'green',
+            ];
         }
 
-        // Predefined party colors for general election
-        $partyColors = [
-            'Democratic Party'  => 'blue',
-            'Republican Party'  => 'red',
-            'Libertarian Party' => '#F39835',
-            'Green Party'       => 'green',
-        ];
-
-        // Fetch related polls
+        // Fetch polls
         $polls = Poll::where('race_id', $raceId)
             ->with(['candidate', 'pollster', 'race.state'])
             ->get();
 
-        // Build data for view
-        $data = $polls->map(function ($poll) use ($isPrimary, $candidateColors, $partyColors) {
-            // Build results with consistent colors
-            $results = $poll->candidate->map(function ($c) use ($isPrimary, $candidateColors, $partyColors) {
-                $color = $isPrimary
+        // Build data array
+        $data = $polls->map(function ($poll) use ($isPrimary, $candidateColors) {
+            // Map each candidate in this poll
+            $results = $poll->candidate->map(fn($c) => [
+                'id'      => $c->id,
+                'name'    => $c->name,
+                'party'   => $c->party,
+                'pct'     => (float) $c->pivot->result_percentage,
+                // primary: lookup by ID; general: lookup by party name
+                'color'   => $isPrimary
                     ? ($candidateColors[$c->id] ?? 'gray')
-                    : ($partyColors[$c->party] ?? 'gray');
+                    : ($candidateColors[$c->party] ?? 'gray'),
+            ])->toArray();
 
-                return [
-                    'id'    => $c->id,
-                    'name'  => $c->name,
-                    'pct'   => (float) $c->pivot->result_percentage,
-                    'color' => $color,
-                ];
-            })->toArray();
-
-            // Sort for net margin
-            $sorted = collect($results)->sortByDesc('pct')->values();
-            $net = round(($sorted->get(0)['pct'] ?? 0) - ($sorted->get(1)['pct'] ?? 0), 1);
+            // Compute net margin & color
+            $sorted   = collect($results)->sortByDesc('pct')->values();
+            $net      = round(($sorted->get(0)['pct'] ?? 0) - ($sorted->get(1)['pct'] ?? 0), 1);
             $netColor = $sorted->get(0)['color'] ?? 'gray';
 
             return [
-                'race_id'   => $poll->race_id,
-                'race_type' => $poll->race->race_type,
+                'race_id'    => $poll->race_id,
+                'race_type'  => $poll->race->race_type,
                 'race_label' => trim(($poll->race->state->name ?? '') . ' ' . $poll->race->election_round),
-                'pollster'  => $poll->pollster->name ?? 'N/A',
-                'date'      => Carbon::parse($poll->poll_date)->format('Y-m-d'),
-                'sample'    => $poll->sample_size,
-                'results'   => $results,
-                'net'       => $net,
-                'net_color' => $netColor,
+                'pollster'   => $poll->pollster->name ?? 'N/A',
+                'date'       => Carbon::parse($poll->poll_date)->format('Y-m-d'),
+                'sample'     => $poll->sample_size,
+                'results'    => $results,
+                'net'        => $net,
+                'net_color'  => $netColor,
             ];
         });
 
@@ -273,11 +272,14 @@ class HomeController extends Controller
             ->with('state', 'candidates')
             ->get();
 
-        // Select view based on election round
-        $view = $isPrimary ? 'frontend.primarydetails' : 'frontend.details';
+        // Pick view based on round
+        $view = $isPrimary
+            ? 'frontend.primarydetails'
+            : 'frontend.details';
 
         return view($view, compact('data', 'featuredRaces'));
     }
+
 
 
     // public function show(Request $request)

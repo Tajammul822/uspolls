@@ -121,8 +121,8 @@
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table"></i> Latest Approval Data</div>
                 <div class="approvalfilters" id="table-filters">
-                    <div class="approvalfilter active">7D</div>
-                    <div class="approvalfilter">1M</div>
+                    <div class="approvalfilter">7D</div>
+                    <div class="approvalfilter active">1M</div>
                     <div class="approvalfilter">1Y</div>
                 </div>
             </div>
@@ -156,25 +156,14 @@
                     <canvas id="avgChart"></canvas>
                 </div>
             </div>
-
-            <!-- Chart 2: Approve/Disapprove by Pollster (BAR) -->
+            <!-- Chart 3: Approval Trend (Last 30 Days) (LINE) -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h3 class="chart-title">Approve & Disapprove by Pollster</h3>
+                    <h3 class="chart-title">Approval Trend (Last 30 Days)</h3>
                 </div>
                 <div class="chart-wrapper">
-                    <canvas id="trendBarChart"></canvas>
+                    <canvas id="trendLineChart"></canvas>
                 </div>
-            </div>
-
-        </div>
-        <!-- Chart 3: Approval Trend (Last 30 Days) (LINE) -->
-        <div class="chart-container">
-            <div class="chart-header">
-                <h3 class="chart-title">Approval Trend (Last 30 Days)</h3>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="trendLineChart"></canvas>
             </div>
         </div>
     </div>
@@ -229,7 +218,7 @@
                     renderTable(filterRecords(btn.textContent));
                 });
             });
-            renderTable(filterRecords('7D'));
+            renderTable(filterRecords('1M'));
 
             // — Chart 1: Doughnut —
             const total = records.length;
@@ -264,52 +253,6 @@
                 }
             });
 
-            // — Chart 2: Bar —
-            const pollsters = records.map(r => r.pollster),
-                approves = records.map(r => r.approve),
-                disapproves = records.map(r => r.disapprove);
-            new Chart(document.getElementById('trendBarChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: pollsters,
-                    datasets: [{
-                            label: 'Approve',
-                            data: approves,
-                            backgroundColor: '#38a169',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Disapprove',
-                            data: disapproves,
-                            backgroundColor: '#e53e3e',
-                            borderRadius: 4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}%`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                callback: v => v + '%'
-                            }
-                        }
-                    }
-                }
-            });
 
             // — Chart 3: Line (Last 30 days) —
             const now = new Date(),
