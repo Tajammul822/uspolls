@@ -65,6 +65,11 @@
             color: #e53e3e;
         } */
 
+        .py-2{
+            padding-right: 1.25rem !important;
+            padding-left: 1.25rem !important;
+        }
+
         .chart-container {
             width: 100%;
         }
