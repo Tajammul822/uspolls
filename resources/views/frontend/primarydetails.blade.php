@@ -144,50 +144,52 @@
             text-align: left;
         }
 
-       
 
-.polling-row {
-    display: flex;
-    padding: 10px 15px;
-    border-bottom: 1px solid #ccc;
-    align-items: center;
-    flex-wrap: wrap;
-}
 
-.polling-header {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
+        .polling-row {
+            display: flex;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ccc;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-.polling-cell {
-    flex: 1;
-    min-width: 100px;
-}
+        .polling-header {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
 
-.toggle-control {
-    cursor: pointer;
-    font-weight: bold;
-    width: 20px;
-    text-align: left;
-}
+        .polling-cell {
+            flex: 1;
+            min-width: 100px;
+        }
 
-.details-row {
-    background-color: #f9f9f9;
-    padding: 10px 15px;
-}
+        .toggle-control {
+            cursor: pointer;
+            font-weight: bold;
+            width: 20px;
+            text-align: left;
+        }
 
-.polling-details {
-    padding: 10px;
-    display: flex;
-    justify-content: left;
-    gap: 50px;
-}
-.details-list li{
-    list-style: none;
-}
-.details-row {
-    display: none;
-}
+        .details-row {
+            background-color: #f9f9f9;
+            padding: 10px 15px;
+        }
+
+        .polling-details {
+            padding: 10px;
+            display: flex;
+            justify-content: left;
+            gap: 50px;
+        }
+
+        .details-list li {
+            list-style: none;
+        }
+
+        .details-row {
+            display: none;
+        }
     </style>
 
     <div class="main-content">
@@ -209,84 +211,93 @@
                 ->toArray();
         @endphp
 
-       <div class="card">
-    <div class="card-header">
-        <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
-    </div>
-    <div class="polling-table-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
+            </div>
+            <div class="polling-table-container">
 
-        <!-- Header -->
-        <div class="polling-row polling-header">
-            <div class="polling-cell"></div>
-            <div class="polling-cell">Pollster</div>
-            <div class="polling-cell">Date</div>
-            @foreach ($topCandidates as $name)
-                @php $c = collect($template)->first(fn($t)=>$t['name']==$name); @endphp
-                <div class="polling-cell" style="color: {{ $c['color'] ?? 'gray' }}">{{ $name }}</div>
-            @endforeach
-            <div class="polling-cell">Net</div>
-        </div>
+                <!-- Header -->
+                <div class="polling-row polling-header">
+                    <div class="polling-cell"></div>
+                    <div class="polling-cell">Pollster</div>
+                    <div class="polling-cell">Date</div>
+                    @foreach ($topCandidates as $name)
+                        @php $c = collect($template)->first(fn($t)=>$t['name']==$name); @endphp
+                        <div class="polling-cell" style="color: {{ $c['color'] ?? 'gray' }}">{{ $name }}</div>
+                    @endforeach
+                    <div class="polling-cell">Net</div>
+                </div>
 
-        <!-- Body -->
-        @foreach ($data as $idx => $poll)
-            @php
-                $pctMap = [];
-                $colorMap = [];
-                foreach ($poll['results'] as $r) {
-                    $pctMap[$r['name']] = $r['pct'];
-                    $colorMap[$r['name']] = $r['color'];
-                }
-                $sorted = collect($poll['results'])->sortByDesc('pct')->values();
-                $topPct = $sorted->first()['pct'] ?? 0;
-            @endphp
-
-            <!-- Main Poll Row -->
-            <div class="polling-row" data-idx="{{ $idx }}">
-                <div class="polling-cell toggle-control">+</div>
-                <div class="polling-cell">{{ $poll['pollster'] }}</div>
-                <div class="polling-cell">{{ $poll['date'] }}</div>
-
-                @foreach ($topCandidates as $name)
+                <!-- Body -->
+                @foreach ($data as $idx => $poll)
                     @php
-                        $pct = $pctMap[$name] ?? 0;
-                        $color = $colorMap[$name] ?? 'gray';
+                        $pctMap = [];
+                        $colorMap = [];
+                        foreach ($poll['results'] as $r) {
+                            $pctMap[$r['name']] = $r['pct'];
+                            $colorMap[$r['name']] = $r['color'];
+                        }
+                        $sorted = collect($poll['results'])->sortByDesc('pct')->values();
+                        $topPct = $sorted->first()['pct'] ?? 0;
                     @endphp
-                    <div class="polling-cell" style="color: {{ $color }}">
-                        {{ number_format($pct, 1) }}%
+
+                    <!-- Main Poll Row -->
+                    <div class="polling-row" data-idx="{{ $idx }}">
+                        <div class="polling-cell toggle-control">+</div>
+                        <div class="polling-cell">{{ $poll['pollster'] }}</div>
+                        <div class="polling-cell">{{ $poll['date'] }}</div>
+
+                        @foreach ($topCandidates as $name)
+                            @php
+                                $pct = $pctMap[$name] ?? 0;
+                                $color = $colorMap[$name] ?? 'gray';
+                            @endphp
+                            <div class="polling-cell" style="color: {{ $color }}">
+                                {{ number_format($pct, 1) }}%
+                            </div>
+                        @endforeach
+
+                        @php
+                            $net = number_format($poll['net'], 1);
+                            $netColor = $poll['net_color'];
+                        @endphp
+                        <div class="polling-cell" style="color: {{ $netColor }}">▲{{ $net }}%</div>
+                    </div>
+
+                    <!-- Details Row -->
+                    <div class="details-row">
+                        <div class="polling-details">
+                            <div class="detailsrace">
+                                <span>Race Type: {{ $poll['race_type'] }}</span>
+                            </div>
+                            <div class="detailssample">
+                                <span>Sample: {{ $poll['sample'] }}</span>
+                            </div>
+                            <div class="detailslist">
+                                <ul class="details-list">
+                                    @foreach ($poll['results'] as $r)
+                                        <li>
+                                            @if ($r['image'])
+                                                <img src="{{ asset($r['image']) }}" alt="Candidate Image"
+                                                    class="rounded-circle"
+                                                    style="width: 35px; height: 35px; background-color: #e2e2e2;">
+                                            @else
+                                                <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image"
+                                                    class="rounded-circle"
+                                                    style="width: 35px; height: 35px; background-color: #e2e2e2;">
+                                            @endif
+                                            <span style="color: {{ $r['color'] }}">{{ $r['name'] }}</span>
+                                            : {{ number_format($r['pct'], 1) }}%
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 @endforeach
-
-                @php
-                    $net = number_format($poll['net'], 1);
-                    $netColor = $poll['net_color'];
-                @endphp
-                <div class="polling-cell" style="color: {{ $netColor }}">▲{{ $net }}%</div>
             </div>
-
-            <!-- Details Row -->
-            <div class="details-row">
-                <div class="polling-details">
-                    <div class="detailsrace">
-                        <span>Race Type: {{ $poll['race_type'] }}</span>
-                    </div>
-                    <div class="detailssample">
-                        <span>Sample: {{ $poll['sample'] }}</span>
-                    </div>
-                    <div class="detailslist">
-                        <ul class="details-list">
-                            @foreach ($poll['results'] as $r)
-                                <li>
-                                    <span style="color: {{ $r['color'] }}">{{ $r['name'] }}</span>
-                                    : {{ number_format($r['pct'], 1) }}%
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-</div>
+        </div>
 
 
         <!-- Demographic Breakdown by Candidate -->
@@ -411,19 +422,19 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-   <script>
-    $(function () {
-        $('.toggle-control').click(function () {
-            var row = $(this).closest('.polling-row');
-            var detail = row.next('.details-row');
+    <script>
+        $(function() {
+            $('.toggle-control').click(function() {
+                var row = $(this).closest('.polling-row');
+                var detail = row.next('.details-row');
 
-            var isVisible = detail.is(':visible');
+                var isVisible = detail.is(':visible');
 
-            detail.toggle(!isVisible);
-            $(this).text(isVisible ? '+' : '-');
+                detail.toggle(!isVisible);
+                $(this).text(isVisible ? '+' : '-');
+            });
         });
-    });
-</script>
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>

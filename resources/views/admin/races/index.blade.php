@@ -5,6 +5,26 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    @php
+        // Party → background‑color map
+        $colorMap = [
+            'Democratic Party' => 'blue',
+            'Republican Party' => 'red',
+            'Libertarian Party' => 'gold',
+            'Green Party' => 'green',
+            'Constitution Party' => 'darkred',
+            'Independent' => 'gray',
+        ];
+    @endphp
+
+    <style>
+        .primary-party-row,
+        .primary-party-row td,
+        .primary-party-row td * {
+            color: white !important;
+        }
+    </style>
+
     <div class="container-xxl">
         <div class="row justify-content-center">
             <div class="col-12">
@@ -24,7 +44,6 @@
                             <table class="table datatable" id="datatable_2">
                                 <thead class="">
                                     <tr>
-                                    <tr>
                                         <th>Race</th>
                                         <th>Race Type</th>
                                         <th>Election Round</th>
@@ -32,17 +51,33 @@
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
-                                    </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($races as $race)
-                                        <tr>
+                                        @php
+                                            $isPrimary = strtolower($race->election_round ?? '') === 'primary';
+                                            $firstPivot = $race->raceCandidates->first();
+                                            $party =
+                                                $firstPivot && $firstPivot->candidate
+                                                    ? $firstPivot->candidate->party
+                                                    : null;
+
+                                            $bgColor =
+                                                $isPrimary && isset($colorMap[$party]) ? $colorMap[$party] : null;
+
+                                            $style = $bgColor
+                                                ? "background-color: {$bgColor}; color: white !important;"
+                                                : '';
+                                        @endphp
+
+                                        <tr @if ($isPrimary) class="primary-party-row" @endif
+                                            style="{{ $style }}">
                                             <td>{{ ucfirst($race->race) }}</td>
                                             <td>{{ ucfirst($race->race_type ?? 'N/A') }}</td>
                                             <td>{{ ucfirst($race->election_round ?? 'N/A') }}</td>
                                             <td>{{ $race->state->name ?? 'N/A' }}</td>
                                             <td>
-                                                @if ($race->status == 1)
+                                                @if ($race->status)
                                                     <span class="badge bg-primary">Active</span>
                                                 @else
                                                     <span class="badge bg-warning">Inactive</span>
@@ -73,11 +108,11 @@
                                                     <i class="fas fa-list"></i>
                                                 </a>
                                             </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="9" class="text-center">No Races found.</td>
-                                        </tr>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="9" class="text-center">No Races found.</td>
+                                            </tr>
                                     @endforelse
                             </table>
                             {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>

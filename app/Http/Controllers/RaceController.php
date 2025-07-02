@@ -14,9 +14,14 @@ use Illuminate\Support\Arr;
 
 class RaceController extends Controller
 {
-    public function index()
+  public function index()
     {
-        $races = Race::all();
+        // Eager‑load state and pivot rows + their Candidate
+        $races = Race::with([
+            'state',
+            'raceCandidates.candidate'   // load the Candidate for each pivot
+        ])->get();
+
         $states = State::all();
         return view('admin.races.index', compact('races', 'states'));
     }

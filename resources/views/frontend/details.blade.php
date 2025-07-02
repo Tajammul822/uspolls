@@ -2,6 +2,11 @@
 @section('content')
 
     <style>
+        html,
+        body {
+            overflow-x: hidden !important;
+        }
+
         /* Charts & layout styling (unchanged) */
         .charts-section {
             display: grid;
@@ -164,6 +169,70 @@
         .arrow-link:hover {
             background-color: #0056b3;
         }
+
+        /* .polling-table-container {
+            display: none !important;
+        } */
+
+        .polling-responsive-table {
+            display: block !important;
+            overflow-x: auto !important;
+        }
+
+        .polling-responsive-table table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            font-size: 14px !important;
+        }
+
+        .polling-responsive-table th,
+        .polling-responsive-table td {
+            border: 1px solid #ccc !important;
+            padding: 6px 10px !important;
+            text-align: left !important;
+        }
+
+        .polling-responsive-table .toggle-control {
+            cursor: pointer !important;
+            font-weight: bold !important;
+            width: 20px !important;
+            text-align: center !important;
+        }
+
+        .polling-responsive-table .details-row td {
+            background: #f9f9f9 !important;
+        }
+
+        .polling-responsive-table ul {
+            margin: 0 !important;
+        }
+
+        */ @media screen and (max-width: 590px) {
+
+            /* Hide the header row so labels don’t collide */
+            .polling-header {
+                display: none;
+            }
+
+            /* Stack each row’s cells */
+            .polling-row {
+                flex-direction: row !important;
+                align-items: flex-start;
+                padding: 8px 12px;
+            }
+
+            .polling-cell {
+                width: 100%;
+                min-width: auto;
+                text-align: left;
+                padding: 4px 0;
+            }
+
+            /* Give the toggle a bit of breathing room */
+            .toggle-control {
+                margin-bottom: 6px;
+            }
+        }
     </style>
 
     <div class="main-content">
@@ -173,76 +242,6 @@
             $template = $data[0]['results'] ?? [];
             $colCount = count($template);
         @endphp
-
-        {{--
-        <!-- Polling Table -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
-            </div>
-            <div class="polling-table-container">
-                <table class="polling-table">
-                    <thead>
-                        <tr>
-                            <th>race_type</th>
-                            <th>race_label</th>
-                            <th>Pollster</th>
-                            <th>Date</th>
-                            <th>Sample</th> --}}
-
-        {{-- Candidate headers --}}
-        {{-- @foreach ($template as $cand)
-                                <th style="color: {{ $cand['color'] }}">
-                                    {{ $cand['name'] }}
-                                </th>
-                            @endforeach
-
-                            <th>Net</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($data as $poll)
-                            <tr>
-                                <td>{{ $poll['race_type'] }}</td>
-                                <td>{{ $poll['race_label'] }}</td>
-                                <td>{{ $poll['pollster'] }}</td>
-                                <td>{{ $poll['date'] }}</td>
-                                <td>{{ $poll['sample'] }}</td> --}}
-
-        {{-- @php
-                                    // Map this poll's results by candidate name
-                                        $pctMap = [];
-                                        $colorMap = [];
-                                        foreach ($poll['results'] as $r) {
-                                            $pctMap[$r['name']] = $r['pct'];
-                                            $colorMap[$r['name']] = $r['color'];
-                                         }
-                                @endphp --}}
-
-        {{-- Always emit one <td> per template candidate --}}
-        {{-- @for ($i = 0; $i < $colCount; $i++)
-                                    @php
-                                        $name = $template[$i]['name'];
-                                        $pct = $pctMap[$name] ?? 0;
-                                        $color = $colorMap[$name] ?? $template[$i]['color'];
-                                    @endphp
-                                    <td style="color: {{ $color }}">
-                                        {{ number_format($pct, 1) }}%
-                                    </td>
-                                @endfor
-
-                                <td style="color: {{ $poll['net_color'] }}">
-                                    {{ $poll['net'] }}%
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div> --}}
-
-
-
 
         @php
             // Prepare top 3 candidates by average pct
@@ -262,7 +261,7 @@
                 ->toArray();
         @endphp
 
-        <div class="card">
+        {{-- <div class="card">
             <div class="card-header">
                 <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
             </div>
@@ -318,7 +317,74 @@
                         </div>
                     </div>
                 @endforeach
+            </div>
+        </div> --}}
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fas fa-table"></i> Polling Data</div>
+            </div>
 
+            <div class="polling-table-container">
+                {{-- HEADER --}}
+                <div class="polling-row polling-header">
+                    <div class="polling-cell toggle-control"></div>
+                    <div class="polling-cell">Pollster</div>
+                    <div class="polling-cell">Date</div>
+                    @foreach ($topCandidates as $name)
+                        @php $c = collect($template)->first(fn($t) => $t['name'] === $name); @endphp
+                        <div class="polling-cell" style="color: {{ $c['color'] }}">{{ $name }}</div>
+                    @endforeach
+                    <div class="polling-cell">Net</div>
+                </div>
+
+                {{-- BODY --}}
+                @foreach ($data as $idx => $poll)
+                    @php
+                        $pctMap = collect($poll['results'])->pluck('pct', 'name')->toArray();
+                        $colorMap = collect($poll['results'])->pluck('color', 'name')->toArray();
+                    @endphp
+                    <div class="polling-row" data-idx="{{ $idx }}">
+                        <div class="polling-cell toggle-control">+</div>
+                        <div class="polling-cell">{{ $poll['pollster'] }}</div>
+                        <div class="polling-cell">{{ $poll['date'] }}</div>
+
+                        @foreach ($topCandidates as $name)
+                            <div class="polling-cell" style="color: {{ $colorMap[$name] ?? 'gray' }}">
+                                {{ number_format($pctMap[$name] ?? 0, 1) }}%
+                            </div>
+                        @endforeach
+
+                        <div class="polling-cell" style="color: {{ $poll['net_color'] }}">
+                            ▲{{ number_format($poll['net'], 1) }}%
+                        </div>
+                    </div>
+
+                    <div class="details-row">
+                        <div class="polling-details">
+                            <div><strong>Race Type:</strong> {{ $poll['race_type'] }}</div>
+                            <div><strong>Sample:</strong> {{ $poll['sample'] }}</div>
+                            <div>
+                                <ul class="details-list">
+                                    @foreach ($poll['results'] as $r)
+                                        <li>
+                                            @if ($r['image'])
+                                                <img src="{{ asset($r['image']) }}" alt="Candidate Image"
+                                                    class="rounded-circle"
+                                                    style="width: 35px; height: 35px; background-color: #e2e2e2;">
+                                            @else
+                                                <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image"
+                                                    class="rounded-circle"
+                                                    style="width: 35px; height: 35px; background-color: #e2e2e2;">
+                                            @endif
+                                            <span style="color: {{ $r['color'] }}">{{ $r['name'] }}</span>:
+                                            {{ number_format($r['pct'], 1) }}%
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
 
