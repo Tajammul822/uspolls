@@ -400,7 +400,12 @@
                                 @endif
 
                                 <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
-                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+                                @if ($fp->district)
+                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }} </td>
+                                @else
+                                    <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+                                @endif
+
 
                                 <td class="border-b px-2 py-1">
                                     @if ($fp->race == 'election')
@@ -437,7 +442,7 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             const pollData = @json($data);
             const template = pollData[0].results;
@@ -470,6 +475,70 @@
                 }
             });
         });
-    </script>
+    </script> --}}
+
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pollData = @json($data);
+    const template = pollData[0].results;
+    const numPolls = pollData.length;
+
+    // compute the averaged percentages
+    const avgs = template.map(t => {
+        const sum = pollData.reduce((acc, p) =>
+            acc + (p.results.find(r => r.name === t.name)?.pct || 0)
+        , 0);
+        return parseFloat((sum / numPolls).toFixed(1));
+    });
+
+    // build legend labels that include the % value
+    const legendLabels = template.map((t, i) =>
+        `${t.name} (${avgs[i]}%)`
+    );
+
+    // register the DataLabels plugin
+    Chart.register(ChartDataLabels);
+
+    const ctx = document.getElementById('allCandidatesPie').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            // swap in the legendLabels
+            labels: legendLabels,
+            datasets: [{
+                data: avgs,
+                backgroundColor: template.map(t => t.color),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        // optional tweaks
+                        boxWidth: 12,
+                        padding: 20
+                    }
+                },
+                datalabels: {
+                    // color each label the same as its slice
+                    color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex],
+                    formatter: v => v + '%',
+                    font: {
+                        weight: 'bold',
+                        size: 12
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 
 @endsection

@@ -1,29 +1,3 @@
-{{-- <div class="card-grid">
-    @foreach ($latestApprovals as $race)
-        @foreach ($race['candidates'] as $name)
-            <div class="approval-card">
-                <div class="approval-card-body">
-                    <h3 class="approval-title">
-                        @if ($cand->image)
-                            <img src="{{ asset($cand->image) }}" alt="Candidate Image" class="rounded-circle"
-                                style="width: 50px; height: 50px; background-color: #e2e2e2;">
-                        @else
-                            <img src="{{ asset('images/default-avatar.jpg') }}" alt="Default Image" class="rounded-circle"
-                                style="width: 50px; height: 50px; background-color: #e2e2e2;">
-                        @endif
-                        {{ $cand->name }}
-                        {{ $name }} Job Approval
-                    </h3>
-                    <a href="{{ route('approval.details', ['race_id' => $race['race_id']]) }}" class="approval-link">
-                        &rarr;
-                    </a>
-                </div>
-            </div>
-        @endforeach
-    @endforeach
-</div> --}}
-
-
 <div class="card-grid">
     @foreach ($latestApprovals as $race)
         @foreach ($race['candidates'] as $imagePath => $candidateName)

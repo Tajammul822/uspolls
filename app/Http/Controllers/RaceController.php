@@ -49,6 +49,7 @@ class RaceController extends Controller
             'race' => 'required|in:election,approval',
             'race_type' => 'nullable|in:president,senate,house,governor,other',
             'state_id' => 'nullable|exists:states,id',
+            'district' => 'nullable|integer',
             'is_featured'      => 'nullable|integer|between:0,1',
             'election_round' => 'nullable|in:primary,general',
         ]);
@@ -116,6 +117,7 @@ class RaceController extends Controller
             'race'      => 'required|in:election,approval',
             'race_type'      => 'nullable|in:president,senate,house,governor,other',
             'state_id'      => 'nullable|exists:states,id',
+            'district' => 'nullable|integer',
             'is_featured'      => 'nullable|integer|between:0,1',
             'election_round' => 'nullable|in:primary,general',
         ]);

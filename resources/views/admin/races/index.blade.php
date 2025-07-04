@@ -8,8 +8,8 @@
     @php
         // Party → background‑color map
         $colorMap = [
-            'Democratic Party' => 'blue',
-            'Republican Party' => 'red',
+            'Democratic Party' => '#CFECF7',
+            'Republican Party' => '#FFEFEF',
             'Libertarian Party' => 'gold',
             'Green Party' => 'green',
             'Constitution Party' => 'darkred',
@@ -17,13 +17,13 @@
         ];
     @endphp
 
-    <style>
+    {{-- <style>
         .primary-party-row,
         .primary-party-row td,
         .primary-party-row td * {
             color: white !important;
         }
-    </style>
+    </style> --}}
 
     <div class="container-xxl">
         <div class="row justify-content-center">
@@ -75,7 +75,17 @@
                                             <td>{{ ucfirst($race->race) }}</td>
                                             <td>{{ ucfirst($race->race_type ?? 'N/A') }}</td>
                                             <td>{{ ucfirst($race->election_round ?? 'N/A') }}</td>
-                                            <td>{{ $race->state->name ?? 'N/A' }}</td>
+                                            <td>
+                                                @if ($race->race === 'approval')
+                                                    N/A
+                                                @elseif ($race->race === 'election')
+                                                    @if ($race->district)
+                                                        {{ $race->state->name ?? 'N/A' }} - {{ ucfirst($race->district) }}
+                                                    @else
+                                                        {{ $race->state->name ?? 'All States' }}
+                                                    @endif
+                                                @endif
+                                            </td>
                                             <td>
                                                 @if ($race->status)
                                                     <span class="badge bg-primary">Active</span>
@@ -108,11 +118,11 @@
                                                     <i class="fas fa-list"></i>
                                                 </a>
                                             </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="9" class="text-center">No Races found.</td>
-                                            </tr>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="9" class="text-center">No Races found.</td>
+                                        </tr>
                                     @endforelse
                             </table>
                             {{-- <button type="button" class="btn btn-sm btn-primary csv">Export CSV</button>

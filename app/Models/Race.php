@@ -14,6 +14,7 @@ class Race extends Model
         'race_type',
         'election_round',
         'state_id',
+        'district',
         'is_featured',
         'status',
     ];

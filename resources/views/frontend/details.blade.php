@@ -171,8 +171,8 @@
         }
 
         /* .polling-table-container {
-            display: none !important;
-        } */
+                display: none !important;
+            } */
 
         .polling-responsive-table {
             display: block !important;
@@ -465,7 +465,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($featuredRaces as $fp)
+                       @foreach ($featuredRaces as $fp)
                             <tr>
                                 @if ($fp->race == 'election')
                                     <td class="border-b px-2 py-1">{{ $fp->race_type . ' ' . $fp->race }}</td>
@@ -475,7 +475,12 @@
                                 @endif
 
                                 <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
-                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+                                @if ($fp->district)
+                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }} </td>
+                                @else
+                                    <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+                                @endif
+
 
                                 <td class="border-b px-2 py-1">
                                     @if ($fp->race == 'election')
@@ -529,10 +534,9 @@
             const template = pollData[0].results;
             const candidateCount = template.length;
 
-            // compute avg % per candidate
+            // 1) Compute each candidate's average %
             const avgs = Array(candidateCount).fill(0);
             pollData.forEach(p => {
-                // map by name for this poll
                 const map = p.results.reduce((m, r) => {
                     m[r.name] = r.pct;
                     return m;
@@ -545,16 +549,20 @@
                 avgs[i] = parseFloat((avgs[i] / numPolls).toFixed(1));
             }
 
-            // labels & colors from template
-            const labels = template.map(r => r.name);
+            // 2) Build legend labels with names + “xx.x%”
+            const legendLabels = template.map((t, i) =>
+                `${t.name} (${avgs[i]}%)`
+            );
+
+            // 3) Grab your colors
             const colors = template.map(r => r.color);
 
-            // render combined pie
+            // 4) Render the doughnut with the new labels
             const ctx = document.getElementById('allCandidatesPie').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
+                    labels: legendLabels, // <-- uses “Name (xx.x%)”
                     datasets: [{
                         data: avgs,
                         backgroundColor: colors,
@@ -567,11 +575,16 @@
                     cutout: '60%',
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 16
+                            }
                         },
                         tooltip: {
                             callbacks: {
-                                label: ctx => `${ctx.label}: ${ctx.parsed}%`
+                                // still show “Name: xx.x%” on hover
+                                label: ctx => `${template[ctx.dataIndex].name}: ${ctx.parsed}%`
                             }
                         }
                     }

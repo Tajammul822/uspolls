@@ -246,7 +246,6 @@
                     <thead>
                         <tr>
                             <th>Race_Type</th>
-                            <th>Election Round</th>
                             <th>State</th>
                             <th>Candidates</th>
                             <th>Action</th>
@@ -335,7 +334,13 @@
                                 @endif
 
                                 <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
-                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+                                @if ($fp->district)
+                                    <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }}
+                                    </td>
+                                @else
+                                    <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
+                                @endif
+
 
                                 <td class="border-b px-2 py-1">
                                     @if ($fp->race == 'election')
@@ -376,172 +381,6 @@
     <!-- jQuery & DataTables JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-            const tabs = document.querySelectorAll('.poll-type-item');
-            const stateSel = document.querySelector('select[name="filter_state_id"]');
-            const pollSel = document.querySelector('select[name="pollster_id"]');
-            const timeframeSel = document.querySelector('select[name="timeframe"]');
-
-            async function loadOptions(pollType) {
-                let opts = {
-                    states: [],
-                    pollesters: []
-                };
-                try {
-                    const res = await fetch("{{ route('polls.options') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                        },
-                        body: JSON.stringify({
-                            pollType
-                        })
-                    });
-                    if (res.ok) opts = await res.json();
-                } catch (e) {
-                    console.error('Options load failed', e);
-                }
-
-                stateSel.innerHTML = '<option value="">All States</option>' +
-                    opts.states.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-
-                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
-                    opts.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            }
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    loadOptions(tab.textContent.trim());
-                });
-            });
-
-            stateSel.addEventListener('change', async () => {
-                const selectedState = stateSel.value;
-                const activeTab = document.querySelector('.poll-type-item.active');
-                const pollType = activeTab.textContent.trim();
-
-                let result = {
-                    pollesters: []
-                };
-                try {
-                    const res = await fetch("{{ route('polls.pollsters') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                        },
-                        body: JSON.stringify({
-                            pollType,
-                            state_id: selectedState
-                        })
-                    });
-                    if (res.ok) result = await res.json();
-                } catch (e) {
-                    console.error('Pollster load failed', e);
-                }
-
-                pollSel.innerHTML = '<option value="">All Pollsters</option>' +
-                    result.pollesters.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            });
-
-            // Auto-trigger filter with default values on load
-            const initialTab = document.querySelector('.poll-type-item[data-default="true"]') || document
-                .querySelector('.poll-type-item');
-            if (initialTab) {
-                initialTab.classList.add('active');
-                loadOptions(initialTab.textContent.trim()).then(() => {
-                    // Set default values
-                    stateSel.value = "";
-                    pollSel.value = "";
-                    if (timeframeSel) timeframeSel.value = "90";
-
-                    // Trigger the apply filter
-                    document.querySelector('.apply-btn').click();
-                });
-            }
-
-            document.querySelector('.apply-btn').addEventListener('click', async () => {
-                const pollType = document.querySelector('.poll-type-item.active').textContent.trim();
-                const state_id = +stateSel.value || null;
-                const pollster_id = +pollSel.value || null;
-                const timeframe = +timeframeSel.value;
-
-                let data = [];
-                try {
-                    const res = await fetch("{{ route('polls.filter') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        body: JSON.stringify({
-                            pollType,
-                            state_id,
-                            pollster_id,
-                            timeframe
-                        })
-                    });
-                    data = res.ok ? await res.json() : [];
-                } catch (err) {
-                    console.error('AJAX error:', err);
-                }
-
-                const container = document.querySelector('.polls-results');
-                const noResultsHTML = document.getElementById('no-polls-template').innerHTML;
-
-                if (!data.length) {
-                    container.innerHTML = noResultsHTML;
-                    return;
-                }
-
-                const grouped = data.reduce((acc, poll) => {
-                    (acc[poll.date] = acc[poll.date] || []).push(poll);
-                    return acc;
-                }, {});
-
-                let html = `
-            <table class="polls-table">
-                <thead>
-                    <tr>
-                        <th>Race</th>
-                        <th>Pollster</th>
-                        <th>Candidate</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-
-                Object.keys(grouped).forEach(dateKey => {
-                    const group = grouped[dateKey];
-                    html += `
-                <tr class="date-separator">
-                    <td colspan="5">${group[0].dateFormatted}</td>
-                </tr>`;
-                    group.forEach(poll => {
-                        html += `
-                                <tr>
-                                    <td>${poll.race}-${poll.election_round}</td>
-                                    <td>${poll.pollster}</td>
-                                    <td>${poll.candidate}</td>
-                                    <td>
-                                    <a href="/details?race_id=${poll.race_id}"
-                                        class="arrow-link" title="View Details">➔</a>
-                                    </td>
-                                </tr>`;
-                    });
-                });
-
-                html += `</tbody></table>`;
-                container.innerHTML = html;
-            });
-        });
-    </script> --}}
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -705,19 +544,20 @@
     </script>
 
 
-    <style>
+    {{-- <style>
         .primary-party-row,
         .primary-party-row td,
         .primary-party-row a,
         .primary-party-row span {
             color: white !important;
         }
-    </style>
-    {{-- <script>
+    </style> --}}
+
+    <script>
         $(function() {
             var colorMap = {
-                'Democratic Party': 'blue',
-                'Republican Party': 'red',
+                'Democratic Party': '#CFECF7',
+                'Republican Party': '#FFEFEF',
                 'Libertarian Party': 'gold',
                 'Green Party': 'green',
                 'Constitution Party': 'darkred',
@@ -732,7 +572,6 @@
                 ordering: false,
                 stripeClasses: [],
 
-                // color primary rows by leading candidate’s party
                 createdRow: function(row, data) {
                     if (
                         data.election_round &&
@@ -744,19 +583,29 @@
                         var bg = colorMap[party] || '';
                         if (bg) {
                             row.style.backgroundColor = bg;
-                            row.classList.add('primary-party-row'); // white text
+                            row.classList.add('primary-party-row');
                         }
                     }
                 },
 
                 columns: [{
-                        data: 'race_type'
+                        data: 'race_type',
+                        render: function(raceType, type, row) {
+                            return raceType + (row.election_round ? ' - ' + row.election_round :
+                            '');
+                        }
                     },
+                    // {
+                    //     data: 'election_round'
+                    // },
                     {
-                        data: 'election_round'
-                    },
-                    {
-                        data: 'state_name'
+                        data: 'state_name',
+                        render: function(stateName, type, row) {
+                            // If there's a district, show "State – District", otherwise just the state
+                            return row.district ?
+                                stateName + ' - ' + row.district :
+                                stateName;
+                        }
                     },
                     {
                         data: 'leading',
@@ -776,9 +625,9 @@
                         orderable: false,
                         render: function(id) {
                             return `
-                      <a href="/details?race_id=${id}" class="arrow-link" title="View Details">
-                        ➔
-                      </a>`;
+            <a href="/details?race_id=${id}" class="arrow-link" title="View Details">
+              ➔
+            </a>`;
                         }
                     }
                 ]
@@ -795,8 +644,7 @@
             $('#race-select').on('change', function() {
                 $('#state-select').val('');
                 var rt = $(this).val();
-                var params = rt ? '?race_type=' + encodeURIComponent(rt) : '';
-                fetch(params);
+                fetch(rt ? '?race_type=' + encodeURIComponent(rt) : '');
             });
 
             $('#state-select').on('change', function() {
@@ -805,16 +653,15 @@
                 fetch('?state_id=' + encodeURIComponent(sid));
             });
 
-            initial load
-            $('#race-select').trigger('change');
+            // Initial load: explicitly fetch all elections
+            fetch('?race=election');
         });
-    </script> --}}
-
-    <script>
+    </script>
+    {{-- <script>
         $(function() {
             var colorMap = {
-                'Democratic Party': 'blue',
-                'Republican Party': 'red',
+                'Democratic Party': '#027ac0',
+                'Republican Party': '#fa3236',
                 'Libertarian Party': 'gold',
                 'Green Party': 'green',
                 'Constitution Party': 'darkred',
@@ -903,7 +750,7 @@
             // Initial load: explicitly fetch all elections
             fetch('?race=election');
         });
-    </script>
+    </script> --}}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

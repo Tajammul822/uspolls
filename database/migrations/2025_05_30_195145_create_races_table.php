@@ -17,6 +17,7 @@ return new class extends Migration
             $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'other'])->nullable();
             $table->enum('election_round', ['primary', 'general'])->nullable();
             $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
+            $table->integer('district')->nullable();
             $table->unsignedInteger('is_featured')->nullable()->default(0);
             $table->integer('status')->default(1);
             $table->timestamps();
