@@ -137,7 +137,6 @@ class HomeController extends Controller
         return view('frontend.approvaldetails', compact('race', 'records'));
     }
 
-
     public function apiIndex(Request $request)
     {
         // Pull your filters
@@ -153,15 +152,13 @@ class HomeController extends Controller
                 'r.state_id',
                 'r.district',
                 's.name as state_name',
-                'p.id as poll_id',
-                'p.pollster_id',
                 'pr.result_percentage',
                 'c.name as candidate_name',
                 'c.party as candidate_party'
             )
-            ->leftJoin('states as s', 'r.state_id', '=', 's.id')
-            ->leftJoin('polls as p',  'r.id',       '=', 'p.race_id')
-            ->leftJoin('poll_results as pr', 'p.id', '=', 'pr.poll_id')
+            ->leftJoin('states as s',  'r.state_id',       '=', 's.id')
+            ->leftJoin('polls as p',    'r.id',            '=', 'p.race_id')
+            ->leftJoin('poll_results as pr', 'p.id',        '=', 'pr.poll_id')
             ->leftJoin('candidates as c',    'pr.candidate_id', '=', 'c.id')
             ->where('r.race', 'election');
 
@@ -177,7 +174,7 @@ class HomeController extends Controller
 
         $rows = $rows->get();
 
-        // Now group by race id
+        // Group raw rows by race
         $grouped = [];
         foreach ($rows as $row) {
             $rid = $row->id;
@@ -188,10 +185,9 @@ class HomeController extends Controller
                     'election_round' => $row->election_round,
                     'state_name'     => $row->state_name ?? 'All States',
                     'district'       => $row->district,
-                    'candidates'     => [],   // will hold all candidates & percentages
+                    'candidates'     => [],   // will hold all raw percentages
                 ];
             }
-            // if there's a result for this row, add it
             if (! is_null($row->candidate_name)) {
                 $grouped[$rid]['candidates'][] = [
                     'name'       => $row->candidate_name,
@@ -201,12 +197,21 @@ class HomeController extends Controller
             }
         }
 
-        // For each race, take top two by percentage into your “leading” array
+        // For each race, merge duplicates by name (avg%), then pick top 2
         $payload = array_map(function ($race) {
-            $all = collect($race['candidates'])
+            $distinct = collect($race['candidates'])
+                ->groupBy('name')
+                ->map(function ($items, $name) {
+                    $avg = collect($items)->avg('percentage');
+                    return [
+                        'name'       => $name,
+                        'percentage' => round($avg, 1),
+                        'party'      => $items[0]['party'],
+                    ];
+                })
                 ->sortByDesc('percentage')
-                ->take(2)
                 ->values()
+                ->take(2)
                 ->all();
 
             return [
@@ -215,12 +220,13 @@ class HomeController extends Controller
                 'election_round' => $race['election_round'],
                 'state_name'     => $race['state_name'],
                 'district'       => $race['district'],
-                'leading'        => $all,
+                'leading'        => $distinct,
             ];
         }, $grouped);
 
         return response()->json(array_values($payload));
     }
+
 
     public function show(Request $request)
     {
@@ -256,7 +262,7 @@ class HomeController extends Controller
             $candidateColors = [
                 'Democratic Party'  => 'blue',
                 'Republican Party'  => 'red',
-                'Libertarian Party' => '#F39835',
+                'Libertarian Party' => '#e77900',
                 'Green Party'       => 'green',
             ];
         }
@@ -311,7 +317,6 @@ class HomeController extends Controller
         return view($view, compact('data', 'featuredRaces'));
     }
 
-
     public function filterOptions(Request $request)
     {
         $request->validate(['pollType' => 'required|string']);
@@ -344,72 +349,6 @@ class HomeController extends Controller
             'pollesters' => $pollesters,
         ]);
     }
-
-    // public function filterPolls(Request $request)
-    // {
-    //     $params = $request->validate([
-    //         'pollType'    => 'required|string',
-    //         'state_id'    => 'nullable|integer',
-    //         'pollster_id' => 'nullable|integer',
-    //         'timeframe'   => 'required|integer',
-    //     ]);
-
-    //     $pollType = strtolower($params['pollType']);
-
-    //     // 1) figure out which race IDs to include (single state or ALL for that type)
-    //     $raceIds = Race::where('race_type', $pollType)
-    //         ->when($params['state_id'], fn($q) => $q->where('state_id', $params['state_id']))
-    //         ->pluck('id');
-
-    //     // 2) pull polls with all your filters
-    //     $polls = Poll::with([
-    //         'candidate' => fn($q) => $q->withPivot('result_percentage'),
-    //         'race',
-    //         'pollster',
-    //     ])
-    //         ->whereIn('race_id', $raceIds)
-    //         ->when(
-    //             $params['pollster_id'],
-    //             fn($q) =>
-    //             $q->where('pollster_id', $params['pollster_id'])
-    //         )
-    //         ->when(
-    //             $params['timeframe'],
-    //             fn($q) =>
-    //             $q->where('poll_date', '>=', now()->subDays($params['timeframe']))
-    //         )
-    //         ->orderBy('poll_date', 'desc')
-    //         ->get();
-
-    //     // 3) map into your exact JSON shape
-    //     $result = $polls->map(fn($poll) => [
-    //         'race'          => ucfirst($poll->race->race_type),
-    //         'election_round' => ucfirst($poll->race->election_round),
-    //         'pollster'      => $poll->pollster->name ?? 'N/A',
-    //         'date'          => $poll->poll_date->format('Y-m-d'),
-    //         'dateFormatted' => $poll->poll_date->format('D, j M'),
-    //         'candidate' => (function () use ($poll) {
-    //             $sorted = $poll->candidate
-    //                 ->sortByDesc(fn($c) => $c->pivot->result_percentage);
-
-    //             $top    = $sorted->first();
-    //             $second = $sorted->skip(1)->first();
-
-    //             $spread = round(
-    //                 ($top->pivot->result_percentage ?? 0)
-    //                     - ($second->pivot->result_percentage ?? 0),
-    //                 1
-    //             );
-
-    //             return $top
-    //                 ? "{$top->name} " . ($spread >= 0 ? '+' : '') . "{$spread}%"
-    //                 : 'N/A';
-    //         })(),
-    //         'race_id'       => $poll->race_id,
-    //     ]);
-    //     return response()->json($result);
-    // }
-
 
     public function filterPolls(Request $request)
     {
@@ -475,7 +414,6 @@ class HomeController extends Controller
         ]);
         return response()->json($result);
     }
-
 
     public function getPollstersByState(Request $request)
     {

@@ -171,8 +171,8 @@
         }
 
         /* .polling-table-container {
-                display: none !important;
-            } */
+                                            display: none !important;
+                                        } */
 
         .polling-responsive-table {
             display: block !important;
@@ -207,12 +207,25 @@
             margin: 0 !important;
         }
 
-        */ @media screen and (max-width: 590px) {
+        .sidebar-card .chart-wrapper {
+            width: 100%;
+            max-width: 100%;
+        }
 
-            /* Hide the header row so labels don’t collide */
-            .polling-header {
-                display: none;
+        /* 2) Force the canvas to fill its wrapper */
+        #allCandidatesPie {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        @media (max-width:1100px) {
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
             }
+        }
+
+        @media screen and (max-width: 768px) {
 
             /* Stack each row’s cells */
             .polling-row {
@@ -231,6 +244,99 @@
             /* Give the toggle a bit of breathing room */
             .toggle-control {
                 margin-bottom: 6px;
+            }
+
+            .details-row {
+                width: 769px;
+            }
+
+            .polling-row {
+                flex-wrap: nowrap !important;
+                width: 769px !important;
+            }
+
+            .charts-section,
+            .demographic-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+
+            /* 4. Sidebar cards full width on mobile */
+            .sidebar {
+                flex: 1;
+            }
+
+            .sidebar-card {
+                padding: 10px;
+            }
+
+            .demographic-item,
+            .chart-container {
+                padding: 15px;
+            }
+
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
+            }
+        }
+
+
+        @media (max-width:590px) {
+
+            /* Stack each row’s cells */
+            .polling-row {
+                flex-direction: row !important;
+                align-items: flex-start;
+                padding: 8px 12px;
+            }
+
+            .polling-cell {
+                width: 100%;
+                min-width: auto;
+                text-align: left;
+                padding: 4px 0;
+            }
+
+            /* Give the toggle a bit of breathing room */
+            .toggle-control {
+                margin-bottom: 6px;
+            }
+
+            .details-row {
+                width: 652px;
+            }
+
+            .polling-row {
+                flex-wrap: nowrap !important;
+                width: 652px !important;
+            }
+
+            .charts-section,
+            .demographic-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+
+            /* 4. Sidebar cards full width on mobile */
+            .sidebar {
+                flex: 1;
+            }
+
+            .sidebar-card {
+                padding: 10px;
+            }
+
+            .demographic-item,
+            .chart-container {
+                padding: 15px;
+            }
+
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
             }
         }
     </style>
@@ -465,7 +571,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                       @foreach ($featuredRaces as $fp)
+                        @foreach ($featuredRaces as $fp)
                             <tr>
                                 @if ($fp->race == 'election')
                                     <td class="border-b px-2 py-1">{{ $fp->race_type . ' ' . $fp->race }}</td>
@@ -476,7 +582,8 @@
 
                                 <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
                                 @if ($fp->district)
-                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }} </td>
+                                    <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }}
+                                    </td>
                                 @else
                                     <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
                                 @endif

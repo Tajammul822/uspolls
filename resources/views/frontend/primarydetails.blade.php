@@ -190,6 +190,141 @@
         .details-row {
             display: none;
         }
+
+        .sidebar-card .chart-wrapper {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* 2) Force the canvas to fill its wrapper */
+        #allCandidatesPie {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+
+        @media screen and (max-width: 768px) {
+
+            /* Stack each row’s cells */
+            .polling-row {
+                flex-direction: row !important;
+                align-items: flex-start;
+                padding: 8px 12px;
+            }
+
+            .polling-cell {
+                width: 100%;
+                min-width: auto;
+                text-align: left;
+                padding: 4px 0;
+            }
+
+            /* Give the toggle a bit of breathing room */
+            .toggle-control {
+                margin-bottom: 6px;
+            }
+
+            .details-row {
+                width: 769px;
+            }
+
+            .polling-row {
+                flex-wrap: nowrap !important;
+                width: 769px !important;
+            }
+
+            .charts-section,
+            .demographic-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+
+            /* 4. Sidebar cards full width on mobile */
+            .sidebar {
+                flex: 1;
+            }
+
+            .sidebar-card {
+                padding: 10px;
+            }
+
+            .demographic-item,
+            .chart-container {
+                padding: 15px;
+            }
+
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
+            }
+        }
+
+
+        
+        @media (max-width:1100px) {
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
+            }
+        }
+
+        @media (max-width:590px) {
+
+            /* Stack each row’s cells */
+            .polling-row {
+                flex-direction: row !important;
+                align-items: flex-start;
+                padding: 8px 12px;
+            }
+
+            .polling-cell {
+                width: 100%;
+                min-width: auto;
+                text-align: left;
+                padding: 4px 0;
+            }
+
+            /* Give the toggle a bit of breathing room */
+            .toggle-control {
+                margin-bottom: 6px;
+            }
+
+            .details-row {
+                width: 652px;
+            }
+
+            .polling-row {
+                flex-wrap: nowrap !important;
+                width: 652px !important;
+            }
+
+            .charts-section,
+            .demographic-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+
+            /* 4. Sidebar cards full width on mobile */
+            .sidebar {
+                flex: 1;
+            }
+
+            .sidebar-card {
+                padding: 10px;
+            }
+
+            .demographic-item,
+            .chart-container {
+                padding: 15px;
+            }
+
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
+            }
+        }
     </style>
 
     <div class="main-content">
@@ -401,7 +536,8 @@
 
                                 <td class="border-b px-2 py-1">{{ $fp->election_round ?: 'N/A' }}</td>
                                 @if ($fp->district)
-                                <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }} </td>
+                                    <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }} - {{ $fp->district }}
+                                    </td>
                                 @else
                                     <td class="border-b px-2 py-1">{{ $fp->state->name ?? 'N/A' }}</td>
                                 @endif
@@ -426,6 +562,8 @@
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <script>
         $(function() {
@@ -440,23 +578,33 @@
             });
         });
     </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {{-- <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const pollData = @json($data);
             const template = pollData[0].results;
             const numPolls = pollData.length;
+
+            // compute the averaged percentages
             const avgs = template.map(t => {
-                let sum = pollData.reduce((acc, p) =>
+                const sum = pollData.reduce((acc, p) =>
                     acc + (p.results.find(r => r.name === t.name)?.pct || 0), 0);
                 return parseFloat((sum / numPolls).toFixed(1));
             });
+
+            // build legend labels that include the % value
+            const legendLabels = template.map((t, i) =>
+                `${t.name} (${avgs[i]}%)`
+            );
+
+            // register the DataLabels plugin
+            Chart.register(ChartDataLabels);
+
             const ctx = document.getElementById('allCandidatesPie').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: template.map(t => t.name),
+                    // swap in the legendLabels
+                    labels: legendLabels,
                     datasets: [{
                         data: avgs,
                         backgroundColor: template.map(t => t.color),
@@ -469,76 +617,26 @@
                     cutout: '60%',
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                // optional tweaks
+                                boxWidth: 12,
+                                padding: 20
+                            }
+                        },
+                        datalabels: {
+                            // color each label the same as its slice
+                            color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex],
+                            formatter: v => v + '%',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            }
                         }
                     }
                 }
             });
         });
-    </script> --}}
-
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const pollData = @json($data);
-    const template = pollData[0].results;
-    const numPolls = pollData.length;
-
-    // compute the averaged percentages
-    const avgs = template.map(t => {
-        const sum = pollData.reduce((acc, p) =>
-            acc + (p.results.find(r => r.name === t.name)?.pct || 0)
-        , 0);
-        return parseFloat((sum / numPolls).toFixed(1));
-    });
-
-    // build legend labels that include the % value
-    const legendLabels = template.map((t, i) =>
-        `${t.name} (${avgs[i]}%)`
-    );
-
-    // register the DataLabels plugin
-    Chart.register(ChartDataLabels);
-
-    const ctx = document.getElementById('allCandidatesPie').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            // swap in the legendLabels
-            labels: legendLabels,
-            datasets: [{
-                data: avgs,
-                backgroundColor: template.map(t => t.color),
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '60%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        // optional tweaks
-                        boxWidth: 12,
-                        padding: 20
-                    }
-                },
-                datalabels: {
-                    // color each label the same as its slice
-                    color: ctx => ctx.dataset.backgroundColor[ctx.dataIndex],
-                    formatter: v => v + '%',
-                    font: {
-                        weight: 'bold',
-                        size: 12
-                    }
-                }
-            }
-        }
-    });
-});
-</script>
+    </script>
 
 @endsection

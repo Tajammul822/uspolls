@@ -147,6 +147,118 @@
         .poll-spread.negative {
             color: #a00;
         }
+
+        @media screen and (max-width: 590px) {
+            .filter-card {
+                padding: 20px;
+            }
+
+            .filters-container {
+                padding: 20px;
+            }
+
+            .poll-type-column {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .poll-type-item {
+                width: 100%;
+            }
+
+            .filter-row {
+                display: flex;
+                gap: 15px;
+                flex-direction: column;
+            }
+
+            .apply-btn {
+                width: 100%;
+            }
+
+            .filters {
+                margin: 0px 0px 25px 0px !important;
+                gap: 0px;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                width: 100%;
+            }
+
+            .card-title {
+                width: 100%;
+                font-size: 18px;
+            }
+
+            .filter-group {
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .filter-group select,
+            .filter-group input {
+                width: 100% !important;
+            }
+
+            .chart-container {
+                padding: 10px 0px !important;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .chart-title {
+                font-size: 18px;
+            }
+
+            .stat-item {
+                margin-right: 0.5rem;
+            }
+
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
+            }
+
+
+            .card-grid {
+                    grid-template-columns: 1fr;
+            }
+        }
+
+
+        @media screen and (max-width: 768px) {
+            .filters {
+                flex-direction: row;
+                align-items: stretch;
+            }
+
+            .card-title {
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                align-items: center;
+            }
+
+            .chart-stats {
+                flex-direction: row;
+                gap: 10px;
+            }
+
+            /* .card-grid {
+                display: flex !important;
+                flex-direction: column !important;
+            } */
+
+            .sidebar-card>table:nth-child(2) {
+                width: 100% !important;
+                table-layout: auto;
+            }
+        }
     </style>
     <!-- Main Content (70%) -->
     <div class="main-content">
@@ -543,16 +655,6 @@
         });
     </script>
 
-
-    {{-- <style>
-        .primary-party-row,
-        .primary-party-row td,
-        .primary-party-row a,
-        .primary-party-row span {
-            color: white !important;
-        }
-    </style> --}}
-
     <script>
         $(function() {
             var colorMap = {
@@ -592,7 +694,7 @@
                         data: 'race_type',
                         render: function(raceType, type, row) {
                             return raceType + (row.election_round ? ' - ' + row.election_round :
-                            '');
+                                '');
                         }
                     },
                     // {
@@ -657,100 +759,6 @@
             fetch('?race=election');
         });
     </script>
-    {{-- <script>
-        $(function() {
-            var colorMap = {
-                'Democratic Party': '#027ac0',
-                'Republican Party': '#fa3236',
-                'Libertarian Party': 'gold',
-                'Green Party': 'green',
-                'Constitution Party': 'darkred',
-                'Independent': 'gray'
-            };
-
-            var table = $('#races-table').DataTable({
-                pageLength: 10,
-                lengthChange: false,
-                searching: false,
-                info: false,
-                ordering: false,
-                stripeClasses: [],
-
-                createdRow: function(row, data) {
-                    if (
-                        data.election_round &&
-                        data.election_round.toLowerCase() === 'primary' &&
-                        Array.isArray(data.leading) &&
-                        data.leading.length > 0
-                    ) {
-                        var party = data.leading[0].party;
-                        var bg = colorMap[party] || '';
-                        if (bg) {
-                            row.style.backgroundColor = bg;
-                            row.classList.add('primary-party-row');
-                        }
-                    }
-                },
-
-                columns: [{
-                        data: 'race_type'
-                    },
-                    {
-                        data: 'election_round'
-                    },
-                    {
-                        data: 'state_name'
-                    },
-                    {
-                        data: 'leading',
-                        render: function(data) {
-                            if (Array.isArray(data) && data.length) {
-                                return data
-                                    .map(function(c) {
-                                        return c.name + ' (' + c.percentage + '%)';
-                                    })
-                                    .join('<br>');
-                            }
-                            return '<span style="color:#999;">No data</span>';
-                        }
-                    },
-                    {
-                        data: 'id',
-                        orderable: false,
-                        render: function(id) {
-                            return `
-            <a href="/details?race_id=${id}" class="arrow-link" title="View Details">
-              ➔
-            </a>`;
-                        }
-                    }
-                ]
-            });
-
-            function fetch(params) {
-                $.getJSON('/Apiracesdata' + params, function(list) {
-                    table.clear().rows.add(list).draw();
-                }).fail(function() {
-                    table.clear().draw();
-                });
-            }
-
-            $('#race-select').on('change', function() {
-                $('#state-select').val('');
-                var rt = $(this).val();
-                fetch(rt ? '?race_type=' + encodeURIComponent(rt) : '');
-            });
-
-            $('#state-select').on('change', function() {
-                $('#race-select').val('');
-                var sid = $(this).val();
-                fetch('?state_id=' + encodeURIComponent(sid));
-            });
-
-            // Initial load: explicitly fetch all elections
-            fetch('?race=election');
-        });
-    </script> --}}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -938,7 +946,6 @@
             });
         });
     </script>
-
 
     <script>
         // Add active state to poll type items
