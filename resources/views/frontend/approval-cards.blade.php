@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 <div class="card-grid">
     @foreach ($latestApprovals as $race)
         @foreach ($race['candidates'] as $imagePath => $candidateName)
@@ -15,12 +16,14 @@
                         {{ $candidateName }} Job Approval
                     </h3>
                     <div>
-                        <a href="{{ route('approval.details', ['race_id' => $race['race_id']]) }}"
+                        <a href="{{ route('approval.details', [
+                            'candidateSlug' => Str::slug($candidateName),
+                            'race_id' => $race['race_id'],
+                        ]) }}"
                             class="approval-link">
-                            &rarr;
+                            View Details &rarr;
                         </a>
                     </div>
-
                 </div>
             </div>
         @endforeach

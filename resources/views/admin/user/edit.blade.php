@@ -19,7 +19,7 @@
                                 <label for="horizontalInput1" class="col-sm-2 col-form-label">Username</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" id="horizontalInput1"
-                                        value="{{ $user->name }}" name="name" placeholder="Enter UserName">
+                                        value="{{ $user->name }}" name="name" placeholder="Enter UserName" disabled>
                                 </div>
                             </div>
                             <div class="mb-3 row">

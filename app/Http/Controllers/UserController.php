@@ -40,11 +40,15 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
+            'user_type' => 'required|integer|in:0,1',
             'password' => 'required|string|min:8',
             'password_confirmation' => 'required',
-            'status' => 'required|string',
+            'status' => 'required|integer|in:0,1',
         ]);
 
+       
+
+        $data['role'] = $data['user_type'];
         $data['password'] = Hash::make($data['password']);
         User::create($data);
         return redirect()->route('users.index')->with('success', 'User created successfully.');
@@ -84,11 +88,14 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'status' => 'required|string',
+            // 'name' => 'required|string|max:255',
+            'user_type' => 'required|integer|in:0,1',
+            'status' => 'required|integer|in:0,1',
         ]);
+        $data = $request->only('status');
+        $data['role'] = (int) $request->input('user_type');
 
-        $user->update($request->all());
+        $user->update($data);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }

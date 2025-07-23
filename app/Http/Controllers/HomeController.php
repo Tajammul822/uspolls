@@ -13,8 +13,7 @@ use App\Models\State;
 use Illuminate\Support\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-
-
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Response;
 
 class HomeController extends Controller
@@ -24,7 +23,9 @@ class HomeController extends Controller
     {
 
         $states = State::orderBy('name')->get(['id', 'name']);
+        $State = $states;
         $races = Race::where('race', 'election')->select('race_type')->distinct()->orderBy('race_type')->get();
+        $racesType = $races;
         $pollesters  = Pollster::orderBy('name')->get(['id', 'name']);
 
         $rac  = Race::where('race', 'approval')->orderBy('race')->get(['id', 'race']);
@@ -77,8 +78,10 @@ class HomeController extends Controller
         }
 
         return view('frontend.home', compact(
-            'states',
             'races',
+            'racesType',
+            'states',
+            'State',
             'pollesters',
             'rawDates',
             'labels',
@@ -112,30 +115,74 @@ class HomeController extends Controller
         return $races;
     }
 
-    public function approvalDetails($race_id)
+    // public function approvalDetails($race_id)
+    // {
+    //     // Load the full Race data including related RaceApprovals
+    //     $race = Race::findOrFail($race_id);
+
+    //     // Get all approval records related to this race
+    //     $records = $race->raceApproval()
+    //         ->with('pollster')
+    //         ->orderByDesc('race_date')
+    //         ->get()
+    //         ->map(function ($a) {
+    //             return [
+    //                 'pollster'     => $a->pollster->name   ?? 'N/A',
+    //                 'pollsterRank' => $a->pollster->rank   ?? 'B',    // ← add rank
+    //                 'rawDate'      => $a->race_date->toDateString(),
+    //                 'displayDate'  => $a->race_date->format('M d, Y'),
+    //                 'sampleSize'   => number_format($a->sample_size),
+    //                 'approve'      => round($a->approve_rating, 1),
+    //                 'disapprove'   => round($a->disapprove_rating, 1),
+    //                 'net'          => round($a->approve_rating - $a->disapprove_rating, 1),
+    //             ];
+    //         })
+    //         ->values();
+
+    //     return view('frontend.approvaldetails', compact('race', 'records'));
+    // }
+
+
+    public function approvalDetails($candidateSlug, $race_id)
     {
-        // Load the full Race data including related RaceApprovals
+        // “Uns‑lug” back into a human name
+        $candidateName = Str::of($candidateSlug)
+            ->replace('-', ' ')
+            ->title();
+
+        // Lookup the candidate by your existing name column
+        $candidate = Candidate::where('name', $candidateName)->firstOrFail();
+
+        // Lookup the race by its ID
         $race = Race::findOrFail($race_id);
 
-        // Get all approval records related to this race
+        // Verify the candidate is actually linked to that race
+        if (! $race->candidates()->where('candidate_id', $candidate->id)->exists()) {
+            abort(404);
+        }
+
+        // Load your approval records as before...
         $records = $race->raceApproval()
-            ->with('pollster') // Ensure pollster relationship is eager loaded
+            ->with('pollster')
             ->orderByDesc('race_date')
             ->get()
             ->map(function ($a) {
                 return [
-                    'pollster'    => $a->pollster->name ?? 'N/A',
-                    'rawDate'     => $a->race_date->toDateString(),
-                    'displayDate' => $a->race_date->format('M d, Y'),
-                    'sampleSize'  => number_format($a->sample_size),
-                    'approve'     => round($a->approve_rating, 1),
-                    'disapprove'  => round($a->disapprove_rating, 1),
-                    'net'         => round($a->approve_rating - $a->disapprove_rating, 1),
+                    'pollster'     => $a->pollster->name   ?? 'N/A',
+                    'pollsterRank' => $a->pollster->rank   ?? 'B',
+                    'rawDate'      => $a->race_date->toDateString(),
+                    'displayDate'  => $a->race_date->format('M d, Y'),
+                    'sampleSize'   => number_format($a->sample_size),
+                    'approve'      => round($a->approve_rating, 1),
+                    'disapprove'   => round($a->disapprove_rating, 1),
+                    'net'          => round($a->approve_rating - $a->disapprove_rating, 1),
                 ];
             })
             ->values();
+
         return view('frontend.approvaldetails', compact('race', 'records'));
     }
+
 
     public function apiIndex(Request $request)
     {
@@ -192,7 +239,7 @@ class HomeController extends Controller
                 $grouped[$rid]['candidates'][] = [
                     'name'       => $row->candidate_name,
                     'percentage' => round($row->result_percentage, 1),
-                    'party'      => $row->candidate_party,
+                    'party'      => strtolower($row->candidate_party),  // <-- lowercase here
                 ];
             }
         }
@@ -206,7 +253,7 @@ class HomeController extends Controller
                     return [
                         'name'       => $name,
                         'percentage' => round($avg, 1),
-                        'party'      => $items[0]['party'],
+                        'party'      => $items[0]['party'],  // already lowercase
                     ];
                 })
                 ->sortByDesc('percentage')
@@ -227,16 +274,15 @@ class HomeController extends Controller
         return response()->json(array_values($payload));
     }
 
-
     public function show(Request $request)
     {
         $raceId = $request->race_id;
 
-        // Load race and its candidates
-        $race = Race::with('candidates')->findOrFail($raceId);
+        // Determine if primary to pick colors
+        $race      = Race::with('candidates')->findOrFail($raceId);
         $isPrimary = ($race->election_round === 'primary');
 
-        // Prepare colors
+        // Build color map
         if ($isPrimary) {
             $palette = [
                 '#f26419',
@@ -252,70 +298,152 @@ class HomeController extends Controller
                 '#f73639',
                 '#ef476f',
             ];
-            $candidateIds = $race->candidates->pluck('id')->values();
-            $candidateColors = $candidateIds->mapWithKeys(function ($id, $index) use ($palette) {
-                $color = $palette[$index % count($palette)];
-                return [$id => $color];
-            })->all();
+            $ids = $race->candidates->pluck('id')->values();
+            $candidateColors = $ids->mapWithKeys(
+                fn($id, $i) => [$id => $palette[$i % count($palette)]]
+            )->all();
         } else {
-            // Fixed party colors
-            $candidateColors = [
-                'Democratic Party'  => 'blue',
-                'Republican Party'  => 'red',
-                'Libertarian Party' => '#e77900',
-                'Green Party'       => 'green',
+            // base party colors (keys are lowercase)
+            $partyColors = [
+                'democratic party'  => 'blue',
+                'republican party'  => 'red',
+                'libertarian party' => '#e77900',
+                'green party'       => 'green',
             ];
+
+            // start by mapping parties
+            $candidateColors = $partyColors;
+
+            // handle Independents specially
+            $independents = $race->candidates
+                ->filter(fn($c) => strtolower($c->party) === 'independent party');
+            $indCount     = $independents->count();
+
+            if ($indCount > 1) {
+                // darker yellow shades for each independent
+                $indPalette = ['#ffc907', '#d9a50f', '#b4840d', '#8f630a', '#6b4207'];
+                foreach ($independents->values() as $idx => $ind) {
+                    $candidateColors[$ind->id] = $indPalette[$idx % count($indPalette)];
+                }
+            } else {
+                // single Independent: use your default yellow
+                $candidateColors['independent party'] = '#ffc907';
+            }
         }
 
-        // Fetch polls
+        // Fetch all polls + relationships
         $polls = Poll::where('race_id', $raceId)
-            ->with(['candidate', 'pollster', 'race.state'])
+            ->with(['results.candidate', 'pollster', 'race.state'])
+            ->orderBy('poll_date')
             ->get();
 
-        // Build data array
-        $data = $polls->map(function ($poll) use ($isPrimary, $candidateColors) {
-            // Map each candidate in this poll
-            $results = $poll->candidate->map(fn($c) => [
-                'id'      => $c->id,
-                'name'    => $c->name,
-                'party'   => $c->party,
-                'image'   => $c->image,
-                'pct'     => (float) $c->pivot->result_percentage,
-                // primary: lookup by ID; general: lookup by party name
-                'color'   => $isPrimary
-                    ? ($candidateColors[$c->id] ?? 'gray')
-                    : ($candidateColors[$c->party] ?? 'gray'),
-            ])->toArray();
+        // — Build your existing $data for the pie chart —
+        $data = $polls->map(function ($poll) use ($candidateColors, $isPrimary) {
+            $results = $poll->results->map(function ($pr) use ($candidateColors, $isPrimary) {
+                // normalize party to lowercase
+                $partyKey = Str::lower($pr->candidate->party);
 
-            // Compute net margin & color
+                return [
+                    'id'    => $pr->candidate->id,
+                    'name'  => $pr->candidate->name,
+                    'party' => $partyKey,
+                    'image' => $pr->candidate->image,
+                    'pct'   => (float) $pr->result_percentage,
+                    'color' => $isPrimary
+                        // primary: always by candidate ID
+                        ? ($candidateColors[$pr->candidate->id] ?? '#ffc907')
+                        // general: first candidate ID override, then party lookup
+                        : ($candidateColors[$pr->candidate->id]
+                            ?? ($candidateColors[$partyKey] ?? '#ffc907')),
+                ];
+            })->toArray();
+
             $sorted   = collect($results)->sortByDesc('pct')->values();
-            $net      = round(($sorted->get(0)['pct'] ?? 0) - ($sorted->get(1)['pct'] ?? 0), 1);
-            $netColor = $sorted->get(0)['color'] ?? 'gray';
+            $net      = round(($sorted[0]['pct'] ?? 0) - ($sorted[1]['pct'] ?? 0), 1);
+            $netColor = $sorted[0]['color'] ?? '#ffc907';
 
             return [
                 'race_id'    => $poll->race_id,
                 'race_type'  => $poll->race->race_type,
                 'race_label' => trim(($poll->race->state->name ?? '') . ' ' . $poll->race->election_round),
                 'pollster'   => $poll->pollster->name ?? 'N/A',
-                'date'       => Carbon::parse($poll->poll_date)->format('Y-m-d'),
+                'date'       => $poll->poll_date->format('Y-m-d'),
                 'sample'     => $poll->sample_size,
                 'results'    => $results,
                 'net'        => $net,
                 'net_color'  => $netColor,
             ];
-        });
+        })->toArray();
 
+        // ───────────────────────────────────────────────────────────
+        // Inject diffs per POLLSTER + CANDIDATE series into $data
+        // ───────────────────────────────────────────────────────────
+
+        // 1) sort ascending by date
+        usort($data, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
+
+        // 2) track last pct for each [pollster][candidate]
+        $lastPct = [];
+        foreach ($data as &$poll) {
+            $ps = $poll['pollster'];
+            foreach ($poll['results'] as &$r) {
+                $cand = $r['name'];
+                if (isset($lastPct[$ps][$cand])) {
+                    $r['diff'] = round($r['pct'] - $lastPct[$ps][$cand], 1);
+                } else {
+                    $r['diff'] = 0;
+                }
+                $lastPct[$ps][$cand] = $r['pct'];
+            }
+            unset($r);
+        }
+        unset($poll);
+
+        // 3) restore newest‑first for display
+        usort($data, fn($a, $b) => strtotime($b['date']) <=> strtotime($a['date']));
+
+        // — Build the trendRecords array (UNCHANGED) —
+        $trendRecords = collect($polls)
+            ->flatMap(function ($poll) use ($candidateColors, $isPrimary) {
+                return $poll->results->map(fn($pr) => [
+                    'rawDate'   => $poll->poll_date->toDateString(),
+                    'display'   => $poll->poll_date->format('M d, Y'),
+                    'candidate' => $pr->candidate->name,
+                    'pct'       => round($pr->result_percentage, 1),
+                    'color'     => $isPrimary
+                        ? ($candidateColors[$pr->candidate->id] ?? '#ffc907')
+                        : ($candidateColors[$pr->candidate->id]
+                            ?? ($candidateColors[Str::lower($pr->candidate->party)] ?? '#ffc907')),
+                ]);
+            })
+            ->groupBy('candidate')
+            ->flatMap(function ($records) {
+                return collect($records)
+                    ->sortBy('rawDate')
+                    ->values()
+                    ->map(function ($rec, $idx) use ($records) {
+                        $rec['diff'] = $idx === 0
+                            ? 0
+                            : round($rec['pct'] - $records[$idx - 1]['pct'], 1);
+                        return $rec;
+                    });
+            })
+            ->values()
+            ->toArray();
+
+        // Featured races & view logic (UNCHANGED)
         $featuredRaces = Race::where('is_featured', 1)
             ->with('state', 'candidates')
             ->get();
 
-        // Pick view based on round
         $view = $isPrimary
             ? 'frontend.primarydetails'
             : 'frontend.details';
 
-        return view($view, compact('data', 'featuredRaces'));
+        return view($view, compact('data', 'trendRecords', 'featuredRaces'));
     }
+
+
 
     public function filterOptions(Request $request)
     {
@@ -350,6 +478,7 @@ class HomeController extends Controller
         ]);
     }
 
+
     public function filterPolls(Request $request)
     {
         $params = $request->validate([
@@ -364,24 +493,23 @@ class HomeController extends Controller
         $pollsterId = $params['pollster_id'] ?? null;
         $timeframe  = $params['timeframe'] ?? 90;
 
-        // Case 1: Initial load → no pollType, no state, no pollster
-        $isInitialLoad = empty($pollType) && is_null($stateId) && is_null($pollsterId);
+        // ─── Build race IDs off all 'election' races, then narrow by type/state ───
+        $raceQuery = Race::where('race', 'election')
+            ->where('created_at', '>=', now()->subDays($timeframe));
 
-        if ($isInitialLoad) {
-            // Default: get all races where race = election and created_at in last 90 days
-            $raceIds = Race::where('race', 'election')
-                ->where('created_at', '>=', now()->subDays($timeframe))
-                ->pluck('id');
-        } else {
-            // User-driven: use pollType and filters
-            $raceIds = Race::where('race_type', $pollType)
-                ->when($stateId, fn($q) => $q->where('state_id', $stateId))
-                ->pluck('id');
+        if ($pollType) {
+            $raceQuery->where('race_type', $pollType);
+        }
+        if ($stateId) {
+            $raceQuery->where('state_id', $stateId);
         }
 
+        $raceIds = $raceQuery->pluck('id');
+
+        // ─── Fetch polls with optional pollster filter ───
         $polls = Poll::with([
             'candidate' => fn($q) => $q->withPivot('result_percentage'),
-            'race',
+            'race.state',  // load state for abbreviation
             'pollster',
         ])
             ->whereIn('race_id', $raceIds)
@@ -390,28 +518,46 @@ class HomeController extends Controller
             ->orderBy('poll_date', 'desc')
             ->get();
 
-        $result = $polls->map(fn($poll) => [
-            'race'           => ucfirst($poll->race->race_type),
-            'election_round' => ucfirst($poll->race->election_round),
-            'pollster'       => $poll->pollster->name ?? 'N/A',
-            'date'           => $poll->poll_date->format('Y-m-d'),
-            'dateFormatted'  => $poll->poll_date->format('D, j M'),
-            'candidate'      => (function () use ($poll) {
-                $sorted = $poll->candidate
-                    ->sortByDesc(fn($c) => $c->pivot->result_percentage);
-                $top    = $sorted->first();
-                $second = $sorted->skip(1)->first();
-                $spread = round(
-                    ($top->pivot->result_percentage ?? 0)
-                        - ($second->pivot->result_percentage ?? 0),
-                    1
-                );
-                return $top
-                    ? "{$top->name} " . ($spread >= 0 ? '+' : '') . "{$spread}%"
-                    : 'N/A';
-            })(),
-            'race_id' => $poll->race_id,
-        ]);
+        // ─── Transform into simple arrays ───
+        $result = $polls->map(function ($poll) {
+            // sort candidates by percentage
+            $sorted = $poll->candidate
+                ->sortByDesc(fn($c) => $c->pivot->result_percentage);
+            $top    = $sorted->first();
+            $second = $sorted->skip(1)->first();
+            $spread = round(
+                ($top->pivot->result_percentage ?? 0)
+                    - ($second->pivot->result_percentage ?? 0),
+                1
+            );
+
+            // build the candidate string
+            $candidateString = $top
+                ? "{$top->name} " . ($spread >= 0 ? '+' : '') . "{$spread}%"
+                : 'N/A';
+
+            return [
+                'race'           => ucfirst($poll->race->race_type),
+                'election_round' => trim(
+                    ucfirst($poll->race->election_round)
+                        . '-'
+                        . ($poll->race->state
+                            ? $poll->race->state->abbreviation
+                            : 'All'
+                        )
+                ),
+                'pollster'       => $poll->pollster->name ?? 'N/A',
+                'date'           => $poll->poll_date->format('Y-m-d'),
+                'dateFormatted'  => $poll->poll_date->format('D, j M'),
+                'candidate'      => $candidateString,
+                'party'          => strtolower(optional($top)->party ?? ''),
+                'district'       => $poll->race->race_type === 'house'
+                    ? ($poll->race->district ?? 'N/A')
+                    : null,
+                'race_id'        => $poll->race_id,
+            ];
+        });
+
         return response()->json($result);
     }
 

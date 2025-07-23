@@ -47,7 +47,7 @@ class RaceController extends Controller
 
         $validated = $request->validate([
             'race' => 'required|in:election,approval',
-            'race_type' => 'nullable|in:president,senate,house,governor,other',
+            'race_type' => 'nullable|in:president,senate,house,governor,mayor,generic ballot,other',
             'state_id' => 'nullable|exists:states,id',
             'district' => 'nullable|integer',
             'is_featured'      => 'nullable|integer|between:0,1',
@@ -115,7 +115,7 @@ class RaceController extends Controller
 
         $validated = $request->validate([
             'race'      => 'required|in:election,approval',
-            'race_type'      => 'nullable|in:president,senate,house,governor,other',
+            'race_type'      => 'nullable|in:president,senate,house,governor,mayor,generic ballot,other',
             'state_id'      => 'nullable|exists:states,id',
             'district' => 'nullable|integer',
             'is_featured'      => 'nullable|integer|between:0,1',

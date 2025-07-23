@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->unsignedTinyInteger('role')->default(1);
+            $table->unsignedTinyInteger('role')->default(0);
             $table->string('password');
             $table->string('profile_image')->nullable();
             $table->text('contact_details')->nullable();

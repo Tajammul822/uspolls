@@ -14,7 +14,7 @@ class ProfileController extends Controller
     public function index()
     {
         return view('admin.dashboard');
-    } 
+    }
 
     public function profile()
     {
@@ -27,21 +27,20 @@ class ProfileController extends Controller
     {
 
         $user = User::findOrFail($id);
-        if($request->hasFile('profile_image')){
+        if ($request->hasFile('profile_image')) {
 
-            $file = $request -> file('profile_image');
-            $path = public_path('/images/users').$user->profile_image;
-            if(file::exists($path))
-            {
+            $file = $request->file('profile_image');
+            $path = public_path('/images/users') . $user->profile_image;
+            if (file::exists($path)) {
                 file::delete($path);
             }
-            $ext = $file -> getClientOriginalExtension();
-            $filename = time().'.'.$ext;
-            $file -> move(public_path('/images/users'),$filename);
-            $user -> profile_image = $filename;
+            $ext = $file->getClientOriginalExtension();
+            $filename = time() . '.' . $ext;
+            $file->move(public_path('/images/users'), $filename);
+            $user->profile_image = $filename;
         }
 
-        $user -> name = $request->name;
+        $user->name = $request->name;
 
         $status = $user->save();
         if ($status) {
@@ -49,7 +48,6 @@ class ProfileController extends Controller
         } else {
             return redirect()->back()->with('error', 'Please try again!');
         }
-        
     }
 
 
@@ -60,16 +58,23 @@ class ProfileController extends Controller
 
     public function changPasswordStore(Request $request)
     {
-
         $request->validate([
-            'current_password' => ['required', new MatchOldPassword], 
-            'new_password' => ['required'],
+            'current_password' => ['required', new MatchOldPassword],
+            'new_password' => [
+                'required',
+                'min:8',
+                'regex:/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/'
+            ],
             'new_confirm_password' => ['same:new_password'],
+        ], [
+            'new_password.regex' => 'Password must be at least 8 characters and include at least one letter, one number, and one special character.'
         ]);
 
-        User::find(auth()->user()->id)->update(['password' => Hash::make($request->new_password)]);
+        User::find(auth()->user()->id)->update([
+            'password' => Hash::make($request->new_password)
+        ]);
 
-        return redirect()->route('admin-profile')->with('success', 'Password successfully changed');
+        return redirect()->route('admin-profile')->with('success', 'Password Successfully Changed');
     }
-}
 
+}

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Politix</title>
     <link rel="stylesheet" href="{{ url('assets/css/bootstrap.min.css') }}" type="text/css" />
+    <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -65,7 +66,7 @@
             color: #e53e3e;
         } */
 
-        .py-2{
+        .py-2 {
             padding-right: 1.25rem !important;
             padding-left: 1.25rem !important;
         }
@@ -206,11 +207,17 @@
 
         /* Header styles */
         .header-section {
-                background: linear-gradient(to right, #1a3a6c, #2c5282);
-                color: white;
-                padding: 30px;
-                border-radius: 10px 10px 0px 0px;
-                text-align: center;
+            /* background: linear-gradient(to right, #1a3a6c, #2c5282); */
+            color: black;
+            padding-bottom: 15px;
+            /* border-radius: 10px 10px 0px 0px; */
+            text-align: center;
+        }
+
+
+        .headerlogo {
+            height: 60px;
+            width: 70px;
         }
 
         .page-title {
@@ -222,7 +229,7 @@
 
         .page-subtitle {
             font-size: 18px;
-            color: rgba(255, 255, 255, 0.85);
+            color: black;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -236,7 +243,8 @@
         /* Poll types inside filter card */
         .filter-card {
             background: white;
-            padding: 30px;
+            /* padding: 30px; */
+            border-radius: 10px 10px 0 0;
             border-bottom: 1px solid #e2e8f0;
         }
 
@@ -380,11 +388,11 @@
 
         /* No polls message */
         .no-polls-container {
-                padding: 30px 30px;
-                border-radius: 0px 0px 10px 10px;
-                text-align: center;
-                background: #f8fafc;
-                border-top: 1px solid #e2e8f0;
+            padding: 30px 30px;
+            border-radius: 0px 0px 10px 10px;
+            text-align: center;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
         }
 
         .no-polls-icon {
@@ -468,7 +476,156 @@
                 font-size: 12px;
             }
         }
-        
+
+        /* logout Dropdown */
+        /* Wrapper to position relative to the button */
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Toggle button */
+        .custom-dropdown-button {
+            background-color: #007bff00;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .custom-dropdown-button i {
+            margin-left: 6px;
+        }
+
+        /* Hidden by default */
+        .custom-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 260px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            overflow: hidden;
+            z-index: 1000;
+            margin-top: 6px;
+        }
+
+        /* Show when JS toggles .custom-show */
+        .custom-dropdown-menu.custom-show {
+            display: block;
+        }
+
+        .custom-dropdown-header {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #f1f3f5;
+        }
+
+        .custom-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .custom-user-info h6 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .custom-user-info small {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .custom-divider {
+            height: 1px;
+            background-color: #e5e5e5;
+            margin: 5px 0;
+        }
+
+        .custom-section-label {
+            font-size: 11px;
+            color: #666;
+            padding: 6px 12px 0;
+            display: block;
+        }
+
+        .custom-dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            font-size: 14px;
+            color: #333;
+            text-decoration: none;
+            background-color: transparent;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .custom-dropdown-item i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .custom-dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .custom-logout-button {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 14px;
+            padding: 10px 12px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .custom-logout-button i {
+            margin-right: 8px;
+        }
+
+        .custom-logout-button:hover {
+            background-color: #fdeaea;
+        }
+
+        @media (max-width:590px) {
+
+            .headerlogo {
+                height: 63px;
+                width: 53px;
+            }
+
+            .logo span {
+                font-size: 22px !important;
+            }
+
+            .logo i {
+                font-size: 21px !important;
+                margin-left: 4px;
+                margin-right: 0;
+            }
+
+            .ms-2 {
+                margin-left: 0.25rem !important;
+            }
+
+            .gap-3 {
+                gap: 0.5rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -476,48 +633,96 @@
     <!-- Header -->
     <header class="d-flex align-items-center justify-content-between px-4 py-2 border-bottom"
         style="border-color: #2e2e4d !important;">
-        <div class="d-flex align-items-center">
+        <div class="menu_logos d-flex align-items-center">
             <!-- Logo -->
-            <div class="logo d-flex align-items-center me-4">
-                <i class="fas fa-chart-line text-warning"></i>
-                <span class="ms-2 fs-5 fw-bold text-white">Politix</span>
+            <div class="logo d-flex align-items-center">
+                <a href="{{ env('APP_URL') }}">
+                    <img src="{{ asset('images/logo.png') }}" class="headerlogo" alt="Politix Logo">
+                    <span class="ms-2 fs-5 fw-bold text-white">POLITIX</span>
+                    <i class="fa-solid fa-plus" style="color: #74C0FC;"></i>
+                </a>
             </div>
-
-            <!-- Navigation Menu -->
-            <nav class="d-none d-md-flex gap-3 menu_list">
-                {{-- <a href="{{ route('homeboard') }}" class="text-decoration-none active-link">Home</a> --}}
-                {{-- <a href="{{ route('presidential') }}" class="text-decoration-none hover-opacity-100">Presidential</a>
-                <a href="{{ route('senate') }}" class="text-decoration-none hover-opacity-100">Senate</a>
-                <a href="{{ route('house') }}" class="text-decoration-none hover-opacity-100">House</a>
-                <a href="{{ route('governor') }}" class="text-decoration-none hover-opacity-100">Governor</a> --}}
-            </nav>
         </div>
 
-        <!-- Right Side Actions -->
         <div class="d-flex align-items-center gap-3">
-            @if (Route::has('login'))
-                <nav class="d-flex align-items-center gap-3">
-                    @auth
-                        <a href="{{ route('dashboard') }}"
-                            class="btn btn-light btn-sm rounded text-[#1b1b18] border border-[#19140035] hover:border-[#1915014a] dark:text-[#EDEDEC] dark:border-[#3E3E3A] dark:hover:border-[#62605b]">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}"
-                            class="btn btn-light btn-sm rounded text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]">
-                            Log in
+
+            @if (auth()->check() && auth()->user()->role == 0)
+                <div class="custom-dropdown">
+                    <button id="customDropdownToggle" class="custom-dropdown-button">
+                        <img src="{{ asset('images/default_profile.png') }}" alt="Avatar" class="custom-avatar"
+                            style="width:43px;height:43px;border-radius:50%;vertical-align:middle;">
+                        <span style="font-weight:500;">{{ auth()->user()->name }}</span>
+                        <i class="fa fa-caret-down" style="margin-left:4px;"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="customDropdownMenu" class="custom-dropdown-menu">
+                        <div class="custom-dropdown-header">
+                            <img src="{{ asset('images/default_profile.png') }}" alt="User Avatar"
+                                class="custom-avatar">
+                            <div class="custom-user-info">
+                                <h6>{{ auth()->user()->name }}</h6>
+                                <small>{{ auth()->user()->role == 1 ? 'Admin' : 'User' }}</small>
+                            </div>
+                        </div>
+
+                        <div class="custom-divider"></div>
+
+                        <span class="custom-section-label">Account</span>
+
+                        {{-- 
+                        <a class="custom-dropdown-item" href="{{ route('profile') }}">
+                            <i class="fa fa-user"></i> Profile
                         </a>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}"
-                                class="btn btn-light btn-sm rounded text-[#1b1b18] border border-[#19140035] hover:border-[#1915014a] dark:text-[#EDEDEC] dark:border-[#3E3E3A] dark:hover:border-[#62605b]">
-                                Register
+                        <a class="custom-dropdown-item" href="{{ route('password.change') }}">
+                            <i class="fa fa-lock"></i> Change Password
+                        </a> --}}
+
+                        <div class="custom-divider"></div>
+
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="custom-logout-button">
+                                <i class="fa fa-power-off"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @else
+                {{-- guests & role ≠ 0: default auth links --}}
+                @if (Route::has('login'))
+                    <nav class=" menu_btn d-flex align-items-center gap-3">
+                        @auth
+                            <a href="{{ route('dashboard') }}"
+                                class="btn btn-light btn-sm rounded text-[#1b1b18]
+                      border border-[#19140035] hover:border-[#1915014a]
+                      dark:text-[#EDEDEC] dark:border-[#3E3E3A] dark:hover:border-[#62605b]">
+                                Dashboard
                             </a>
-                        @endif
-                    @endauth
-                </nav>
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="btn btn-light btn-sm rounded text-[#1b1b18]
+                      border border-transparent hover:border-[#19140035]
+                      dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]">
+                                Log in
+                            </a>
+
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}"
+                                    class="btn btn-light btn-sm rounded text-[#1b1b18]
+                        border border-[#19140035] hover:border-[#1915014a]
+                        dark:text-[#EDEDEC] dark:border-[#3E3E3A] dark:hover:border-[#62605b]">
+                                    Register
+                                </a>
+                            @endif
+                        @endauth
+                    </nav>
+                @endif
             @endif
+
         </div>
+
     </header>
 
     <div class="container">
@@ -529,10 +734,11 @@
         <div class="footer-content">
 
             <div class="copyright">
-                <div class="footerlogo">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Politix</span>
-                </div>
+                <a href="{{ env('APP_URL') }}" class="footerlogo">
+                    <img src="{{ asset('images/logo.png') }}" alt="Politix Logo" style="height: 67px; width: 73px;">
+                    <span>POLITIX</span>
+                </a>
+
                 <div>
                     © 2025 Politix. All rights reserved. | Data Source: Politics, Gallup, Pew Research, and
                     other leading polling firms
@@ -547,6 +753,24 @@
 
 
     <script src="{{ url('assets/js/bootstrap.bundle.min.js') }}"></script>
+    {{-- JS --}}
+    <script>
+        (function() {
+            const btn = document.getElementById('customDropdownToggle');
+            const menu = document.getElementById('customDropdownMenu');
+
+            if (!btn || !menu) return;
+
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                menu.classList.toggle('custom-show');
+            });
+
+            document.addEventListener('click', () => {
+                menu.classList.remove('custom-show');
+            });
+        })();
+    </script>
 
 </body>
 

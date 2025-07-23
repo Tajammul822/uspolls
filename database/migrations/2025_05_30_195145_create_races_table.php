@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('races', function (Blueprint $table) {
             $table->id();
             $table->enum('race', ['election', 'approval']);
-            $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'other'])->nullable();
+            $table->enum('race_type', ['president', 'senate', 'house', 'governor', 'mayor', 'generic ballot', 'other'])->nullable();
             $table->enum('election_round', ['primary', 'general'])->nullable();
             $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
             $table->integer('district')->nullable();

@@ -63,7 +63,7 @@
             <div class="col-sm-10">
                 <select name="race_type" id="race_type" class="form-select" onchange="toggleDistrictField()">
                     <option value="">None</option>
-                    @foreach (['president', 'senate', 'house', 'governor', 'other'] as $type)
+                    @foreach (['president', 'senate', 'house', 'governor', 'mayor', 'generic ballot', 'other'] as $type)
                         <option value="{{ $type }}"
                             {{ old('race_type', $race->race_type ?? '') == $type ? 'selected' : '' }}>
                             {{ ucfirst($type) }}
